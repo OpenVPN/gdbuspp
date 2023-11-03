@@ -1,0 +1,92 @@
+#!/bin/bash
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+#
+
+set -eu
+
+##
+# @file tests/scripts/test-proxy
+#
+# @brief Runs several tests using the tests/test_proxy.cpp
+#        D-Bus proxy client.
+#
+#        This tests requires the tests/simple-service.cpp test service
+#        to be running
+
+FAILED_RESULT=0
+
+run_proxy()
+{
+    DEFAULT_ARGS="-E -d net.openvpn.gdbuspp.test.simple"
+    echo ">> Running proxy test: ${BUILD_DIR:-.}/test_proxy ${DEFAULT_ARGS} $@"
+    ${BUILD_DIR:-.}/test_proxy -q ${DEFAULT_ARGS} "$@"
+    if [ $? -ne 0 ]; then
+        echo ">>     ## Result: FAIL"
+        FAILED_RESULT=$(($FAILED_RESULT + 1))
+    else
+        echo ">>     Result: Pass"
+    fi
+    echo ""
+}
+
+
+MAIN_PATH="-p /gdbuspp/tests/simple1"
+METHODS_PATH="$MAIN_PATH/methods"
+PROPS_PATH="$MAIN_PATH/properties"
+
+# Test introspection
+run_proxy $MAIN_PATH -Q
+
+# Test calling D-Bus methods
+run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m MethodNoArgs
+run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m StringLength -t s -v "A small test string" -X "(i)" -x "(19,)"
+
+# Test creating child objects and introspect it
+run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m CreateSimpleObject -t s -v proxy_test -X "(o)" -x "('/gdbuspp/tests/simple1/childs/proxy_test',)"
+run_proxy $MAIN_PATH/childs/proxy_test -Q
+run_proxy $MAIN_PATH/childs/proxy_test -i gdbuspp.test.simple1.child -m GetMyName -X '(s)' -x "('proxy_test',)"
+run_proxy $MAIN_PATH/childs/proxy_test -i gdbuspp.test.simple1.child -g my_path -X "o" -x "'/gdbuspp/tests/simple1/childs/proxy_test'"
+run_proxy $MAIN_PATH/childs/proxy_test -i gdbuspp.test.simple1.child -m RemoveMe
+
+run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m CreateSimpleObject -t s -v proxy_test2 -X "(o)" -x "('/gdbuspp/tests/simple1/childs/proxy_test2',)"
+run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m RemoveSimpleObject -t s -v proxy_test2
+
+# Test querying properties - simple types
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g bool_val -X "b" -x "true"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g int_val -X "i" -x "-345"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g long_val -X "x" -x "9223372036854775807"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g uint_val -X "u" -x "123"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g ulonglong_val -X "t" -x "18446744073709551615"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g string_val -X "s" -x "'Initial string'"
+
+# Test querying properties - array types
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g int_array -X "ai" -x "[-10, 3, 16, 9388]"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g uint_array -X "au" -x "[0, 15, 16, 31, 32, 65534, 65535]"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g string_array -X "as" -x "['line 1', 'line 2', 'line 3']"
+
+# Test querying properties - struct type
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g complex -X "(bis)" -x "(true, 98877, 'Initial complex string value')"
+
+# Test setting properties - just taking a selection here (test-simple-servce-1 will test all)
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s bool_val -t "b" -v "false"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g bool_val -X "b" -x "false"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s bool_val -t "b" -v "true"
+
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s string_val -t "s" -v "Modified by test-proxy"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g string_val -X "s" -x "'Modified by test-proxy'"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s string_val -t "s" -v "Initial string"
+
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s complex -t bis -v false -v -34977 -v "Complex string modified by test-proxy"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g complex -X "(bis)" -x "(false, -34977, 'Complex string modified by test-proxy')"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s complex -t bis -v true -v 98877 -v "Initial complex string value"
+
+
+echo "Test failed: $FAILED_RESULT"
+if [ $FAILED_RESULT -gt 0 ]; then
+    exit 1
+fi

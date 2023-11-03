@@ -1,0 +1,12 @@
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+
+option('doxygen', type: 'boolean', value: false,
+        description: 'Build doxygen documentation?')
+
+option('install_testprogs', type: 'boolean', value: false,
+        description: 'Install misc test programs?')

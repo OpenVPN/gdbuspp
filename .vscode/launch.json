@@ -1,0 +1,86 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test :: fd-receive-read",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_fd-receive-read",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test :: fd-send-fstat",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_fd-send-fstat",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test :: proxy client",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_proxy",
+            "args": [
+                "-E",
+                "-d",
+                "net.openvpn.gbduspp.simple",
+                "-p",
+                "/gdbuspp/tests/simple1"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test :: signal-emit",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_signal-emit",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test :: signal-group",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_signal-group",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test :: simple-service",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_simple-service",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test :: signal-subscribe",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_signal-subscribe",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "examples :: example-service",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/example-service",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "examples :: example-proxy",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/example-proxy",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+    ]
+}

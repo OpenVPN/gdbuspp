@@ -1,0 +1,7 @@
+*~
+build/
+builddir/
+_build/
+*.patch
+*.tar.xz
+.cache/

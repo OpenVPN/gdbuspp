@@ -1,0 +1,77 @@
+#!/bin/bash
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+#
+
+set -eu
+
+##
+# @file tests/scripts/run-simple-server-test
+#
+# @brief Runs a test script provided via the command line
+#        after start the test_simple-service D-Bus service
+#
+#        This is used to run tests through meson and other
+#        automated testing frameworks
+#
+
+SERVICE_PID=""
+export FAILED_RESULT=0
+
+start_service()
+{
+    echo "Starting simple-server: ${BUILD_DIR:-.}/test_simple-service"
+    ${BUILD_DIR:-.}/test_simple-service &
+    SERVICE_PID=$!
+    if [ ! -d /proc/${SERVICE_PID} ]; then
+        echo "** FATAL ** test_simple-service didn't start"
+        FAILED_RESULT=100
+        exit 2
+    fi
+}
+
+stop_service()
+{
+    kill -INT $SERVICE_PID
+}
+
+run_test()
+{
+    echo "-----------------------------------------------------------"
+    echo "###  Running test: $@"
+    echo
+    eval $@
+    ec=$?
+    echo
+    echo ".."
+    if [ ${ec} -ne 0 ]; then
+        echo "..     ## Result: FAIL"
+        FAILED_RESULT=$(($FAILED_RESULT + 1))
+    else
+        echo "..     Result: Pass"
+    fi
+    echo ".."
+    echo
+    echo "-----------------------------------------------------------"
+    echo
+}
+
+
+start_service
+sleep 1
+echo "Simple Service PID: $SERVICE_PID"
+
+# Run tests
+run_test $@
+
+sleep 1
+stop_service
+
+echo "$0: Test failed: $FAILED_RESULT"
+if [ $FAILED_RESULT -gt 0 ]; then
+    exit 1
+fi

@@ -1,0 +1,60 @@
+#!/bin/bash
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+#
+
+set -eu
+
+##
+# @file tests/scripts/test-fd-passing.sh
+#
+# @brief Runs a test using tests/fd-receive-read.cpp
+#
+#        This calls a D-Bus method with a file name which the
+#        tests/simple-service.cpp will call open() to and return the
+#        related file descriptor back to the test program.  That program
+#        will then write the content of that file to a local file.
+#
+#        This test script will then run sha256sum on both the requested
+#        file and the copied file, to verify the content is the same.
+#
+#        This tests requires the tests/simple-service.cpp test service
+#        to be running
+#
+
+FAIL=0
+
+run_receive_read()
+{
+    echo ">> Running fd-receive-read command: ${BUILD_DIR:-.}/test_fd-receive-read $@"
+    ${BUILD_DIR:-.}/test_fd-receive-read -q "$@"
+    if [ $? -ne 0 ]; then
+        echo ">>     ## FAIL: receiving file descriptor"
+        FAIL=1
+    else
+        echo ">>     Success: file descriptor received, file copied"
+    fi
+}
+
+rm -f check.bin
+run_receive_read -f ${BUILD_DIR:-.}/test_fd-receive-read -o check.bin
+if [ $FAIL -eq 1 ]; then
+    echo "** ERROR **  Could not receive a file descriptor to read from D-Bus service"
+    exit 1
+fi
+
+orig_file="$(sha256sum ${BUILD_DIR:-.}/test_fd-receive-read | awk '{print $1}')"
+copied_file="$(sha256sum check.bin | awk '{print $1}')"
+
+if [ "${orig_file}" != "${copied_file}" ]; then
+    echo "** ERROR ** Copied file from file descriptor does not match the original file"
+    exit 1
+fi
+rm -f check.bin
+
+echo "Test result:  -- SUCCESS --"
+exit 0

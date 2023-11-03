@@ -1,0 +1,74 @@
+#!/bin/bash
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+#
+
+set -eu
+
+##
+# @file tests/scripts/test-fd-passing.sh
+#
+# @brief Runs a test using tests/fd-send-fstat.cpp and verify the result
+#
+#        This test program sends a file descriptor to an opened file
+#        where the D-Bus service is expected to perform an fstat() call
+#        using the file descriptor and return back the UID, GID and file
+#        size.  This result is verified against running `stat` and
+#        comparing the values.
+#
+#        This tests requires the tests/simple-service.cpp test service
+#        to be running
+#
+
+FAIL=0
+
+run_fd_fstat()
+{
+    rm -f fd_stat.results
+    echo ">> Running fd-send-fstat command: ${BUILD_DIR:-.}/test_fd-send-fstat $@"
+    ${BUILD_DIR:-.}/test_fd-send-fstat -q "$@" > fd_stat.results
+    if [ $? -ne 0 ]; then
+        echo ">>     ## FAIL: sending file descriptor"
+        FAIL=1
+    else
+        echo ">>     Success: file descriptor send, result retrieved"
+    fi
+}
+
+run_fd_fstat -f ${BUILD_DIR:-.}/test_fd-send-fstat
+if [ $FAIL -eq 1 ]; then
+    echo "** ERROR **  Could not receive a file descriptor to read from D-Bus service"
+    exit 1
+fi
+
+# Verify the results
+eval $(cat ./fd_stat.results)
+eval $(stat --print "export verify_result_size=%s\nexport verify_result_uid=%u\nexport verify_result_gid=%g\n" ${BUILD_DIR:-.}/test_fd-send-fstat)
+
+if [ $verify_result_uid != $testresult_uid ]; then
+    echo "FAIL:  UID values do not match ... expected ${verify_result_uid}, received ${testresult_uid}"
+    FAIL=1
+fi
+
+if [ $verify_result_gid != $testresult_gid ]; then
+    echo "FAIL:  GID values do not match ... expected ${verify_result_gid}, received ${testresult_gid}"
+    FAIL=1
+fi
+
+if [ $verify_result_size != $testresult_size ]; then
+    echo "FAIL:  File size values do not match ... expected ${verify_result_size}, received ${testresult_size}"
+    FAIL=1
+fi
+
+
+if [ $FAIL -gt 0 ]; then
+    echo "Test result: ** FAILED **"
+    exit 1
+fi
+echo "Verifying UID, GID and file size - all matched"
+echo "Test result:  -- SUCCESS --"
+exit 0

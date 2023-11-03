@@ -1,0 +1,42 @@
+#!/bin/bash
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+#
+
+#
+#  Retrieve the version based on the git tree
+#
+#  If a version tag is found (always prefixed with 'v'), this value
+#  is used.  Otherwise compose a version string based on branch name
+#  and commit reference
+VERSION="$(git describe --always --tags 2>/dev/null)"
+if [ $? -ne 0 ]; then
+	ver_file="$(dirname $0)/../version.txt"
+	if [ -r "$ver_file" ]; then
+		cat "$ver_file"
+	else
+		echo "unkown_version"
+	fi
+	exit 0
+fi
+
+
+#  Only accept explicit tag references, not a reference
+#  derived from a tag reference, such as "v3_beta-36-gcd68aee"
+echo ${VERSION} | grep -qE "^v[[:digit:]]+(|_[[:alnum:]]+)$"
+ec=$?
+
+if [ $ec -ne 0  ]; then
+	# Presume not a version tag, so use commit reference
+	VERSION="$(git rev-parse --symbolic-full-name HEAD | cut -d/ -f3-)_$(git rev-parse --short=16 HEAD)"
+fi
+
+if [ "$1" == "--dist" ]; then
+	echo ${VERSION} > ${MESON_DIST_ROOT}/version.txt
+else
+	echo ${VERSION}
+fi

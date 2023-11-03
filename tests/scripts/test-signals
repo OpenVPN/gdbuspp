@@ -1,0 +1,168 @@
+#!/usr/bin/python3
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+#
+
+##
+# @file tests/scripts/test-signals
+#
+# @brief Runs two programs, one subscribing to specific signals and the
+#        other one emiting signals.  Checking that the content and right
+#        amount of messages are received correctly
+#
+
+import os
+import subprocess
+import sys
+from time import sleep
+
+
+def prog(bin_name):
+    build_dir = os.getenv('BUILD_DIR')
+    if build_dir is None:
+        build_dir='.'
+    return build_dir + '/' + bin_name
+
+
+def parse_result(res, expect_fail, timeout=2):
+    out = ''
+    err = ''
+    try:
+        res.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        pass
+
+    try:
+        o, e = res.communicate(timeout=timeout*2)
+        if o:
+            out = out + o.decode('utf-8')
+        if e:
+            err = err + e.decode('utf-8')
+    except subprocess.TimeoutExpired:
+        pass
+
+    ec = res.returncode
+    if (expect_fail == False and ec > 0) \
+        or (expect_fail == True and ec == 0):
+        print('~'*40)
+        print('FAILED: {}'.format(" ".join(res.args)))
+        print('        >> Expected {}, exit code: {}'.format(expect_fail and "failure" or "success", ec))
+        print(out)
+        print('-'*20)
+        print(err)
+        print('~'*40)
+        return False
+    return ec == 0
+
+
+
+def run_signal_subscribe(args):
+    all_args = [prog('test_signal-subscribe'), '-p', '/gdbuspp/tests/signals', '-i', 'gdbuspp.test.signals'] + args
+    print('signal subscribe: {}'.format(' '.join(all_args)))
+    ret = subprocess.Popen(all_args, bufsize=0, stdout=subprocess.PIPE)
+    sleep(1)
+    return ret
+
+
+
+def run_signal_emit(args, expect_fail, timeout=None):
+    build_dir = os.getenv('BUILD_DIR')
+    if build_dir is None:
+        build_dir='.'
+
+    all_args = [prog('test_signal-emit')] + args
+    print('signal emit: {}'.format(' '.join(all_args)))
+    p = subprocess.run(all_args + ['-q'], stdout=subprocess.PIPE, timeout=timeout)
+    if (expect_fail == False and p.returncode > 0) \
+        or (expect_fail == True and p.returncode == 0):
+        print('~'*40)
+        print('FAILED: {}'.format(" ".join(all_args)))
+        print('        >> Expected {}, exit code: {}'.format(expect_fail and "failure" or "success", p.returncode))
+        print(p.stdout.decode('utf-8'))
+        print('~'*40)
+        return False
+    return True
+
+
+def run_signal_group(args, expect_fail, timeout=None):
+    build_dir = os.getenv('BUILD_DIR')
+    if build_dir is None:
+        build_dir='.'
+
+    all_args = [prog('test_signal-group')] + args
+    print('signal emit: {}'.format(' '.join(all_args)))
+    p = subprocess.run(all_args + ['-q'], stdout=subprocess.PIPE, timeout=timeout)
+    if (expect_fail == False and p.returncode > 0) \
+        or (expect_fail == True and p.returncode == 0):
+        print('~'*40)
+        print('FAILED: {}'.format(" ".join(all_args)))
+        print('        >> Expected {}, exit code: {}'.format(expect_fail and "failure" or "success", p.returncode))
+        print(p.stdout.decode('utf-8'))
+        print('~'*40)
+        return False
+    return True
+
+
+errors = 0
+
+
+# Single basic string
+s = run_signal_subscribe(['-X','s','-x','Basic test, simple string','-s','BasicTest','-C','1'])
+err = run_signal_emit(['-t','s','-v','Basic test, simple string','-s','BasicTest'], False)
+if not (parse_result(s, False) or err):
+    errors = errors + 1
+
+# Receive unexpected data type in signal
+s = run_signal_subscribe(['-X','s','-x','Basic test, simple string','-s','WrongType','-C','1'])
+err = run_signal_emit(['-t','b','-v','1','-s','WrongType'], False)
+if not (parse_result(s, True) or err):
+    errors = errors + 1
+
+# Send 10.000 signals with structured data
+s = run_signal_subscribe(['-X','sub','-x','Structured data test','-x','3141592653','-x','true','-s','StructSignal', '-C', '10000'])
+err = run_signal_emit(['-t','sub','-v','Structured data test','-v','3141592653','-v','1','-s','StructSignal','-r','7000'], False)
+err2 = run_signal_emit(['-t','sub','-v','Structured data test','-v','3141592653','-v','1','-s','StructSignal','-r','3000'], False)
+if not (parse_result(s, False) or err or err2):
+    errors = errors + 1
+
+#
+# Tests the DBus::Signal::Group API
+#
+
+# Test case 1 - Info signal
+s = run_signal_subscribe(['-s','Info','-X','is','-x','1','-x', 'Testing Info signal','-C','1'])
+err = run_signal_group(['-l','info'], False)
+if not (parse_result(s, False) or err):
+    errors = errors + 1
+
+# Test case 2 - Error signal, with more details
+s = run_signal_subscribe(['-s','Error','-X','uss','-x','2','-x', 'Error signal test', '-x', 'signal-group','-C','1'])
+err = run_signal_group(['-l','error'], False)
+if not (parse_result(s, False) or err):
+    errors = errors + 1
+
+# Test case 3 - Debug signal, with even more details
+s = run_signal_subscribe(['-s','Debug','-X','tsss','-x','3','-x', 'A debug message', '-x', 'With details here', '-x', 'signal-group', '-C','1'])
+err = run_signal_group(['-l','debug'], False)
+if not (parse_result(s, False) or err):
+    errors = errors + 1
+
+# Test case 4 - Try sending a signal with the wrong data type - stopped before being sent
+if not run_signal_group(['-l','invalid'], False):
+    errors = errors + 1
+
+
+#
+#  Wrap up the test results
+#
+print('-'*40)
+if errors > 0:
+    print('Overall test result: FAIL ... {} errors'.format(errors))
+    sys.exit(2)
+else:
+    print('Overall test result: Pass')
+    sys.exit(0)
