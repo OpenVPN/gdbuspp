@@ -16,6 +16,7 @@ to compile and install the GDBus++ library and header files.
       $ meson compile
       $ meson test
       $ meson install
+      $ sudo ldconfig
 
 To see the configuration options available:
 
