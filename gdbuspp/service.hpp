@@ -75,13 +75,13 @@ class Service : public std::enable_shared_from_this<Service>
      *             class C constructor
      * @param all  All the argument list used with the constructor
      *
-     * @return Service::Ptr  Returns a std::shared_ptr to the newly
+     * @return C::Ptr  Returns a std::shared_ptr<C> to the newly
      *         created object
      */
     template <typename C, typename... T>
-    static Service::Ptr Create(T &&...all)
+    static std::shared_ptr<C> Create(T &&...all)
     {
-        return Ptr(new C(std::forward<T>(all)...));
+        return std::shared_ptr<C>(new C(std::forward<T>(all)...));
     }
 
     virtual ~Service() noexcept;
