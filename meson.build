@@ -51,6 +51,8 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/glib2/callbacks.cpp',
                 'gdbuspp/glib2/utils.cpp',
                 'gdbuspp/connection.cpp',
+                'gdbuspp/credentials/exceptions.cpp',
+                'gdbuspp/credentials/query.cpp',
                 'gdbuspp/exceptions.cpp',
                 'gdbuspp/mainloop.cpp',
                 'gdbuspp/object/base.cpp',
@@ -85,6 +87,12 @@ install_headers(
         'gdbuspp/proxy.hpp',
         'gdbuspp/service.hpp',
         subdir: 'gdbuspp'
+)
+
+install_headers(
+        'gdbuspp/credentials/exceptions.hpp',
+        'gdbuspp/credentials/query.hpp',
+        subdir: 'gdbuspp/credentials'
 )
 
 install_headers(
@@ -220,6 +228,23 @@ test_proxy = executable(
         install_dir: get_option('libexecdir') + '/gdbuspp/tests'
 )
 
+#  A test utility to retrieve D-Bus service credentials
+test_credentials = executable(
+        'test_credentials',
+        [
+                'tests/credentials.cpp'
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+                tests_lib,
+        ],
+        dependencies: [
+                glib2_deps,
+        ],
+        install: get_option('install_testprogs'),
+        install_dir: get_option('libexecdir') + '/gdbuspp/tests'
+)
+
 #  Sends D-Bus signals in various ways
 signal_emit = executable(
         'test_signal-emit',
@@ -340,6 +365,16 @@ test('proxy-tests',
         depends: [
                 simple_service,
                 test_proxy
+        ],
+        priority: 90,
+        is_parallel: false
+)
+
+test('credentials',
+        find_program('tests/scripts/test-credentials'),
+        depends: [
+                simple_service,
+                test_credentials
         ],
         priority: 90,
         is_parallel: false
