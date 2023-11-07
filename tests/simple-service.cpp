@@ -611,6 +611,8 @@ class SimpleHandler : public DBus::Object::Base
         method_tests = object_mgr->CreateObject<MethodTests>(object_mgr, log);
         failing_meths = object_mgr->CreateObject<FailingMethodTests>();
 
+        AddProperty("version", version, false);
+
         log->Log("SimpleHandler", "Handler is initialized");
     }
 
@@ -646,6 +648,7 @@ class SimpleHandler : public DBus::Object::Base
     PropertyTests::Ptr property_tests = nullptr;
     MethodTests::Ptr method_tests = nullptr;
     FailingMethodTests::Ptr failing_meths = nullptr;
+    std::string version = "0.1.2.3";
 };
 
 

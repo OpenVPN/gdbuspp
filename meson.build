@@ -63,6 +63,7 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/object/operation.cpp',
                 'gdbuspp/object/property.cpp',
                 'gdbuspp/proxy.cpp',
+                'gdbuspp/proxy/utils.cpp',
                 'gdbuspp/service.cpp',
                 'gdbuspp/signals/emit.cpp',
                 'gdbuspp/signals/exceptions.cpp',
@@ -103,6 +104,11 @@ install_headers(
         'gdbuspp/object/property.hpp',
         'gdbuspp/object/base.hpp',
         subdir: 'gdbuspp/object'
+)
+
+install_headers(
+        'gdbuspp/proxy/utils.hpp',
+        subdir: 'gdbuspp/proxy'
 )
 
 install_headers(
@@ -216,6 +222,22 @@ test_proxy = executable(
         'test_proxy',
         [
                 'tests/proxy-client.cpp'
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+                tests_lib,
+        ],
+        dependencies: [
+                glib2_deps,
+        ],
+        install: get_option('install_testprogs'),
+        install_dir: get_option('libexecdir') + '/gdbuspp/tests'
+)
+
+test_proxy_utils = executable(
+        'test_proxy_utils',
+        [
+                'tests/proxy-utils.cpp'
         ],
         link_with: [
                 gdbuspp_lib.get_static_lib(),
@@ -365,6 +387,16 @@ test('proxy-tests',
         depends: [
                 simple_service,
                 test_proxy
+        ],
+        priority: 90,
+        is_parallel: false
+)
+
+test('proxy-utils',
+        test_proxy_utils,
+        depends: [
+                simple_service,
+                test_proxy_utils
         ],
         priority: 90,
         is_parallel: false
