@@ -408,6 +408,12 @@ Client::Client(Connection::Ptr conn, const std::string &dest)
 }
 
 
+const std::string &Client::GetDestination() const noexcept
+{
+    return destination;
+}
+
+
 GVariant *Client::Call(const std::string &object_path,
                        const std::string &interface,
                        const std::string &method,

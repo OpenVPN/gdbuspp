@@ -116,6 +116,13 @@ class Client
 
 
     /**
+     *  Retrieve the destination this proxy is configured to access
+     *
+     * @return const std::string& to the D-Bus destination name
+     */
+    const std::string &GetDestination() const noexcept;
+
+    /**
      *  Call a D-Bus method in a D-Bus object on the D-Bus service this
      *  proxy is configured against
 

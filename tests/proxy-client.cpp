@@ -234,6 +234,14 @@ int main(int argc, char **argv)
         auto prx = Proxy::Client::Create(conn, options.destination);
         log << "Connected to: " << prx << std::endl;
 
+        // Check the Proxy::Client::GetDestination() method
+        if (prx->GetDestination() != options.destination)
+        {
+            log << "** ERROR ** Proxy::Client::GetDestination() "
+                << "did not return " << options.destination << std::endl;
+            throw DBus::Exception("Proxy::Client::GetDestination()",
+                                  "Unexpected result:" + prx->GetDestination());
+        }
         if (!options.method.empty())
         {
             if (options.object_interface.empty())
