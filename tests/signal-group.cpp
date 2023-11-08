@@ -63,7 +63,7 @@ class Options : public TestUtils::OptionParser
                 bustype = DBus::BusType::SESSION;
                 break;
             case 't':
-                target = std::string(optarg);
+                target.push_back(std::string(optarg));
                 break;
             case 'p':
                 object_path = std::string(optarg);
@@ -86,23 +86,26 @@ class Options : public TestUtils::OptionParser
             }
         }
 
+        if (target.size() == 0)
+        {
+            // If no targets has been added, do broadcast
+            target.push_back("");
+        }
+
         // default to test sending all signal types
         if (log_types.size() == 0)
         {
             log_types = {"info", "error", "debug", "invalid"};
         }
-
-        preset = DBus::Proxy::TargetPreset::Create(object_path, object_interface);
     }
 
     DBus::BusType bustype = DBus::BusType::SESSION;
-    std::string target = {};
+    std::vector<std::string> target = {};
     std::string object_path = Constants::GenPath("signals");
     std::string object_interface = Constants::GenInterface("signals");
     std::vector<std::string> log_types;
     bool quiet = false;
     bool show_introspection = false;
-    DBus::Proxy::TargetPreset::Ptr preset = nullptr;
 };
 
 
@@ -110,8 +113,12 @@ class Options : public TestUtils::OptionParser
 class LogExample : public Signals::Group
 {
   public:
-    LogExample(DBus::Connection::Ptr conn, const std::string progname)
-        : Group(conn), program_name(progname)
+    LogExample(DBus::Connection::Ptr conn,
+               const std::string &path,
+               const std::string &interface,
+               const std::string &progname)
+        : Group(conn, path, interface),
+          program_name(progname)
     {
         RegisterSignal("Info",
                        {{"id", "i"},
@@ -168,7 +175,10 @@ int main(int argc, char **argv)
         Options opts(argc, argv);
 
         auto dbuscon = DBus::Connection::Create(opts.bustype);
-        auto log = Signals::Group::Create<LogExample>(dbuscon, "signal-group");
+        auto log = Signals::Group::Create<LogExample>(dbuscon,
+                                                      opts.object_path,
+                                                      opts.object_interface,
+                                                      "signal-group");
 
         if (opts.show_introspection)
         {
@@ -176,8 +186,10 @@ int main(int argc, char **argv)
             return 0;
         }
 
-
-        log->AddTarget(opts.target, opts.object_path, opts.object_interface);
+        for (const auto &tgt : opts.target)
+        {
+            log->AddTarget(tgt);
+        }
 
         for (const auto &log_type : opts.log_types)
         {

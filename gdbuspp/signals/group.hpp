@@ -147,23 +147,15 @@ class Group : private Emit
      *
      *  At least one target must be added.
      *
-     *  This method just re-exports the @Emit::AddTarget() method.
+     *  This method is a bit different from the one found in
+     *  Signals::Emit::AddTarget().  This one being provided in Signals::Groups
+     *  only takes the busname as the target; the object path and interface
+     *  is already declared via the constructor.
      *
      * @param busname       std::string of the recipient of a signal
-     * @param object_path   std::string of the D-Bus object the signal references
-     * @param interface     std::string of the interface scope of the D-Bus object
      */
-    void AddTarget(const std::string &busname,
-                   const std::string &object_path,
-                   const std::string &interface);
+    void AddTarget(const std::string &busname);
 
-    /**
-     *  Similar to the @AddTarget() above, but will take a Target::Ptr
-     *  object instead.
-     *
-     * @param target   Target::Ptr object with the target details
-     */
-    void AddTarget(Target::Ptr target);
 
 
     /**
@@ -181,8 +173,16 @@ class Group : private Emit
 
 
   protected:
-    Group(DBus::Connection::Ptr conn);
-
+    /**
+     * Signals::Group contructor
+     *
+     * @param conn              DBus::Connection object where signals will be sent
+     * @param object_path       std::string of the D-Bus object the signal references
+     * @param object_interface  std::string of the interface scope of the D-Bus object
+     */
+    Group(DBus::Connection::Ptr conn,
+          const std::string &object_path,
+          const std::string &object_interface);
 
   private:
     /**
@@ -198,6 +198,12 @@ class Group : private Emit
      * registered_signals.
      */
     std::map<std::string, std::string> type_cache;
+
+    /// D-Bus object path these signals are sent from from
+    const std::string object_path;
+
+    /// D-Bus object interface these signals belongs to
+    const std::string object_interface;
 };
 
 } // namespace Signals

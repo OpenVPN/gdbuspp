@@ -48,7 +48,9 @@ class SimpleLog : public DBus::Signals::Group
     using Ptr = std::shared_ptr<SimpleLog>;
 
     SimpleLog(DBus::Connection::Ptr conn)
-        : DBus::Signals::Group(conn)
+        : DBus::Signals::Group(conn,
+                               Constants::GenPath("simple1"),
+                               Constants::GenInterface("simple1"))
     {
         RegisterSignal("Log", {{"method", "s"}, {"message", "s"}});
     }
@@ -604,7 +606,7 @@ class SimpleHandler : public DBus::Object::Base
     {
         log = DBus::Signals::Group::Create<SimpleLog>(service->GetConnection());
         RegisterSignals(log);
-        log->AddTarget("", GetPath(), GetInterface());
+        log->AddTarget("");
 
         auto object_mgr = service->GetObjectManager();
         property_tests = object_mgr->CreateObject<PropertyTests>(log);

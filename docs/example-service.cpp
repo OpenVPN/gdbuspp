@@ -31,7 +31,9 @@ class MySignalGroup : public DBus::Signals::Group
     using Ptr = std::shared_ptr<MySignalGroup>;
 
     MySignalGroup(DBus::Connection::Ptr connection)
-        : DBus::Signals::Group(connection)
+        : DBus::Signals::Group(connection,
+                               "/example/myobject",
+                               "net.example.myinterface")
     {
         RegisterSignal("MySignal", {{"message", "s"}});
     }
@@ -92,7 +94,7 @@ class MyObject : public DBus::Object::Base
 
         // Declaring a D-Bus signal
         my_signals = DBus::Signals::Group::Create<MySignalGroup>(connection);
-        my_signals->AddTarget("", GetPath(), GetInterface());
+        my_signals->AddTarget("");
         RegisterSignals(my_signals);
     }
 

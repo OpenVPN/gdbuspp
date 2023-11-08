@@ -64,17 +64,9 @@ const std::string Group::GenerateIntrospection()
 }
 
 
-void Group::AddTarget(const std::string &busname,
-                      const std::string &object_path,
-                      const std::string &interface)
+void Group::AddTarget(const std::string &busname)
 {
-    Emit::AddTarget(busname, object_path, interface);
-};
-
-
-void Group::AddTarget(Target::Ptr target)
-{
-    Emit::AddTarget(target);
+    Emit::AddTarget(busname, object_path, object_interface);
 };
 
 
@@ -111,8 +103,11 @@ void Group::SendGVariant(const std::string &signal_name, GVariant *param)
 }
 
 
-Group::Group(DBus::Connection::Ptr conn)
-    : Emit(conn)
+Group::Group(DBus::Connection::Ptr conn,
+             const std::string &object_path_,
+             const std::string &object_interface_)
+    : Emit(conn),
+      object_path(object_path_), object_interface(object_interface_)
 {
 }
 
