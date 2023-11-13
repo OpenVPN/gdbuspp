@@ -38,15 +38,15 @@ void _int_callback_name_acquired(GDBusConnection *conn,
                                  const char *name,
                                  void *this_ptr)
 {
-    DBus::Service *obj = static_cast<DBus::Service *>(this_ptr);
-    obj->BusNameAcquired(conn, std::string(name));
+    DBus::Service *service = static_cast<DBus::Service *>(this_ptr);
+    service->BusNameAcquired(conn, std::string(name));
 }
 
 
 void _int_callback_name_lost(GDBusConnection *conn, const gchar *name, void *this_ptr)
 {
-    DBus::Service *obj = static_cast<DBus::Service *>(this_ptr);
-    obj->BusNameLost(conn, name);
+    DBus::Service *service = static_cast<DBus::Service *>(this_ptr);
+    service->BusNameLost(conn, name);
 }
 
 
