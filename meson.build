@@ -38,6 +38,7 @@ glib2_deps = [
         dependency('glib-2.0'),
         dependency('gio-2.0'),
         dependency('gio-unix-2.0'),
+        dependency('threads')
 ]
 
 #
@@ -54,6 +55,7 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/credentials/exceptions.cpp',
                 'gdbuspp/credentials/query.cpp',
                 'gdbuspp/exceptions.cpp',
+                'gdbuspp/features/idle-detect.cpp',
                 'gdbuspp/mainloop.cpp',
                 'gdbuspp/object/base.cpp',
                 'gdbuspp/object/callbacklink.cpp',
@@ -353,6 +355,20 @@ test_fd_send = executable(
 )
 
 
+test_idle_detect = executable(
+        'test_idle-detect',
+        [
+                'tests/idle-detect.cpp'
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+                tests_lib,
+        ],
+        dependencies: [
+                glib2_deps,
+        ]
+)
+
 #
 #
 #   Define various test scripts
@@ -451,3 +467,12 @@ test('signals',
         timeout: 60,
         is_parallel: false
 )
+
+if (get_option('long_tests'))
+    test('idle-detect',
+         test_idle_detect,
+         priority: 50,
+         timeout: 60,
+         is_parallel: true
+    )
+endif

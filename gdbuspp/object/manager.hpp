@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <glib.h>
 
@@ -24,7 +25,15 @@
 #include "base.hpp"
 
 namespace DBus {
+
+namespace Features {
+class IdleDetect; // Forward declaration; see features/idle-detect.hpp
+}
+
+class MainLoop; // Forward declaration; see mainloop.hpp
+
 namespace Object {
+
 
 class CallbackLink; // forward declaration; declared in object/callbacklink.hpp
 
@@ -125,6 +134,42 @@ class Manager : public std::enable_shared_from_this<Manager>
         return object;
     }
 
+
+    /**
+     *  Activate the idle-exit mechanism.  If no objects are active in the
+     *  service, the service will shutdown after the given timeout value.
+     *
+     * @param timeout  std::chrono::duration describing the idle timeout
+     *                 of the service
+     */
+    void PrepareIdleDetector(const std::chrono::duration<uint32_t> timeout,
+                             std::shared_ptr<DBus::MainLoop> mainloop);
+
+    /**
+     *  Control if the idle detector should run or not.
+     *
+     *  This is normally called by glib2::Callbacks::_int_callback_name_acquired()
+     *  and glib2::Callbacks::_int_callback_name_lost() which starts and
+     *  stops the idle detector when the service is registered and available on
+     *  the D-Bus.
+     *
+     *  The DBus::Service object can also call this method, as part of the
+     *  shutdown logic; to ensure it does not leave any threads behind.
+     *
+     * @param run   bool flag to start or stop the Features::IdleDetect
+     *              functionality.  When true, the idle detector thread is
+     *              started, otherwise the thread is stopped.
+     */
+    void RunIdleDetector(const bool run);
+
+    /**
+     *  This is primarily called via functions in the glib2::Callbacks scope,
+     *  to just update the internal IdleDetect last activity timestamp.  As
+     *  long as this timestamp + the configured timeout is behind the current
+     *  host system's current timestamp, this service should be kept running.
+     */
+    void IdleActivityUpdate() const noexcept;
+
     /**
      *  This method is can be called by any DBus::Object::Base object
      *  to remove an object from this D-Bus service.
@@ -151,6 +196,12 @@ class Manager : public std::enable_shared_from_this<Manager>
      *  An thread pool to handle some D-Bus calls asynchronously
      */
     AsyncProcess::Pool::Ptr request_pool{};
+
+    /**
+     *  The Idle Detector object.  This is activated via the
+     *  PrepareIdleDetector() method.
+     */
+    std::shared_ptr<Features::IdleDetect> idle_detector{nullptr};
 
     /**
      *  The main object map, which owns the DBus::Object::Base objects.
@@ -212,6 +263,17 @@ class Manager : public std::enable_shared_from_this<Manager>
     /// glib2 callback function granted access to this private section,
     /// used to delete an Object::Base object via _destructObjectCallback()
     friend void glib2::Callbacks::_int_dbusobject_callback_destruct(void *this_ptr);
+
+    /**
+     *  The DBus::Features::IdleDetect::__idle_detector_thread() method
+     *  will be running in a separate thread and need access to loop through
+     *  all the available objects and check if they should be considered in the
+     *  idle detection logic.
+     *
+     *  The IdleDetect() class is an internal object, not to be exposed to
+     *  any external users.
+     */
+    friend class DBus::Features::IdleDetect;
 };
 
 

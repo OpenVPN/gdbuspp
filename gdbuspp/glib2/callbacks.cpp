@@ -150,6 +150,13 @@ void _int_dbusobject_callback_method_call(GDBusConnection *conn,
         AsyncProcess::Request::UPtr req = cbl->NewObjectOperation(conn, sender, obj_path, intf_name);
         req->MethodCall(meth_name, params, invoc);
         cbl->QueueOperation(req);
+
+        // Update the activity for the idle detector
+        Object::Manager::Ptr om = cbl->manager.lock();
+        if (om)
+        {
+            om->IdleActivityUpdate();
+        }
     }
     catch (const DBus::Exception &excp)
     {
@@ -183,6 +190,14 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
 
             throw Object::Exception(erm.str());
         }
+
+        // Update the activity for the idle detector
+        Object::Manager::Ptr om = cbl->manager.lock();
+        if (om)
+        {
+            om->IdleActivityUpdate();
+        }
+
         // Authorize this request before we do anything
         auto req = AsyncProcess::Request::Create(conn, cbl->object, sender, obj_path, intf_name);
         req->GetProperty(property_name);
@@ -240,6 +255,13 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
             std::cerr << erm.str() << std::endl;
 
             throw Object::Exception(erm.str());
+        }
+
+        // Update the activity for the idle detector
+        Object::Manager::Ptr om = cbl->manager.lock();
+        if (om)
+        {
+            om->IdleActivityUpdate();
         }
 
         // Authorize this request before we do anything
@@ -322,6 +344,7 @@ void _int_dbusobject_callback_destruct(void *this_ptr)
     Object::Manager::Ptr om = cbl->manager.lock();
     if (om)
     {
+        om->IdleActivityUpdate();
         om->_destructObjectCallback(cbl->object->GetPath());
         // NOTE: cbl is no longer valid after this call
     }
@@ -354,6 +377,11 @@ void _int_dbus_connection_signal_handler(GDBusConnection *conn,
 
         throw Signals::Exception(erm.str());
     }
+    // TODO:  Consider idle detection timestamp update on signal handling
+    //        This will require access to the object manager, which need to
+    //        come via "this_ptr".  And it is probably more suitable for
+    //        DBus::Signals::Group based signal handling
+
     auto event = Signals::Event::Create(sender, obj_path, intf_name, sign_name, params);
     sigsub->callback(event);
 }

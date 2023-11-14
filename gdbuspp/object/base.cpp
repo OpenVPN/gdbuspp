@@ -155,5 +155,15 @@ void Object::Base::MethodCall(AsyncProcess::Request::UPtr &req)
 }
 
 
+void Object::Base::DisableIdleDetector(const bool disable)
+{
+    disable_idle_detection = disable;
+}
+
+
+const bool Object::Base::GetIdleDetectorDisabled() const
+{
+    return disable_idle_detection;
+}
 
 } // namespace DBus

@@ -302,6 +302,18 @@ class Base : public std::enable_shared_from_this<Base>
      */
     void MethodCall(AsyncProcess::Request::UPtr &req);
 
+    /**
+     *  Retrieve the object setting if the idle detector should consider
+     *  this object when evaluating if a service is running idle or not.
+     *
+     * @return Returns true when the idle detector has been disabled and the
+     *         service will be shut down regardless of this object is in use
+     *         or not if no activity has been registered.
+     *         If this returns false, the idle detector will not shut down
+     *         the service as long as this object is available in memory.
+     */
+    const bool GetIdleDetectorDisabled() const;
+
 
     friend std::ostream &operator<<(std::ostream &os, const Base &object)
     {
@@ -334,6 +346,28 @@ class Base : public std::enable_shared_from_this<Base>
      * @param interf  std::string with the D-Bus interface used by this object
      */
     Base(const std::string &path, const std::string &interf);
+
+    /**
+     *  If the DBus::Service implementation has enabled the idle detection,
+     *  it may shutdown if there has not been any activity within a certain
+     *  amount of time.
+     *
+     *  If a D-Bus object is added to the service at runtime, that will
+     *  result in the service disabling the idle detection while that object
+     *  is active.  Once the D-Bus object is removed again, the idle detection
+     *  will be activated again.
+     *
+     *  Via this method, it can instruct the idle detection logic to not
+     *  consider this object at all.  If an object with the "skip idle
+     *  detection" flag enabled, the service may shutdown even if this object
+     *  is still in memory.
+     *
+     *  This flag is false by default
+     *
+     * @param enable  bool flag to indicate if this object should be considered
+     *                if the D-Bus service is being idle and wants to shut down.
+     */
+    void DisableIdleDetector(const bool enable);
 
 
   private:
@@ -650,6 +684,9 @@ class Base : public std::enable_shared_from_this<Base>
 
     /// D-Bus object interface scope of this C++ is responsible for
     const std::string interface;
+
+    /// Disable the idle detection checks, see DisableIdleDetector() for details
+    bool disable_idle_detection = false;
 
     /**
      *  D-Bus properties stored within this object.

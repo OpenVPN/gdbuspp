@@ -10,3 +10,6 @@ option('doxygen', type: 'boolean', value: false,
 
 option('install_testprogs', type: 'boolean', value: false,
         description: 'Install misc test programs?')
+
+option('long_tests', type: 'boolean', value: false,
+        description: 'Run long running/slow tests by default')

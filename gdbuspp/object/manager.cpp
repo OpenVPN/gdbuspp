@@ -19,6 +19,7 @@
 #include <gio/gio.h>
 
 #include "../async-process.hpp"
+#include "../features/idle-detect.hpp"
 #include "../glib2/callbacks.hpp"
 #include "manager.hpp"
 #include "callbacklink.hpp"
@@ -54,6 +55,56 @@ Manager::Manager(DBus::Connection::Ptr conn)
         glib2::Callbacks::_int_dbusobject_callback_set_property};
 
     request_pool = AsyncProcess::Pool::Create();
+}
+
+
+void Manager::PrepareIdleDetector(const std::chrono::duration<uint32_t> timeout,
+                                  std::shared_ptr<DBus::MainLoop> mainloop)
+{
+    if (idle_detector)
+    {
+        throw Manager::Exception("EnableIdleDetector: "
+                                 "An idle detector is already setup");
+    }
+    if (!mainloop)
+    {
+        throw Manager::Exception("EnableIdleDetector: "
+                                 "A valid DBus::Mainloop object is required");
+    }
+    if (std::chrono::duration<uint32_t>(0) == timeout)
+    {
+        // Timeout set to 0, which disables this feature
+        return;
+    }
+
+    idle_detector = Features::IdleDetect::Create(mainloop,
+                                                 timeout,
+                                                 shared_from_this());
+}
+
+
+void Manager::RunIdleDetector(const bool run)
+{
+    if (idle_detector)
+    {
+        if (run)
+        {
+            idle_detector->Start();
+        }
+        else
+        {
+            idle_detector->Stop();
+        }
+    }
+}
+
+
+void Manager::IdleActivityUpdate() const noexcept
+{
+    if (idle_detector)
+    {
+        idle_detector->ActivityUpdate();
+    }
 }
 
 
