@@ -52,6 +52,7 @@ void MainLoop::Run()
     g_unix_signal_add(SIGTERM, glib2::Callbacks::_int_mainloop_stop_handler, _private::_int_glib2_mainloop);
     g_main_loop_run(_private::_int_glib2_mainloop);
     g_main_loop_unref(_private::_int_glib2_mainloop);
+    _private::_int_glib2_mainloop = nullptr;
 }
 
 
