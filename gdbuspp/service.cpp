@@ -43,14 +43,36 @@ Object::Manager::Ptr Service::GetObjectManager() const noexcept
 }
 
 
-void Service::Run()
+void Service::PrepareIdleDetector(const std::chrono::duration<uint32_t> timeout)
 {
-    if (service_mainloop)
+    if (std::chrono::duration<uint32_t>(0) == timeout)
     {
-        throw Service::Exception("A main loop is already started by this service object");
+        // Timeout set to 0, which disables this feature
+        return;
     }
 
+    if (service_mainloop)
+    {
+        throw Service::Exception("Idle detection must be enabled before the main loop is created");
+    }
     service_mainloop = MainLoop::Create();
+    object_manager->PrepareIdleDetector(timeout, service_mainloop);
+}
+
+
+void Service::RunIdleDetector(const bool run)
+{
+    object_manager->RunIdleDetector(run);
+}
+
+
+void Service::Run()
+{
+    if (!service_mainloop)
+    {
+        // If not created via PrepareIdleDetection(), create it now
+        service_mainloop = MainLoop::Create();
+    }
     service_mainloop->Run();
 }
 
@@ -61,6 +83,7 @@ void Service::Stop()
     {
         throw Service::Exception("No main loop started by this service object");
     }
+    object_manager->RunIdleDetector(false);
     service_mainloop->Stop();
 }
 
@@ -77,6 +100,10 @@ Service::~Service() noexcept
 {
     try
     {
+        if (object_manager)
+        {
+            object_manager->RunIdleDetector(false);
+        }
         service_unregister();
     }
     catch (const DBus::Exception &err)

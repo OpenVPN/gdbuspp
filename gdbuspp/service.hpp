@@ -15,6 +15,8 @@
  *         applications providing a service on the D-Bus.
  */
 
+#include <cstdint>
+#include <chrono>
 #include <string>
 #include <glib.h>
 
@@ -147,6 +149,35 @@ class Service : public std::enable_shared_from_this<Service>
      * @return Object::Manager::Ptr
      */
     Object::Manager::Ptr GetObjectManager() const noexcept;
+
+
+    /**
+     *  Activate the idle-exit mechanism.  If no objects are active in the
+     *  service, the service will shutdown after the given timeout value.
+     *
+     *  The service handler object is always excluded, but DBus::Object::Base
+     *  objects can control if it should be checked via the
+     *  DBus::Object::Base::DisableIdleDetector() method.
+     *
+     * @param timeout  std::chrono::duration describing the idle timeout
+     *                 of the service
+     */
+    void PrepareIdleDetector(const std::chrono::duration<uint32_t> timeout);
+
+
+    /**
+     *  Control if the idle detector should run or not.
+     *
+     *  This is typically called by glib2::Callbacks::_int_callback_name_acquired()
+     *  and glib2::Callbacks::_int_callback_name_lost() which starts and
+     *  stops the idle detector when the service is registered and available on
+     *  the D-Bus.
+     *
+     * @param run   bool flag to start or stop the Features::IdleDetect
+     *              functionality
+     */
+    void RunIdleDetector(const bool run);
+
 
     /**
      *  Very simple DBus::MainLoop to get a D-Bus service running

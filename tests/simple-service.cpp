@@ -174,6 +174,7 @@ class PropertyTests : public DBus::Object::Base
                              Constants::GenInterface("simple1")),
           log(log_)
     {
+        DisableIdleDetector(true);
         RegisterSignals(log);
 
         // Test simple data type based properties.  These D-Bus object properties
@@ -314,6 +315,7 @@ class MethodTests : public DBus::Object::Base
                              Constants::GenInterface("simple1")),
           object_manager(obj_mgr_), log(log_)
     {
+        DisableIdleDetector(true);
         RegisterSignals(log);
 
         // Just a simple D-Bus method not requiring any input arguments nor
@@ -546,6 +548,7 @@ class FailingMethodTests : public DBus::Object::Base
         : DBus::Object::Base(Constants::GenPath("simple1/method_failures"),
                              Constants::GenInterface("simple1"))
     {
+        DisableIdleDetector(true);
         auto wrong_args1 = AddMethod("NoReceive123",
                                      [](DBus::Object::Method::Arguments::Ptr args)
                                      {
@@ -604,6 +607,7 @@ class SimpleHandler : public DBus::Object::Base
         : DBus::Object::Base(Constants::GenPath("simple1"),
                              Constants::GenInterface("simple1"))
     {
+        DisableIdleDetector(true);
         log = DBus::Signals::Group::Create<SimpleLog>(service->GetConnection());
         RegisterSignals(log);
         log->AddTarget("");
@@ -668,6 +672,8 @@ int main(int argc, char **argv)
         // This root object is the ServiceHandler; which can create child
         // objects with different functionality
         simple_service->CreateServiceHandler<SimpleHandler>(simple_service);
+
+        simple_service->PrepareIdleDetector(std::chrono::seconds(60));
 
         // Start the service
         simple_service->Run();
