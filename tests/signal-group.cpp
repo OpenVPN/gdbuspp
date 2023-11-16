@@ -157,7 +157,15 @@ class LogExample : public Signals::Group
     void Invalid()
     {
         GVariant *p = g_variant_new("(s)", program_name.c_str());
-        SendGVariant("Debug", p);
+        try
+        {
+            SendGVariant("Debug", p);
+        }
+        catch (...)
+        {
+            g_variant_unref(p);
+            throw;
+        }
     }
 
   private:
