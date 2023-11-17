@@ -77,6 +77,14 @@ class Emit
     void AddTarget(Target::Ptr target);
 
     /**
+     *  Clears all the registered/added signal targets.
+     *
+     *  Before a new signal can be sent after calling this method, the
+     *  AddTarget() method must have been called first.
+     */
+    void ClearTargets() noexcept;
+
+    /**
      *   Send a D-Bus signal to all registered targets.
      *
      * @param signal_name   std::string with the signal name to use

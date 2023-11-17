@@ -38,6 +38,12 @@ void Emit::AddTarget(Target::Ptr target)
 }
 
 
+void Emit::ClearTargets() noexcept
+{
+    targets.clear();
+}
+
+
 void Emit::SendGVariant(const std::string &signal_name, GVariant *params)
 {
     if (!connection || !G_IS_DBUS_CONNECTION(connection->ConnPtr()))
