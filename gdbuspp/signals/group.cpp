@@ -66,11 +66,93 @@ const std::string Group::GenerateIntrospection()
 
 void Group::AddTarget(const std::string &busname)
 {
-    Emit::AddTarget(busname, object_path, object_interface);
+    signal_groups.at("__default__")->AddTarget(busname, object_path, object_interface);
 };
 
 
-void Group::SendGVariant(const std::string &signal_name, GVariant *param)
+void Group::GroupCreate(const std::string &groupname)
+{
+    try
+    {
+        (void)signal_groups.at(groupname);
+        throw Signals::Exception("Group name '" + groupname + "' exists");
+    }
+    catch (const std::out_of_range &)
+    {
+        // If we receive this exception; this key does not exists
+        signal_groups[groupname] = Signals::Emit::Create(connection);
+    }
+}
+
+
+void Group::GroupRemove(const std::string &groupname)
+{
+    if ("__default__" == groupname)
+    {
+        throw Signals::Exception("Cannot use reserved group name (__default__)");
+    }
+
+    const auto it = signal_groups.find(groupname);
+    if (signal_groups.end() == it)
+    {
+        throw Signals::Exception("Group name '" + groupname + "' is not created");
+    }
+    signal_groups.erase(it);
+}
+
+
+void Group::GroupAddTarget(const std::string &groupname,
+                           const std::string &busname)
+{
+    if ("__default__" == groupname)
+    {
+        throw Signals::Exception("Cannot use reserved group name (__default__)");
+    }
+    try
+    {
+        signal_groups.at(groupname)->AddTarget(busname, object_path, object_interface);
+    }
+    catch (const std::out_of_range &)
+    {
+        throw Signals::Exception("Group name '" + groupname + "' is not created");
+    }
+}
+
+
+void Group::GroupAddTargetList(const std::string &groupname,
+                               const std::vector<std::string> &list)
+{
+    for (const std::string &busname : list)
+    {
+        GroupAddTarget(groupname, busname);
+    }
+}
+
+
+void Group::GroupClearTargets(const std::string &groupname)
+{
+    try
+    {
+        Signals::Emit::Ptr emitter = signal_groups[groupname];
+        emitter->ClearTargets();
+    }
+    catch (const std::out_of_range &)
+    {
+        throw Signals::Exception("Group name '" + groupname + "' is not created");
+    }
+}
+
+
+void Group::SendGVariant(const std::string &signal_name,
+                         GVariant *param)
+{
+    GroupSendGVariant("__default__", signal_name, param);
+}
+
+
+void Group::GroupSendGVariant(const std::string &groupname,
+                              const std::string &signal_name,
+                              GVariant *param)
 {
     // If the type cache is empty, run the introspection generation
     // to build the cache
@@ -78,37 +160,51 @@ void Group::SendGVariant(const std::string &signal_name, GVariant *param)
     {
         (void)GenerateIntrospection();
     }
+
+    std::string exp_type{};
     try
     {
         // Retrieve the expected type from the type cache for the signal ...
-        std::string &exp_type = type_cache.at(signal_name);
-
-        // ... and validate it with what we have recevied
-        std::string param_type(g_variant_get_type_string(param));
-        if (exp_type != param_type)
-        {
-            std::ostringstream err;
-            err << "Invalid data type for '" << signal_name << "' "
-                << "Expected '" << exp_type << "' "
-                << "but received '" << param_type << "'";
-            throw Signals::Exception(err.str());
-        }
-        Emit::SendGVariant(signal_name, param);
-        g_variant_unref(param);
+        exp_type = type_cache.at(signal_name);
     }
     catch (const std::out_of_range &)
     {
         throw Signals::Exception("Not a registered signal: " + signal_name);
     }
+
+    Signals::Emit::Ptr emitter{nullptr};
+    try
+    {
+        emitter = signal_groups[groupname];
+    }
+    catch (const std::out_of_range &)
+    {
+        throw Signals::Exception("Group name '" + groupname + "' is not created");
+    }
+
+    // ... and validate it with what we have recevied
+    std::string param_type(g_variant_get_type_string(param));
+    if (exp_type != param_type)
+    {
+        std::ostringstream err;
+        err << "Invalid data type for '" << signal_name << "' "
+            << "Expected '" << exp_type << "' "
+            << "but received '" << param_type << "'";
+        throw Signals::Exception(err.str());
+    }
+    emitter->SendGVariant(signal_name, param);
+    g_variant_unref(param);
 }
 
 
 Group::Group(DBus::Connection::Ptr conn,
              const std::string &object_path_,
              const std::string &object_interface_)
-    : Emit(conn),
+    : connection(conn),
       object_path(object_path_), object_interface(object_interface_)
 {
+    // Create a default target group
+    signal_groups["__default__"] = Signals::Emit::Create(connection);
 }
 
 } // namespace Signals

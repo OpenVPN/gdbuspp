@@ -55,7 +55,7 @@ using SignalArgList = std::vector<struct SignalArgument>;
  *  This class will take care of ensuring only known signals are
  *  sent and that the data they send is formatted correctly.
  */
-class Group : private Emit
+class Group
 {
   public:
     using Ptr = std::shared_ptr<Group>;
@@ -157,7 +157,6 @@ class Group : private Emit
     void AddTarget(const std::string &busname);
 
 
-
     /**
      *  Sends the D-Bus signals with the provided parameters
      *
@@ -169,7 +168,64 @@ class Group : private Emit
      * @param param         GVariant glib2 object containing the signal
      *                      data payload
      */
-    void SendGVariant(const std::string &signal_name, GVariant *param) override;
+    void SendGVariant(const std::string &signal_name, GVariant *param);
+
+
+    /**
+     *  Create a separate distribution list for a group of signal targets
+     *
+     * @param groupname  std::string with a name for the distribution list
+     */
+    void GroupCreate(const std::string &groupname);
+
+
+    /**
+     *  Deletes a specific distribution list
+     *
+     * @param groupname  std::string with the distribution list to remove
+     */
+    void GroupRemove(const std::string &groupname);
+
+
+    /**
+     *  Adds a D-Bus bus name where signals will be sent for a specific
+     *  distribution list
+     *
+     * @param groupname  std::string with the group name to add the recipient
+     * @param busname    std::String with the bus name of the recipient
+     */
+    void GroupAddTarget(const std::string &groupname, const std::string &busname);
+
+
+    /**
+     *  Similar to GroupAddTarget(), where it takes a std::vector of recipients
+     *  to add to the group list.
+     *
+     * @param groupname  std::string with the group name to add the recipient
+     * @param list       std::vector<std::String> with bus names of the recipients
+     */
+    void GroupAddTargetList(const std::string &groupname, const std::vector<std::string> &list);
+
+
+    /**
+     *  Removes all the recipients in a distribution list
+     *
+     * @param groupname
+     */
+    void GroupClearTargets(const std::string &groupname);
+
+
+    /**
+     *  Sends a signal to all recipients in a single distribution list
+     *
+     * @param groupname    std::string with the group name of recipients to signal
+     * @param signal_name  std::string of the D-Bus signal to send
+     * @param param         GVariant glib2 object containing the signal
+     *                      data payload
+     */
+    void GroupSendGVariant(const std::string &groupname,
+                           const std::string &signal_name,
+                           GVariant *param);
 
 
   protected:
@@ -185,6 +241,9 @@ class Group : private Emit
           const std::string &object_interface);
 
   private:
+    /// D-Bus connection used to emit signals
+    DBus::Connection::Ptr connection{};
+
     /**
      *  All signals registered via RegisterSignal ends up here.  This is
      *  used to gather all the needed information for the D-Bus introspection
@@ -204,6 +263,16 @@ class Group : private Emit
 
     /// D-Bus object interface these signals belongs to
     const std::string object_interface;
+
+    /**
+     *  Signal groups; each named group has their own Emit object with
+     *  their own set of signal targets.
+     *
+     *  The calls not using a group name explicitly uses the "__default__"
+     *  group name.  This group name is reserved and may not be used by
+     *  any of the Group methods.
+     */
+    std::map<std::string, Signals::Emit::Ptr> signal_groups{};
 };
 
 } // namespace Signals
