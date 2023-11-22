@@ -385,8 +385,8 @@ inline bool Get<bool>(GVariant *v)
 template <>
 inline std::string Get<std::string>(GVariant *v)
 {
-    gsize size = 0;
-    return std::string(g_variant_get_string(v, &size));
+    const char *val = g_variant_get_string(v, nullptr);
+    return std::string((val ? val : ""));
 }
 
 
