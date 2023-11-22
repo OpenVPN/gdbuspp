@@ -145,7 +145,7 @@ class SimpleObject : public DBus::Object::Base
     };
 
 
-    const bool Authorize(const DBus::Authz::Request::Ptr req) const override
+    const bool Authorize(const DBus::Authz::Request::Ptr req) override
     {
         return true;
     }
@@ -218,7 +218,7 @@ class PropertyTests : public DBus::Object::Base
     }
 
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) const override
+    const bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         std::ostringstream ar;
         ar << request;
@@ -405,7 +405,7 @@ class MethodTests : public DBus::Object::Base
         std::cout << __func__ << " -- ~MethodTests() called" << std::endl;
     }
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) const override
+    const bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         std::ostringstream ar;
         ar << request;
@@ -593,7 +593,7 @@ class FailingMethodTests : public DBus::Object::Base
         no_send_fd->PassFileDescriptor(DBus::Object::Method::PassFDmode::RECEIVE);
     }
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) const override
+    const bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         return true;
     }
@@ -640,7 +640,7 @@ class SimpleHandler : public DBus::Object::Base
     }
 
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) const override
+    const bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         std::ostringstream ar;
         ar << request;

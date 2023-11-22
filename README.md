@@ -108,7 +108,7 @@ public:
   {
   }
 
-  const bool Authorize(const DBus::Authz::Request::Ptr request) const override
+  const bool Authorize(const DBus::Authz::Request::Ptr request) override
   {
     // code to authorize a D-Bus proxy client accessing this object
   }

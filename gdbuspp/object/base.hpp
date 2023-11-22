@@ -269,7 +269,7 @@ class Base : public std::enable_shared_from_this<Base>
      * @returns If the callback returns true, the requested operation is
      *          allowed, otherwise the operation will be rejected.
      */
-    virtual const bool Authorize(const Authz::Request::Ptr request) const = 0;
+    virtual const bool Authorize(const Authz::Request::Ptr request) = 0;
 
 
     /**
