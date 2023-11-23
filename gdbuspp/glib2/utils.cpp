@@ -93,7 +93,7 @@ void checkParams(const char *func,
 
 
 
-namespace Value {
+namespace Builder {
 
 GVariant *TupleWrap(GVariantBuilder *bld)
 {
@@ -104,11 +104,6 @@ GVariant *TupleWrap(GVariantBuilder *bld)
     g_variant_builder_unref(bld);
     return ret;
 }
-} // namespace Value
-
-
-
-namespace Builder {
 
 GVariant *CreateEmpty(const char *type)
 {
