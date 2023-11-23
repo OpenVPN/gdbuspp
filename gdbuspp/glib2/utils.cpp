@@ -105,13 +105,32 @@ GVariant *TupleWrap(GVariantBuilder *bld)
     return ret;
 }
 
-GVariant *CreateEmpty(const char *type)
+
+GVariantBuilder *Create(const char *type)
 {
     GVariantBuilder *b = g_variant_builder_new(G_VARIANT_TYPE(type));
+    if (!b)
+    {
+        throw glib2::Utils::Exception("Builder::Create()",
+                                      "Failed allocating new GVariantBuilder");
+    }
+    return b;
+}
+
+
+GVariant *CreateEmpty(const char *type)
+{
+    GVariantBuilder *b = Builder::Create(type);
     GVariant *ret = g_variant_builder_end(b);
     g_variant_builder_unref(b);
+    if (!ret)
+    {
+        throw glib2::Utils::Exception("Builder::CreateEmpty()",
+                                      "Failed allocating new GVariantBuilder");
+    }
     return ret;
 }
+
 
 } // namespace Builder
 

@@ -197,6 +197,14 @@ namespace Builder {
  */
 GVariant *TupleWrap(GVariantBuilder *bld);
 
+/**
+ *  Simple wrapper around g_variant_builder_new() to provide a more
+ *  consistent C++ interface
+ *
+ * @param type               D-Bus data type this builder container expects
+ * @return GVariantBuilder*
+ */
+GVariantBuilder *Create(const char *type);
 
 /**
  *  Creates an empty variant object based on more complex types.
@@ -211,7 +219,6 @@ GVariant *TupleWrap(GVariantBuilder *bld);
  *         without any values.
  */
 GVariant *CreateEmpty(const char *type);
-
 
 /**
  *   Template variant of GLib2's @g_variant_builder_add() which extract
