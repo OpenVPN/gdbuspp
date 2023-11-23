@@ -268,6 +268,21 @@ inline void Add(GVariantBuilder *builder,
     }
 }
 
+
+/**
+ *  Just a wrapper fpr adding an already prepared GVariant object
+ *  to a builder object.  This function is primarily here to provide
+ *  a consistent C++ API.
+ *
+ * @param builder   GVariantBuilder object where to add the value
+ * @param value     GVariant object to add to the builder object
+ */
+inline void Add(GVariantBuilder *builder,
+                GVariant *value) noexcept
+{
+    g_variant_builder_add_value(builder, value);
+}
+
 /**
  *  Converts a std::vector<T> to a D-Bus compliant
  *  array  builder of the D-Bus corresponding data type
