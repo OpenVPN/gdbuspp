@@ -42,8 +42,13 @@ class Exception; // forward delcaration
 class Request
 {
   public:
-    friend class Authz::Exception;
     using Ptr = std::shared_ptr<Authz::Request>;
+
+    const std::string caller;          ///< D-Bus unique bus ID of the caller
+    const Object::Operation operation; ///< Operation requested by caller
+    const std::string object_path;     ///< D-Bus object path caller wants to access
+    const std::string interface;       ///< D-Bus interface of the object
+    const std::string target;          ///< Method/Property caller wants to access
 
 
     /**
@@ -112,13 +117,6 @@ class Request
 
 
   private:
-    const std::string caller;          ///< D-Bus unique bus ID of the caller
-    const Object::Operation operation; ///< Operation requested by caller
-    const std::string object_path;     ///< D-Bus object path caller wants to access
-    const std::string interface;       ///< D-Bus interface of the object
-    const std::string target;          ///< Method/Property caller wants to access
-
-
     /**
      * @see Create
      */
