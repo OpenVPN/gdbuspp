@@ -318,7 +318,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
 
         throw Object::Property::Exception(cbl->object,
                                           property_name,
-                                          "Failed signalign new property value");
+                                          "Failed signaling new property value");
     }
     catch (Object::Exception &err)
     {
