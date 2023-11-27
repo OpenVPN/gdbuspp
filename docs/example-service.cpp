@@ -147,20 +147,28 @@ class MyService : public DBus::Service
 
 int main(int argc, char **argv)
 {
-    // Prepare a connection to the Session D-Bus
-    auto connection = DBus::Connection::Create(DBus::BusType::SESSION);
+    try
+    {
+        // Prepare a connection to the Session D-Bus
+        auto connection = DBus::Connection::Create(DBus::BusType::SESSION);
 
-    // Instantiate and prepare the D-Bus service provided
-    // via the MyService class
-    auto my_service = DBus::Service::Create<MyService>(connection);
+        // Instantiate and prepare the D-Bus service provided
+        // via the MyService class
+        auto my_service = DBus::Service::Create<MyService>(connection);
 
-    // Get access to the DBus::Object::Manager object
-    auto object_manager = my_service->GetObjectManager();
+        // Get access to the DBus::Object::Manager object
+        auto object_manager = my_service->GetObjectManager();
 
-    // Add the service root object
-    my_service->CreateServiceHandler<MyObject>(connection, object_manager);
+        // Add the service root object
+        my_service->CreateServiceHandler<MyObject>(connection, object_manager);
 
-    // Start the service
-    my_service->Run();
-    return 0;
+        // Start the service
+        my_service->Run();
+        return 0;
+    }
+    catch (const DBus::Exception &excp)
+    {
+        std::cerr << "EXCEPTION CAUGHT: " << excp.what() << std::endl;
+        return 2;
+    }
 }

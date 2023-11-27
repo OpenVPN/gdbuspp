@@ -28,46 +28,52 @@
 
 int main(int argc, char **argv)
 {
-    // Get a connection to the Session D-Bus
-    auto connection = DBus::Connection::Create(DBus::BusType::SESSION);
+    try
+    {
+        // Get a connection to the Session D-Bus
+        auto connection = DBus::Connection::Create(DBus::BusType::SESSION);
 
-    // Setup a client proxy to our example-service
-    auto proxy = DBus::Proxy::Client::Create(connection, "net.example.myservice");
+        // Setup a client proxy to our example-service
+        auto proxy = DBus::Proxy::Client::Create(connection, "net.example.myservice");
 
-    // Prepare an object and interface target we want to access.
-    // This consists of a D-Bus object path and the interface scope inside
-    // that object
-    auto preset = DBus::Proxy::TargetPreset::Create("/example/myobject",
-                                                    "net.example.myinterface");
+        // Prepare an object and interface target we want to access.
+        // This consists of a D-Bus object path and the interface scope inside
+        // that object
+        auto preset = DBus::Proxy::TargetPreset::Create("/example/myobject",
+                                                        "net.example.myinterface");
 
-    // Doing a method call; prepare the argument values required for the
-    // 'MethodWithArgs'  D-Bus method, which takes two strings
-    GVariant *arguments = g_variant_new("(ss)",
-                                        "My first string",
-                                        "My Second String");
+        // Doing a method call; prepare the argument values required for the
+        // 'MethodWithArgs'  D-Bus method, which takes two strings
+        GVariant *arguments = g_variant_new("(ss)",
+                                            "My first string",
+                                            "My Second String");
 
-    // Perform the D-Bus method call
-    GVariant *response = proxy->Call(preset, "MethodWithArgs", arguments);
+        // Perform the D-Bus method call
+        GVariant *response = proxy->Call(preset, "MethodWithArgs", arguments);
 
-    // Extract the response from the object.  This method returns only a
-    // single string.
-    auto result = glib2::Value::Extract<std::string>(response, 0);
-    g_variant_unref(response);
-    std::cout << "Method call result: " << result << std::endl;
+        // Extract the response from the object.  This method returns only a
+        // single string.
+        auto result = glib2::Value::Extract<std::string>(response, 0);
+        g_variant_unref(response);
+        std::cout << "Method call result: " << result << std::endl;
 
-    // Retrieve the content of the D-Bus object property, which is a string
-    std::string my_property = proxy->GetProperty<std::string>(preset, "my_property");
-    std::cout << "my_property: " << my_property << std::endl;
+        // Retrieve the content of the D-Bus object property, which is a string
+        std::string my_property = proxy->GetProperty<std::string>(preset, "my_property");
+        std::cout << "my_property: " << my_property << std::endl;
 
-    // Change this property to a new string
-    std::string new_property_value = "A changed property";
-    proxy->SetProperty(preset, "my_property", new_property_value);
+        // Change this property to a new string
+        std::string new_property_value = "A changed property";
+        proxy->SetProperty(preset, "my_property", new_property_value);
 
-    return 0;
-
-    // Retrieve the same property again to show this value did indeed change
-    std::cout << "modified property: "
-              << proxy->GetProperty<std::string>(preset, "my_property")
-              << std::endl;
-    return 0;
+        // Retrieve the same property again to show this value did indeed change
+        std::cout << "modified property: "
+                  << proxy->GetProperty<std::string>(preset, "my_property")
+                  << std::endl;
+        return 0;
+    }
+    catch (const DBus::Exception &excp)
+    {
+        std::cerr << "EXCEPTION CAUGHT: " << excp.what() << std::endl;
+        return 2;
+    }
 }
