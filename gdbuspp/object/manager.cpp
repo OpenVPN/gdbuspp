@@ -77,9 +77,18 @@ void Manager::PrepareIdleDetector(const std::chrono::duration<uint32_t> timeout,
         return;
     }
 
-    idle_detector = Features::IdleDetect::Create(mainloop,
-                                                 timeout,
-                                                 shared_from_this());
+    try
+    {
+        idle_detector = Features::IdleDetect::Create(mainloop,
+                                                     timeout,
+                                                     shared_from_this());
+    }
+    catch (const std::bad_weak_ptr &)
+    {
+        throw Manager::Exception("EnableIdleDetector: "
+                                 "Could not create the internal Idle "
+                                 "Detection object (bad_weak_ptr)");
+    }
 }
 
 
