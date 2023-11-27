@@ -73,9 +73,9 @@ void Object::Base::AddPropertyBySpec(const std::string name,
         name,
         true,
         dbustype,
-        get_cb,
-        set_cb);
-    properties->AddBinding(prop);
+        std::move(get_cb),
+        std::move(set_cb));
+    properties->AddBinding(std::move(prop));
 }
 
 
@@ -93,9 +93,9 @@ void Object::Base::AddPropertyBySpec(const std::string name,
                                                           name,
                                                           false,
                                                           dbustype,
-                                                          get_cb,
-                                                          set_readonly_cb);
-    properties->AddBinding(prop);
+                                                          std::move(get_cb),
+                                                          std::move(set_readonly_cb));
+    properties->AddBinding(std::move(prop));
 }
 
 
