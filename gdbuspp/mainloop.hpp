@@ -41,7 +41,7 @@ class MainLoop
   public:
     using Ptr = std::shared_ptr<MainLoop>;
 
-    class Exception : DBus::Exception
+    class Exception : public DBus::Exception
     {
       public:
         Exception(const std::string &errm);
