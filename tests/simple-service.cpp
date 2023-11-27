@@ -206,7 +206,8 @@ class PropertyTests : public DBus::Object::Base
         {
             return this->SetComplexProperty(prop, v);
         };
-        AddPropertyBySpec("complex", true, "(bis)", complex_get, complex_set);
+        AddPropertyBySpec("complex", "(bis)", complex_get, complex_set);
+        AddPropertyBySpec("complex_readonly", "(bis)", complex_get);
 
         Log(__func__, "Initialized");
     }

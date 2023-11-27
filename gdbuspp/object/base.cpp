@@ -64,7 +64,6 @@ const std::string &Object::Base::GetInterface() const noexcept
 
 
 void Object::Base::AddPropertyBySpec(const std::string name,
-                                     const bool readwr,
                                      const std::string dbustype,
                                      Property::BySpec::GetPropertyCallback get_cb,
                                      Property::BySpec::SetPropertyCallback set_cb)
@@ -72,10 +71,30 @@ void Object::Base::AddPropertyBySpec(const std::string name,
     Property::BySpec::Ptr prop = Property::BySpec::Create(
         interface,
         name,
-        readwr,
+        true,
         dbustype,
         get_cb,
         set_cb);
+    properties->AddBinding(prop);
+}
+
+
+void Object::Base::AddPropertyBySpec(const std::string name,
+                                     const std::string dbustype,
+                                     Property::BySpec::GetPropertyCallback get_cb)
+{
+    auto set_readonly_cb{
+        [](const DBus::Object::Property::BySpec &prop, GVariant *v) -> Object::Property::Update::Ptr
+        {
+            throw Object::Exception("Property '" + prop.GetName() + "' is read-only");
+        }};
+
+    Property::BySpec::Ptr prop = Property::BySpec::Create(interface,
+                                                          name,
+                                                          false,
+                                                          dbustype,
+                                                          get_cb,
+                                                          set_readonly_cb);
     properties->AddBinding(prop);
 }
 

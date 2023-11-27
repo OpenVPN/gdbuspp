@@ -337,6 +337,8 @@ class TestProperty(object):
     is provided, it will also attempt changing to that value and set it back
     to the initial value.
     """
+
+
     def __init__(self, name, value_type, init_val, new_val):
         self.__name = name
         self.__type = value_type
@@ -618,7 +620,7 @@ if __name__ == "__main__":
     complex_init = dbus.Struct([dbus.Boolean(True), dbus.Int32(98877), dbus.String('Initial complex string value')])
     complex_new  = dbus.Struct([dbus.Boolean(False), dbus.Int32(-304922), dbus.String('New complex value set by test script')])
     simple1_props.AddTest(TestProperty('complex', '(bis)', complex_init, complex_new))
-
+    simple1_props.AddTest(TestProperty('complex_readonly', '(bis)', complex_init, None))
 
     ##
     ##  Run all the tests

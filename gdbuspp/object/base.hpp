@@ -158,7 +158,6 @@ class Base : public std::enable_shared_from_this<Base>
      *  types, like properties containing struct values of different types.
      *
      * @param name        std::string with the D-Bus property name
-     * @param readwrite   boolean read/write flag. Read-only if false
      * @param dbustype    std::string containing the D-Bus data type of this
      *                    property
      * @param get_cb      GetPropertyCallback() functor. Called each time
@@ -169,10 +168,28 @@ class Base : public std::enable_shared_from_this<Base>
      *                    org.freedesktop.DBus.Properties.Set() method.
      */
     void AddPropertyBySpec(const std::string name,
-                           const bool readwrite,
                            const std::string dbustype,
                            Property::BySpec::GetPropertyCallback get_cb,
                            Property::BySpec::SetPropertyCallback set_cb);
+
+    /**
+     *  This is the AddPropertyBySpec variant for read-only properties.
+     *  The read-write flag is automatically false, as this method call
+     *  does not set a "set property" callback; only a "get property".
+     *
+     *  This is used when needing to operate on more complex D-Bus data
+     *  types, like properties containing struct values of different types.
+     *
+     * @param name        std::string with the D-Bus property name
+     * @param dbustype    std::string containing the D-Bus data type of this
+     *                    property
+     * @param get_cb      GetPropertyCallback() functor. Called each time
+     *                    this property is queried for its value via the
+     *                    D-Bus org.freedesktop.DBus.Properties.Get() method.
+     */
+    void AddPropertyBySpec(const std::string name,
+                           const std::string dbustype,
+                           Property::BySpec::GetPropertyCallback get_cb);
 
 
     /**

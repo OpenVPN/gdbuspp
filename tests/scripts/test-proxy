@@ -83,7 +83,9 @@ run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s string_val -t "s" -v "Initial s
 
 run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s complex -t bis -v false -v -34977 -v "Complex string modified by test-proxy"
 run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g complex -X "(bis)" -x "(false, -34977, 'Complex string modified by test-proxy')"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g complex_readonly -X "(bis)" -x "(false, -34977, 'Complex string modified by test-proxy')"
 run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -s complex -t bis -v true -v 98877 -v "Initial complex string value"
+run_proxy $PROPS_PATH -i gdbuspp.test.simple1 -g complex_readonly -X "(bis)" -x "(true, 98877, 'Initial complex string value')"
 
 
 echo "Test failed: $FAILED_RESULT"
