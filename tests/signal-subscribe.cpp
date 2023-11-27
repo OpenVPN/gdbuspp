@@ -231,7 +231,7 @@ int main(int argc, char **argv)
         auto mainloop = MainLoop::Create();
         sigmgr->Subscribe(opts.target,
                           opts.signal_name,
-                          [opts, mainloop](Signals::Event::Ptr &event)
+                          [&opts, mainloop](Signals::Event::Ptr &event)
                           {
                               signal_handler(mainloop, opts, event);
                           });

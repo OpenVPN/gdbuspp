@@ -123,12 +123,18 @@ int main(int argc, char **argv)
         int fd = -1;
         GVariant *p = g_variant_new("(s)", opts.file.c_str());
         GVariant *r = prx->GetFD(fd, opts.preset, opts.method, p);
+
+        bool res = glib2::Value::Extract<bool>(r, 0) && (fd > 0);
+        g_variant_unref(r);
         if (!opts.quiet)
         {
-            std::cout << "Success: " << (glib2::Value::Extract<bool>(r, 0) ? "true" : "false") << std::endl;
+            std::cout << "Success: " << (res ? "true" : "false") << std::endl;
             std::cout << "Buffer size: " << std::to_string(opts.bufsize) << std::endl;
         }
-        g_variant_unref(r);
+        if (!res)
+        {
+            return 2;
+        }
 
         char buf[opts.bufsize + 1];
         memset(&buf, 0, opts.bufsize + 1);
@@ -143,6 +149,12 @@ int main(int argc, char **argv)
         do
         {
             s = ::read(fd, &buf, opts.bufsize);
+            if (s < 0)
+            {
+                throw DBus::Exception("main()",
+                                      "Failed reading from file descriptor:"
+                                          + std::string(strerror(errno)));
+            }
             if (!opts.output.empty())
             {
                 if (!opts.quiet)

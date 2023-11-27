@@ -156,30 +156,40 @@ unsigned stou(std::string const &str, size_t *idx = 0, int base = 10)
 
 GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
 {
-    switch (type[0])
+    try
     {
-    case 'b':
+        switch (type[0])
         {
-            bool boolval = (value == "1" || value == "yes" || value == "true");
-            return glib2::Value::Create("b", boolval);
+        case 'b':
+            {
+                bool boolval = (value == "1" || value == "yes" || value == "true");
+                return glib2::Value::Create("b", boolval);
+            }
+        case 'd':
+            return glib2::Value::Create("d", std::stod(value));
+        case 'i':
+        case 'h':
+        case 'n':
+            return glib2::Value::Create(type.substr(0).c_str(), std::stoi(value));
+        case 't':
+            return glib2::Value::Create("t", stoul(value));
+        case 'q':
+        case 'u':
+        case 'y':
+            return glib2::Value::Create(type.substr(0).c_str(), stou(value));
+        case 'x':
+            return glib2::Value::Create("x", stol(value));
+        case 's':
+        default:
+            return glib2::Value::Create("s", value);
         }
-    case 'd':
-        return glib2::Value::Create("d", std::stod(value));
-    case 'i':
-    case 'h':
-    case 'n':
-        return glib2::Value::Create(type.substr(0).c_str(), std::stoi(value));
-    case 't':
-        return glib2::Value::Create("t", stoul(value));
-    case 'q':
-    case 'u':
-    case 'y':
-        return glib2::Value::Create(type.substr(0).c_str(), stou(value));
-    case 'x':
-        return glib2::Value::Create("x", stol(value));
-    case 's':
-    default:
-        return glib2::Value::Create("s", value);
+    }
+    catch (const std::out_of_range &)
+    {
+        throw TestUtils::Exception(__func__,
+                                   "Type '" + type + "' "
+                                       + "with value '" + value + "' "
+                                       + "exceeds the range for the data type");
     }
 }
 

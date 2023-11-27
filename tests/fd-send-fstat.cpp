@@ -132,7 +132,10 @@ int main(int argc, char **argv)
         }
         g_variant_unref(r);
 
-        close(fd);
+        if (fd > 0)
+        {
+            close(fd);
+        }
     }
     catch (const DBus::Exception &excp)
     {

@@ -57,8 +57,15 @@ class SimpleLog : public DBus::Signals::Group
 
     void Log(const std::string &info, const std::string &details)
     {
-        GVariant *p = g_variant_new("(ss)", info.c_str(), details.c_str());
-        SendGVariant("Log", p);
+        try
+        {
+            GVariant *p = g_variant_new("(ss)", info.c_str(), details.c_str());
+            SendGVariant("Log", p);
+        }
+        catch (const DBus::Signals::Exception &excp)
+        {
+            std::cerr << "EXCEPTION :: SimpleLog: " << excp.what() << std::endl;
+        }
     }
 };
 
