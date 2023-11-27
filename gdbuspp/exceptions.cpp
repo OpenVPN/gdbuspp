@@ -54,7 +54,7 @@ const char *Exception::GetRawError() const noexcept
 
 
 void Exception::SetDBusError(GDBusMethodInvocation *invocation,
-                             std::string errdomain) const noexcept
+                             const std::string &errdomain) const noexcept
 {
     std::string qdom = (!errdomain.empty() ? errdomain : "net.openvpn.gdbuspp");
 #ifdef GDBUSPP_DEBUG

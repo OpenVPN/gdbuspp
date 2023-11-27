@@ -67,7 +67,7 @@ class Exception : public std::exception
      *                   method call
      */
     virtual void SetDBusError(GDBusMethodInvocation *invocation,
-                              std::string errdomain) const noexcept;
+                              const std::string &errdomain) const noexcept;
 
 
     /**

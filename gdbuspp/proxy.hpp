@@ -108,7 +108,7 @@ class Client
      * @return Client::Ptr Returns a shared_ptr with the prepared Proxy client
      */
     [[nodiscard]] static Client::Ptr Create(Connection::Ptr connection,
-                                            const std::string destination)
+                                            const std::string &destination)
     {
         return Client::Ptr(new Client(connection, destination));
     }
