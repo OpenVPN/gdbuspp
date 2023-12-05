@@ -64,6 +64,12 @@ const std::string Group::GenerateIntrospection()
 }
 
 
+void Group::ModifyPath(const std::string &new_path) noexcept
+{
+    object_path = new_path;
+}
+
+
 void Group::AddTarget(const std::string &busname)
 {
     signal_groups.at("__default__")->AddTarget(busname, object_path, object_interface);

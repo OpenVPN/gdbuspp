@@ -141,6 +141,13 @@ class Group
 
 
     /**
+     *  Update the D-Bus object path used when sending signals
+     *
+     * @param new_path
+     */
+    void ModifyPath(const std::string &new_path) noexcept;
+
+    /**
      *  Add a signal recipient target.  Empty string are allowed, which
      *  will be treated as a "wildcard".  If all are empty, it will be
      *  considered broadcast.
@@ -259,7 +266,7 @@ class Group
     std::map<std::string, std::string> type_cache;
 
     /// D-Bus object path these signals are sent from from
-    const std::string object_path;
+    std::string object_path;
 
     /// D-Bus object interface these signals belongs to
     const std::string object_interface;
