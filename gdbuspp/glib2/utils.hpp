@@ -315,6 +315,18 @@ inline GVariantBuilder *FromVector(const std::vector<T> input,
 
     return bld;
 }
+
+
+/**
+ *  Just a wrapper around @g_variant_builder_end() with a memory cleanup.
+ *  This function is primarily here to provide a consistent C++ API.
+ *
+ * @param builder   GVariantBuilder object to complete
+ * @return GVariant* The finialized GVariantBuilder object as a GVariant object
+ */
+GVariant *Finish(GVariantBuilder *builder) noexcept;
+
+
 } // namespace Builder
 
 
