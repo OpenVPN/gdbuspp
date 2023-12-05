@@ -101,16 +101,16 @@ namespace DataType {
 
 // Declare template as prototype only so it cannot be used directly
 template <typename T>
-inline const char *GetDBusType();
+inline const char *GetDBusType() noexcept;
 
 template <>
-inline const char *GetDBusType<uint32_t>()
+inline const char *GetDBusType<uint32_t>() noexcept
 {
     return "u";
 }
 
 template <>
-inline const char *GetDBusType<int32_t>()
+inline const char *GetDBusType<int32_t>() noexcept
 {
     return "i";
 }
@@ -130,43 +130,43 @@ GetDBusDataType()
 #endif
 
 template <>
-inline const char *GetDBusType<uint16_t>()
+inline const char *GetDBusType<uint16_t>() noexcept
 {
     return "q";
 }
 
 template <>
-inline const char *GetDBusType<int16_t>()
+inline const char *GetDBusType<int16_t>() noexcept
 {
     return "n";
 }
 
 template <>
-inline const char *GetDBusType<uint64_t>()
+inline const char *GetDBusType<uint64_t>() noexcept
 {
     return "t";
 }
 
 template <>
-inline const char *GetDBusType<int64_t>()
+inline const char *GetDBusType<int64_t>() noexcept
 {
     return "x";
 }
 
 template <>
-inline const char *GetDBusType<double>()
+inline const char *GetDBusType<double>() noexcept
 {
     return "d";
 }
 
 template <>
-inline const char *GetDBusType<bool>()
+inline const char *GetDBusType<bool>() noexcept
 {
     return "b";
 }
 
 template <>
-inline const char *GetDBusType<std::string>()
+inline const char *GetDBusType<std::string>() noexcept
 {
     return "s";
 }
@@ -220,7 +220,7 @@ GVariant *CreateEmpty(const char *type);
 template <typename T>
 inline void Add(GVariantBuilder *builder,
                 const T &value,
-                const char *override_type = nullptr)
+                const char *override_type = nullptr) noexcept
 {
     if (override_type)
     {
@@ -244,7 +244,7 @@ inline void Add(GVariantBuilder *builder,
 template <>
 inline void Add(GVariantBuilder *builder,
                 const std::string &value,
-                const char *override_type)
+                const char *override_type) noexcept
 {
     if (override_type)
     {
@@ -325,7 +325,7 @@ GVariant *Finish(GVariantBuilder *builder) noexcept;
  *  @param bld the builder to wrap
  * @return the result of the builder wrapped into a tuple
  */
-GVariant *FinishWrapped(GVariantBuilder *bld);
+GVariant *FinishWrapped(GVariantBuilder *bld) noexcept;
 
 
 } // namespace Builder
@@ -353,23 +353,23 @@ namespace Value {
 
 // Declare template as prototype only so it cannot be used directly
 template <typename T>
-inline T Get(GVariant *v);
+inline T Get(GVariant *v) noexcept;
 
 
 template <>
-inline double Get<double>(GVariant *v)
+inline double Get<double>(GVariant *v) noexcept
 {
     return g_variant_get_double(v);
 }
 
 template <>
-inline uint32_t Get<uint32_t>(GVariant *v)
+inline uint32_t Get<uint32_t>(GVariant *v) noexcept
 {
     return g_variant_get_uint32(v);
 }
 
 template <>
-inline int32_t Get<int32_t>(GVariant *v)
+inline int32_t Get<int32_t>(GVariant *v) noexcept
 {
     return g_variant_get_int32(v);
 }
@@ -382,44 +382,44 @@ inline int32_t Get<int32_t>(GVariant *v)
 #if 0 // FIXME::This is now failing on x86_64 - added GetVariantValue<int32_t>() as workaround
 template <typename T>
 inline typename std::enable_if<sizeof(T) == 4 && std::is_signed<T>::value, int32_t>::type
-Get(GVariant *v)
+Get(GVariant *v) noexcept
 {
     return g_variant_get_int32(v);
 }
 #endif
 
 template <>
-inline uint16_t Get<uint16_t>(GVariant *v)
+inline uint16_t Get<uint16_t>(GVariant *v) noexcept
 {
     return g_variant_get_uint16(v);
 }
 
 template <>
-inline int16_t Get<int16_t>(GVariant *v)
+inline int16_t Get<int16_t>(GVariant *v) noexcept
 {
     return g_variant_get_int16(v);
 }
 
 template <>
-inline uint64_t Get<uint64_t>(GVariant *v)
+inline uint64_t Get<uint64_t>(GVariant *v) noexcept
 {
     return g_variant_get_uint64(v);
 }
 
 template <>
-inline int64_t Get<int64_t>(GVariant *v)
+inline int64_t Get<int64_t>(GVariant *v) noexcept
 {
     return g_variant_get_int64(v);
 }
 
 template <>
-inline bool Get<bool>(GVariant *v)
+inline bool Get<bool>(GVariant *v) noexcept
 {
     return g_variant_get_boolean(v);
 }
 
 template <>
-inline std::string Get<std::string>(GVariant *v)
+inline std::string Get<std::string>(GVariant *v) noexcept
 {
     const char *val = g_variant_get_string(v, nullptr);
     return std::string((val ? val : ""));
@@ -435,10 +435,10 @@ inline std::string Get<std::string>(GVariant *v)
 
 // Declare template as prototype only so it cannot be used directly
 template <typename T>
-inline T Extract(GVariant *v, int elm);
+inline T Extract(GVariant *v, int elm) noexcept;
 
 template <>
-inline double Extract<double>(GVariant *v, int elm)
+inline double Extract<double>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     double ret = Get<double>(bv);
@@ -448,7 +448,7 @@ inline double Extract<double>(GVariant *v, int elm)
 
 
 template <>
-inline uint64_t Extract<uint64_t>(GVariant *v, int elm)
+inline uint64_t Extract<uint64_t>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     uint64_t ret = Get<uint64_t>(bv);
@@ -457,7 +457,7 @@ inline uint64_t Extract<uint64_t>(GVariant *v, int elm)
 }
 
 template <>
-inline int64_t Extract<int64_t>(GVariant *v, int elm)
+inline int64_t Extract<int64_t>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     int64_t ret = Get<int64_t>(bv);
@@ -466,7 +466,7 @@ inline int64_t Extract<int64_t>(GVariant *v, int elm)
 }
 
 template <>
-inline uint32_t Extract<uint32_t>(GVariant *v, int elm)
+inline uint32_t Extract<uint32_t>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     uint32_t ret = Get<uint32_t>(bv);
@@ -475,7 +475,7 @@ inline uint32_t Extract<uint32_t>(GVariant *v, int elm)
 }
 
 template <>
-inline int32_t Extract<int32_t>(GVariant *v, int elm)
+inline int32_t Extract<int32_t>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     int32_t ret = Get<int32_t>(bv);
@@ -484,7 +484,7 @@ inline int32_t Extract<int32_t>(GVariant *v, int elm)
 }
 
 template <>
-inline uint16_t Extract<uint16_t>(GVariant *v, int elm)
+inline uint16_t Extract<uint16_t>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     uint16_t ret = Get<uint16_t>(bv);
@@ -493,7 +493,7 @@ inline uint16_t Extract<uint16_t>(GVariant *v, int elm)
 }
 
 template <>
-inline int16_t Extract<int16_t>(GVariant *v, int elm)
+inline int16_t Extract<int16_t>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     int16_t ret = Get<int16_t>(bv);
@@ -502,7 +502,7 @@ inline int16_t Extract<int16_t>(GVariant *v, int elm)
 }
 
 template <>
-inline bool Extract<bool>(GVariant *v, int elm)
+inline bool Extract<bool>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     bool ret = Get<bool>(bv);
@@ -511,7 +511,7 @@ inline bool Extract<bool>(GVariant *v, int elm)
 }
 
 template <>
-inline std::string Extract<std::string>(GVariant *v, int elm)
+inline std::string Extract<std::string>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     std::string ret = Get<std::string>(bv);
@@ -534,7 +534,9 @@ inline std::string Extract<std::string>(GVariant *v, int elm)
  * @return std::vector<T>
  */
 template <typename T>
-inline std::vector<T> ExtractVector(GVariant *params, const char *override_type = nullptr, bool wrapped = true)
+inline std::vector<T> ExtractVector(GVariant *params,
+                                    const char *override_type = nullptr,
+                                    bool wrapped = true) noexcept
 {
     std::stringstream type;
     type << (wrapped ? "(" : "")
@@ -571,7 +573,7 @@ inline std::vector<T> ExtractVector(GVariant *params, const char *override_type 
  * @return GVariant*
  */
 template <typename T>
-inline GVariant *Create(const char *dbustype, const T &value)
+inline GVariant *Create(const char *dbustype, const T &value) noexcept
 {
     return g_variant_new(dbustype, value);
 }
@@ -586,7 +588,7 @@ inline GVariant *Create(const char *dbustype, const T &value)
  * @return GVariant*
  */
 template <>
-inline GVariant *Create(const char *dbustype, const std::string &value)
+inline GVariant *Create(const char *dbustype, const std::string &value) noexcept
 {
     return g_variant_new(dbustype, value.c_str());
 }
@@ -601,7 +603,7 @@ inline GVariant *Create(const char *dbustype, const std::string &value)
  * @return GVariant*
  */
 template <typename T>
-inline GVariant *Create(const T &value)
+inline GVariant *Create(const T &value) noexcept
 {
     return g_variant_new(DataType::GetDBusType<T>(), value);
 }
@@ -614,7 +616,7 @@ inline GVariant *Create(const T &value)
  * @return GVariant*
  */
 template <>
-inline GVariant *Create(const std::string &value)
+inline GVariant *Create(const std::string &value) noexcept
 {
     return g_variant_new(DataType::GetDBusType<std::string>(), value.c_str());
 }
@@ -630,7 +632,7 @@ inline GVariant *Create(const std::string &value)
  * @return GVariant*
  */
 template <typename T>
-inline GVariant *CreateTupleWrapped(const T &value)
+inline GVariant *CreateTupleWrapped(const T &value) noexcept
 {
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
     g_variant_builder_add_value(bld, Create(value));
@@ -649,7 +651,7 @@ inline GVariant *CreateTupleWrapped(const T &value)
  * @return Returns a GVariant object containing the complete array
  */
 template <typename T>
-inline GVariant *CreateVector(const std::vector<T> &input)
+inline GVariant *CreateVector(const std::vector<T> &input) noexcept
 {
     GVariantBuilder *bld = Builder::FromVector(input);
     GVariant *ret = g_variant_builder_end(bld);

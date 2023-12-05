@@ -129,7 +129,7 @@ GVariant *Finish(GVariantBuilder *builder) noexcept
 }
 
 
-GVariant *FinishWrapped(GVariantBuilder *bld)
+GVariant *FinishWrapped(GVariantBuilder *bld) noexcept
 {
     GVariantBuilder *wrapper = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
     g_variant_builder_add_value(wrapper, g_variant_builder_end(bld));
