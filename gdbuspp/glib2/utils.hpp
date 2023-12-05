@@ -186,18 +186,6 @@ inline const char *GetDBusType<std::string>()
 namespace Builder {
 
 /**
- *  Wraps the content in a GVariantBuilder object into a tuple
- *  and returns the complete tuple as GVariant object.
- *
- *  This function will call @g_variant_builder_end() on the provided
- *  GVariantBuilder object and unrefs it.
- *
- *  @param bld the builder to wrap
- * @return the result of the builder wrapped into a tuple
- */
-GVariant *TupleWrap(GVariantBuilder *bld);
-
-/**
  *  Simple wrapper around g_variant_builder_new() to provide a more
  *  consistent C++ interface
  *
@@ -325,6 +313,19 @@ inline GVariantBuilder *FromVector(const std::vector<T> input,
  * @return GVariant* The finialized GVariantBuilder object as a GVariant object
  */
 GVariant *Finish(GVariantBuilder *builder) noexcept;
+
+
+/**
+ *  Wraps the content in a GVariantBuilder object into a tuple
+ *  and returns the complete tuple as GVariant object.
+ *
+ *  This function will call @g_variant_builder_end() on the provided
+ *  GVariantBuilder object and unrefs it.
+ *
+ *  @param bld the builder to wrap
+ * @return the result of the builder wrapped into a tuple
+ */
+GVariant *FinishWrapped(GVariantBuilder *bld);
 
 
 } // namespace Builder

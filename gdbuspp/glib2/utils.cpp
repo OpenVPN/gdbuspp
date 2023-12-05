@@ -95,17 +95,6 @@ void checkParams(const char *func,
 
 namespace Builder {
 
-GVariant *TupleWrap(GVariantBuilder *bld)
-{
-    GVariantBuilder *wrapper = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value(wrapper, g_variant_builder_end(bld));
-    GVariant *ret = g_variant_builder_end(wrapper);
-    g_variant_builder_unref(wrapper);
-    g_variant_builder_unref(bld);
-    return ret;
-}
-
-
 GVariantBuilder *Create(const char *type)
 {
     GVariantBuilder *b = g_variant_builder_new(G_VARIANT_TYPE(type));
@@ -136,6 +125,17 @@ GVariant *Finish(GVariantBuilder *builder) noexcept
 {
     GVariant *ret = g_variant_builder_end(builder);
     g_variant_builder_unref(builder);
+    return ret;
+}
+
+
+GVariant *FinishWrapped(GVariantBuilder *bld)
+{
+    GVariantBuilder *wrapper = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
+    g_variant_builder_add_value(wrapper, g_variant_builder_end(bld));
+    GVariant *ret = g_variant_builder_end(wrapper);
+    g_variant_builder_unref(wrapper);
+    g_variant_builder_unref(bld);
     return ret;
 }
 
