@@ -163,25 +163,25 @@ GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
         case 'b':
             {
                 bool boolval = (value == "1" || value == "yes" || value == "true");
-                return glib2::Value::Create("b", boolval);
+                return glib2::Value::CreateType("b", boolval);
             }
         case 'd':
-            return glib2::Value::Create("d", std::stod(value));
+            return glib2::Value::CreateType("d", std::stod(value));
         case 'i':
         case 'h':
         case 'n':
-            return glib2::Value::Create(type.substr(0).c_str(), std::stoi(value));
+            return glib2::Value::CreateType(type.substr(0).c_str(), std::stoi(value));
         case 't':
-            return glib2::Value::Create("t", stoul(value));
+            return glib2::Value::CreateType("t", stoul(value));
         case 'q':
         case 'u':
         case 'y':
-            return glib2::Value::Create(type.substr(0).c_str(), stou(value));
+            return glib2::Value::CreateType(type.substr(0).c_str(), stou(value));
         case 'x':
-            return glib2::Value::Create("x", stol(value));
+            return glib2::Value::CreateType("x", stol(value));
         case 's':
         default:
-            return glib2::Value::Create("s", value);
+            return glib2::Value::CreateType("s", value);
         }
     }
     catch (const std::out_of_range &)

@@ -546,7 +546,7 @@ class Base : public std::enable_shared_from_this<Base>
          */
         GVariant *GetValue() const noexcept override
         {
-            return glib2::Value::Create(GetDBusType(), PropertyTypeBase<T>::variable_ref);
+            return glib2::Value::CreateType(GetDBusType(), PropertyTypeBase<T>::variable_ref);
         }
 
         /**

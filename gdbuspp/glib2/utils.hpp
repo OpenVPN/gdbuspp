@@ -573,7 +573,7 @@ inline std::vector<T> ExtractVector(GVariant *params,
  * @return GVariant*
  */
 template <typename T>
-inline GVariant *Create(const char *dbustype, const T &value) noexcept
+inline GVariant *CreateType(const char *dbustype, const T &value) noexcept
 {
     return g_variant_new(dbustype, value);
 }
@@ -588,7 +588,7 @@ inline GVariant *Create(const char *dbustype, const T &value) noexcept
  * @return GVariant*
  */
 template <>
-inline GVariant *Create(const char *dbustype, const std::string &value) noexcept
+inline GVariant *CreateType(const char *dbustype, const std::string &value) noexcept
 {
     return g_variant_new(dbustype, value.c_str());
 }
