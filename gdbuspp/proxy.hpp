@@ -409,7 +409,7 @@ class Client
     void SetProperty(const std::string &object_path,
                      const std::string &interface,
                      const std::string &property_name,
-                     T &value) const
+                     const T &value) const
     {
         SetPropertyGVariant(object_path,
                             interface,
@@ -438,7 +438,7 @@ class Client
     template <typename T>
     void SetProperty(const TargetPreset::Ptr preset,
                      const std::string &property_name,
-                     T &value) const
+                     const T &value) const
     {
         SetPropertyGVariant(preset,
                             property_name,
