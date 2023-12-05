@@ -101,16 +101,16 @@ namespace DataType {
 
 // Declare template as prototype only so it cannot be used directly
 template <typename T>
-inline const char *GetDBusType() noexcept;
+inline const char *DBus() noexcept;
 
 template <>
-inline const char *GetDBusType<uint32_t>() noexcept
+inline const char *DBus<uint32_t>() noexcept
 {
     return "u";
 }
 
 template <>
-inline const char *GetDBusType<int32_t>() noexcept
+inline const char *DBus<int32_t>() noexcept
 {
     return "i";
 }
@@ -122,51 +122,50 @@ inline const char *GetDBusType<int32_t>() noexcept
  */
 #if 0 // FIXME::This is now failing on x86_64 - added GetDBusType<int32_t>() as workaround
 template <typename T>
-inline typename std::enable_if<sizeof(T) == 4 && std::is_signed<T>::value, const char *>::type
-GetDBusDataType()
+inline typename std::enable_if<sizeof(T) == 4 && std::is_signed<T>::value, const char *>::type DBus()
 {
     return "i";
 }
 #endif
 
 template <>
-inline const char *GetDBusType<uint16_t>() noexcept
+inline const char *DBus<uint16_t>() noexcept
 {
     return "q";
 }
 
 template <>
-inline const char *GetDBusType<int16_t>() noexcept
+inline const char *DBus<int16_t>() noexcept
 {
     return "n";
 }
 
 template <>
-inline const char *GetDBusType<uint64_t>() noexcept
+inline const char *DBus<uint64_t>() noexcept
 {
     return "t";
 }
 
 template <>
-inline const char *GetDBusType<int64_t>() noexcept
+inline const char *DBus<int64_t>() noexcept
 {
     return "x";
 }
 
 template <>
-inline const char *GetDBusType<double>() noexcept
+inline const char *DBus<double>() noexcept
 {
     return "d";
 }
 
 template <>
-inline const char *GetDBusType<bool>() noexcept
+inline const char *DBus<bool>() noexcept
 {
     return "b";
 }
 
 template <>
-inline const char *GetDBusType<std::string>() noexcept
+inline const char *DBus<std::string>() noexcept
 {
     return "s";
 }
@@ -228,7 +227,7 @@ inline void Add(GVariantBuilder *builder,
     }
     else
     {
-        g_variant_builder_add(builder, DataType::GetDBusType<T>(), value);
+        g_variant_builder_add(builder, DataType::DBus<T>(), value);
     }
 }
 
@@ -252,7 +251,7 @@ inline void Add(GVariantBuilder *builder,
     }
     else
     {
-        g_variant_builder_add(builder, DataType::GetDBusType<std::string>(), value.c_str());
+        g_variant_builder_add(builder, DataType::DBus<std::string>(), value.c_str());
     }
 }
 
@@ -292,7 +291,7 @@ inline GVariantBuilder *FromVector(const std::vector<T> input,
     }
     else
     {
-        type = std::string("a") + std::string(DataType::GetDBusType<T>());
+        type = std::string("a") + std::string(DataType::DBus<T>());
     }
 
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE(type.c_str()));
@@ -541,7 +540,7 @@ inline std::vector<T> ExtractVector(GVariant *params,
     std::stringstream type;
     type << (wrapped ? "(" : "")
          << "a"
-         << (override_type ? std::string(override_type) : std::string(DataType::GetDBusType<T>()))
+         << (override_type ? std::string(override_type) : std::string(DataType::DBus<T>()))
          << (wrapped ? ")" : "");
 
     GVariantIter *list = nullptr;
@@ -603,9 +602,9 @@ inline GVariant *CreateType(const char *dbustype, const std::string &value) noex
  * @return GVariant*
  */
 template <typename T>
-inline GVariant *Create(const T &value) noexcept
+inline GVariant *Create(const T value) noexcept
 {
-    return g_variant_new(DataType::GetDBusType<T>(), value);
+    return g_variant_new(DataType::DBus<T>(), value);
 }
 
 /**
@@ -616,9 +615,9 @@ inline GVariant *Create(const T &value) noexcept
  * @return GVariant*
  */
 template <>
-inline GVariant *Create(const std::string &value) noexcept
+inline GVariant *Create(std::string value) noexcept
 {
-    return g_variant_new(DataType::GetDBusType<std::string>(), value.c_str());
+    return g_variant_new("s", value.c_str());
 }
 
 /**

@@ -530,7 +530,7 @@ class Base : public std::enable_shared_from_this<Base>
         const char *GetDBusType() const noexcept override
         {
             return (override_dbus_type.empty()
-                        ? glib2::DataType::GetDBusType<T>()
+                        ? glib2::DataType::DBus<T>()
                         : override_dbus_type.c_str());
         }
 
@@ -604,7 +604,7 @@ class Base : public std::enable_shared_from_this<Base>
                                      const bool readwrite,
                                      std::vector<T> &vector_var)
             : PropertyTypeBase<std::vector<T>>(interface_arg, name_arg, readwrite, vector_var),
-              dbus_array_type("a" + std::string(glib2::DataType::GetDBusType<T>()))
+              dbus_array_type("a" + std::string(glib2::DataType::DBus<T>()))
         {
         }
 
