@@ -75,6 +75,15 @@ class Target
         return !(this->operator==(cmp));
     }
 
+    friend std::ostream &operator<<(std::ostream &os, const Target::Ptr &tgt)
+    {
+        return os << "Signals::Target("
+                  << "busname=" << tgt->busname << ", "
+                  << "object_path=" << tgt->object_path << ", "
+                  << "interface=" << tgt->object_interface << ")";
+    }
+
+
   private:
     Target(const std::string &busname_,
            const std::string &object_path_,
