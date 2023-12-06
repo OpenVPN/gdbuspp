@@ -228,7 +228,17 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         }
 
         // Retrieve the property value and return it to the caller
-        return cbl->object->GetProperty(property_name);
+        GVariant *value = cbl->object->GetProperty(property_name);
+        if (nullptr == value)
+        {
+            GDBUSPP_LOG("GetProperty('" << property_name << "') "
+                                        << "returned nullptr: "
+                                        << cbl->object);
+            throw Object::Property::Exception(cbl->object,
+                                              property_name,
+                                              "NULL/nullptr value is not allowed");
+        }
+        return value;
     }
     catch (const Object::Property::Exception &excp)
     {
