@@ -90,7 +90,15 @@ class Connection
     GDBusConnection *ConnPtr() const noexcept;
 
 
+    /**
+     *  Retrieve the unique D-Bus bus name this connection has been
+     *  assigned.  This is controlled by the main D-Bus daemon on the
+     *  system.
+     *
+     * @return const std::string
+     */
     const std::string GetUniqueBusName() const;
+
 
     /**
      *  Explicit disconnect request, clossing the D-Bus connection
