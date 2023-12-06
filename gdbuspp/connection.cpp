@@ -98,6 +98,14 @@ const std::string Connection::GetUniqueBusName() const
 }
 
 
+const bool Connection::Check() const
+{
+    return dbuscon
+           && G_IS_DBUS_CONNECTION(dbuscon)
+           && !g_dbus_connection_is_closed(dbuscon);
+}
+
+
 void Connection::Disconnect()
 {
     if (!dbuscon)

@@ -99,6 +99,12 @@ class Connection
      */
     const std::string GetUniqueBusName() const;
 
+    /**
+     *  Check if the D-Bus connection is still valid
+     *
+     * @return Returns true if the connection is still valid, otherwise false
+     */
+    const bool Check() const;
 
     /**
      *  Explicit disconnect request, clossing the D-Bus connection
