@@ -238,6 +238,9 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
                                               property_name,
                                               "NULL/nullptr value is not allowed");
         }
+        GDBUSPP_LOG("Get Property Callback (Return): "
+                    << req
+                    << " - Value: " << g_variant_print(value, true));
         return value;
     }
     catch (const Object::Property::Exception &excp)
@@ -309,6 +312,9 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         if (cbl->object->PropertyExists(property_name))
         {
             updated_vals = cbl->object->SetProperty(property_name, value);
+            GDBUSPP_LOG("Set Property Callback (Return): "
+                        << req
+                        << " - New value: " << g_variant_print(value, true));
         }
         else
         {

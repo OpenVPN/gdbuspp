@@ -16,6 +16,7 @@
  *         callback function being executed in the running D-Bus service.
  */
 
+#include "../features/debug-log.hpp"
 #include "../glib2/utils.hpp"
 #include "method.hpp"
 
@@ -60,6 +61,7 @@ class CallbackArguments : public Arguments
 
     void PrepareResponse(AsyncProcess::Request::UPtr &req);
 
+    GVariant *GetReturnArgs() const noexcept;
 
     /**
      *  Generates the XML snippet tags of all declared arguments to a method
@@ -323,6 +325,12 @@ void CallbackArguments::PrepareResponse(AsyncProcess::Request::UPtr &req)
 }
 
 
+GVariant *CallbackArguments::GetReturnArgs() const noexcept
+{
+    return return_params;
+}
+
+
 const std::string CallbackArguments::GenerateIntrospection() const
 {
     return Arguments::GenerateIntrospection();
@@ -371,6 +379,14 @@ void Callback::Execute(AsyncProcess::Request::UPtr &req)
 {
     method_args->SetRequestInfo(req);
     callback_fn(static_cast<Arguments::Ptr>(method_args));
+
+#ifdef GDBUSPP_INTERNAL_DEBUG
+    GVariant *result = method_args->GetReturnArgs();
+    GDBUSPP_LOG("Callback::Execute (return) - "
+                << req << " - Result: "
+                << (result ? g_variant_print(result, true) : "(n/a)"));
+#endif
+
     method_args->PrepareResponse(req);
 }
 
