@@ -44,6 +44,15 @@ glib2_deps = [
 #
 # The main GDBus++ library
 #
+build_config_data = configuration_data({
+        'GDBUSPP_INTERNAL_DEBUG': get_option('internal_debug'),
+})
+build_config_h = configure_file(
+        output: 'build-config.h',
+        configuration: build_config_data,
+)
+
+
 gdbuspp_lib = both_libraries(
         'gdbuspp',
         [

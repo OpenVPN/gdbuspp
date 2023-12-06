@@ -13,3 +13,6 @@ option('install_testprogs', type: 'boolean', value: false,
 
 option('long_tests', type: 'boolean', value: false,
         description: 'Run long running/slow tests by default')
+
+option('internal_debug', type: 'boolean', value: false,
+        description: 'Enable internal GDBus++ debug logging')
