@@ -22,6 +22,7 @@
 
 #include "connection.hpp"
 #include "proxy.hpp"
+#include "features/debug-log.hpp"
 #include "glib2/utils.hpp"
 
 #define DBUS_PROXY_CALL_TIMEOUT 5000
@@ -59,6 +60,13 @@ class Proxy
           const std::string &interface_)
         : destination(destination_), object_path(path_), interface(interface_)
     {
+        if (!connection->Check())
+        {
+            throw DBus::Proxy::Exception(destination,
+                                         object_path,
+                                         interface,
+                                         "DBus::Connection is not valid");
+        }
         GError *err = nullptr;
         proxy = g_dbus_proxy_new_sync(connection->ConnPtr(),
                                       G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
@@ -249,6 +257,14 @@ class Proxy
      */
     void do_call_no_response(const std::string &method, GVariant *params)
     {
+        GDBUSPP_LOG("Proxy::Client::Call("
+                    << "'" << destination << "', "
+                    << "'" << object_path << "', "
+                    << "'" << interface << "', "
+                    << "'" << method << "', "
+                    << "params=" << (params ? g_variant_print(params, true) : "(none)")
+                    << ") [NO RESPONSE CALL]");
+
         g_dbus_proxy_call(proxy,
                           method.c_str(),
                           params,
@@ -345,6 +361,13 @@ class Proxy
     {
         if (!res || error)
         {
+            GDBUSPP_LOG("Proxy::Client::Call("
+                        << "'" << destination << "', "
+                        << "'" << object_path << "', "
+                        << "'" << interface << "', "
+                        << "'" << method << "'"
+                        << ") ERROR:"
+                        << (error ? error->message : "(n/a)"));
             if (res)
             {
                 g_variant_unref(res);
@@ -355,6 +378,14 @@ class Proxy
                                          "Failed calling D-Bus method '" + method + "'",
                                          error);
         }
+        GDBUSPP_LOG("Proxy::Client::Call("
+                    << "'" << destination << "', "
+                    << "'" << object_path << "', "
+                    << "'" << interface << "', "
+                    << "'" << method << "'"
+                    << ") "
+                    << "Result: "
+                    << (res ? g_variant_print(res, true) : "(none)"));
     }
 };
 
