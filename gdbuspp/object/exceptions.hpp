@@ -35,16 +35,19 @@ class Exception : public DBus::Exception
     Exception(const std::string &path,
               const std::string &interface,
               const std::string &errmsg,
-              GError *gliberr = nullptr);
+              GError *gliberr = nullptr,
+              const std::string &object_info = "");
 
 
     Exception(const std::shared_ptr<Object::Base> obj,
               const std::string &errmsg,
-              GError *gliberr = nullptr);
+              GError *gliberr = nullptr,
+              const std::string &object_info = "");
 
     Exception(const Object::Base *obj,
               const std::string &errmsg,
-              GError *gliberr = nullptr);
+              GError *gliberr = nullptr,
+              const std::string &object_info = "");
 
     Exception(const std::string &errmsg,
               GError *gliberr = nullptr);

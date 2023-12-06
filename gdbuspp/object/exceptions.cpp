@@ -16,11 +16,28 @@
  */
 
 #include <memory>
+#include <sstream>
 #include <string>
 #include <glib.h>
 
 #include "base.hpp"
 #include "exceptions.hpp"
+
+namespace _private::exception {
+static const std::string comppse_object_descr(const std::string &path,
+                                              const std::string &interface,
+                                              const std::string &info)
+{
+    std::ostringstream ret;
+    ret << "DBus::Object('" << path << "', '" << interface << "'";
+    if (!info.empty())
+    {
+        ret << ", " << info;
+    }
+    ret << ")";
+    return ret.str();
+}
+} // namespace _private::exception
 
 
 namespace DBus {
@@ -28,8 +45,12 @@ namespace DBus {
 Object::Exception::Exception(const std::string &path,
                              const std::string &interface,
                              const std::string &errmsg,
-                             GError *gliberr)
-    : DBus::Exception(std::string("DBus::Object('" + path + "', '" + interface + "')"),
+                             GError *gliberr,
+                             const std::string &object_info)
+    : DBus::Exception(_private::exception::comppse_object_descr(
+                          path,
+                          interface,
+                          object_info),
                       errmsg,
                       gliberr)
 {
@@ -38,8 +59,10 @@ Object::Exception::Exception(const std::string &path,
 
 Object::Exception::Exception(const std::shared_ptr<Object::Base> obj,
                              const std::string &errmsg,
-                             GError *gliberr)
-    : DBus::Exception(std::string("DBus::Object('" + obj->GetPath() + "', '" + obj->GetInterface() + "')"),
+                             GError *gliberr,
+                             const std::string &object_info)
+    : DBus::Exception(_private::exception::comppse_object_descr(
+                          obj->GetPath(), obj->GetInterface(), object_info),
                       errmsg,
                       gliberr)
 {
@@ -48,8 +71,10 @@ Object::Exception::Exception(const std::shared_ptr<Object::Base> obj,
 
 Object::Exception::Exception(const Object::Base *obj,
                              const std::string &errmsg,
-                             GError *gliberr)
-    : DBus::Exception(std::string("DBus::Object('" + obj->GetPath() + "', '" + obj->GetInterface() + "')"),
+                             GError *gliberr,
+                             const std::string &object_info)
+    : DBus::Exception(_private::exception::comppse_object_descr(
+                          obj->GetPath(), obj->GetInterface(), object_info),
                       errmsg,
                       gliberr)
 {
@@ -76,7 +101,7 @@ Object::Property::Exception::Exception(const std::shared_ptr<Object::Base> objec
                                        const std::string &property,
                                        const std::string &errmsg,
                                        GError *gliberr)
-    : Object::Exception(object, "::Property('" + property + "')" + errmsg, gliberr)
+    : Object::Exception(object, errmsg, gliberr, "property='" + property + "'")
 {
 }
 
@@ -85,7 +110,7 @@ Object::Property::Exception::Exception(const Object::Base *object,
                                        const std::string &property,
                                        const std::string &errmsg,
                                        GError *gliberr)
-    : Object::Exception(object, "::Property('" + property + "')" + errmsg, gliberr)
+    : Object::Exception(object, errmsg, gliberr, "property='" + property + "'")
 {
 }
 
