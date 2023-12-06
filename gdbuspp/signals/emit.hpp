@@ -90,8 +90,12 @@ class Emit
      * @param signal_name   std::string with the signal name to use
      * @param params        GVariant object to object with data values
      *                      to provide with the signal
+     *
+     * @return Returns true if emitting the signal was successfully,
+     *         otherwise false.  This method will return instantly on
+     *         error if more signal targets have been set up.
      */
-    virtual void SendGVariant(const std::string &signal_name, GVariant *params);
+    virtual bool SendGVariant(const std::string &signal_name, GVariant *params) const;
 
 
   protected:

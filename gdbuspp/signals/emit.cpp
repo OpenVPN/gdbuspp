@@ -13,6 +13,7 @@
  *         for sending D-Bus signals
  */
 
+#include <iostream>
 #include <string>
 #include <glib.h>
 
@@ -44,7 +45,7 @@ void Emit::ClearTargets() noexcept
 }
 
 
-void Emit::SendGVariant(const std::string &signal_name, GVariant *params)
+bool Emit::SendGVariant(const std::string &signal_name, GVariant *params) const
 {
     if (!connection || !G_IS_DBUS_CONNECTION(connection->ConnPtr()))
     {
@@ -69,12 +70,17 @@ void Emit::SendGVariant(const std::string &signal_name, GVariant *params)
                                            params,
                                            &err))
         {
-            throw Signals::Exception(tgt,
-                                     "Failed to send '" + signal_name
-                                         + "' signal",
-                                     err);
+            std::cerr << "[GDBus++ Error: " << tgt << "] "
+                      << "Failed to send signal '" << signal_name << "' ";
+            if (err)
+            {
+                std::cerr << "glib2 Error: " << err->message;
+            }
+            std::cerr << std::endl;
+            return false;
         }
     }
+    return true;
 }
 
 
