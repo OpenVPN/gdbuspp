@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#define GDBUSPP_LOG(msg) std::cout << "[GDBus++ DEBUG "                                              \
+#define GDBUSPP_LOG(msg) std::cout << "[GDBus++ DEBUG (pid:" << getpid() << ") "                     \
                                    << "{" << __FILE__ << ":" << __LINE__ << " " << __func__ << "}] " \
                                    << msg << std::endl;
 
