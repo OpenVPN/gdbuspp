@@ -17,6 +17,7 @@
 #include <string>
 #include <glib.h>
 
+#include "../features/debug-log.hpp"
 #include "../glib2/strings.hpp"
 #include "exceptions.hpp"
 #include "emit.hpp"
@@ -47,9 +48,10 @@ void Emit::ClearTargets() noexcept
 
 bool Emit::SendGVariant(const std::string &signal_name, GVariant *params) const
 {
-    if (!connection || !G_IS_DBUS_CONNECTION(connection->ConnPtr()))
+    if (!connection || !connection->Check())
     {
-        throw Signals::Exception("D-Bus connection not valid ");
+        GDBUSPP_LOG("D-Bus connection is not valid");
+        return false;
     }
 
     if (targets.empty())
