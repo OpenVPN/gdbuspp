@@ -82,6 +82,8 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
             //  Authorize this request before starting to process the request
             auto azreq = Authz::Request::Create(req);
             bool authzres = req->object->Authorize(azreq);
+            GDBUSPP_LOG("ProcessPool (Authorizaion): "
+                        << req << " Result: " << (authzres ? "Allow" : "Deny"));
             if (!authzres)
             {
                 // Authz failed; stop the request and return an error
@@ -211,8 +213,9 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         req->GetProperty(property_name);
         auto azreq = Authz::Request::Create(req);
 
-        GDBUSPP_LOG("Get Property Callback (Authorizaion): " << req);
         bool authzres = cbl->object->Authorize(azreq);
+        GDBUSPP_LOG("Get Property Callback (Authorizaion): "
+                    << req << " Result: " << (authzres ? "Allow" : "Deny"));
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
@@ -297,8 +300,9 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         auto req = AsyncProcess::Request::Create(conn, cbl->object, sender, obj_path, intf_name);
         req->SetProperty(property_name, value);
         auto azreq = Authz::Request::Create(req);
-        GDBUSPP_LOG("Set Property Callback (Authorizaion): " << req);
         bool authzres = cbl->object->Authorize(azreq);
+        GDBUSPP_LOG("Set Property Callback (Authorizaion): "
+                    << req << " Result: " << (authzres ? "Allow" : "Deny"));
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
