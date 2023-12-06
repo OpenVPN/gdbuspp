@@ -23,7 +23,7 @@ namespace Utils {
 
 const bool Query::Ping() const noexcept
 {
-    auto target = Proxy::TargetPreset::Create("/", "org.freedesktop.DBus");
+    auto target = Proxy::TargetPreset::Create("/", "org.freedesktop.DBus.Peer");
     for (int i = 5; i > 0; --i)
     {
         try
