@@ -64,6 +64,9 @@ bool Emit::SendGVariant(const std::string &signal_name, GVariant *params) const
     g_variant_ref_sink(params);
     for (const auto &tgt : targets)
     {
+        GDBUSPP_LOG("Signals::Emit -- " << tgt << "; "
+                                        << "signal_name='" << signal_name << "'"
+                                        << ", params=" << g_variant_print(params, true));
         if (!g_dbus_connection_emit_signal(connection->ConnPtr(),
                                            str2gchar(tgt->busname),
                                            str2gchar(tgt->object_path),
