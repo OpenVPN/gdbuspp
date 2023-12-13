@@ -620,6 +620,26 @@ inline GVariant *Create(std::string value) noexcept
     return g_variant_new("s", value.c_str());
 }
 
+
+/**
+ *  Converts a std::vector<T> to a D-Bus compliant
+ *  array of the corresponding D-Bus data type
+ *
+ * @param input  std::vector<T> to convert
+ *
+ * @return Returns a GVariant object containing the complete array
+ */
+template <typename T>
+inline GVariant *CreateVector(const std::vector<T> &input) noexcept
+{
+    GVariantBuilder *bld = Builder::FromVector(input);
+    GVariant *ret = g_variant_builder_end(bld);
+    g_variant_builder_unref(bld);
+
+    return ret;
+}
+
+
 /**
  *  Wraps a single C++ value into a D-Bus tuple in a GVariant object
  *
@@ -641,21 +661,13 @@ inline GVariant *CreateTupleWrapped(const T &value) noexcept
 }
 
 
-/**
- *  Converts a std::vector<T> to a D-Bus compliant
- *  array of the corresponding D-Bus data type
- *
- * @param input  std::vector<T> to convert
- *
- * @return Returns a GVariant object containing the complete array
- */
 template <typename T>
-inline GVariant *CreateVector(const std::vector<T> &input) noexcept
+inline GVariant *CreateTupleWrapped(const std::vector<T> &input) noexcept
 {
-    GVariantBuilder *bld = Builder::FromVector(input);
+    GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
+    g_variant_builder_add_value(bld, CreateVector(input));
     GVariant *ret = g_variant_builder_end(bld);
     g_variant_builder_unref(bld);
-
     return ret;
 }
 
