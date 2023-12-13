@@ -322,7 +322,6 @@ class Client
     {
         GVariant *res = GetPropertyGVariant(object_path, interface, property_name);
         std::vector<T> ret = glib2::Value::ExtractVector<T>(res, nullptr, false);
-        g_variant_unref(res);
         return ret;
     }
 
