@@ -230,6 +230,13 @@ class Proxy
      */
     GVariant *do_call(const std::string &method, GVariant *params)
     {
+        GDBUSPP_LOG("Proxy::Client::Call("
+                    << "'" << destination << "', "
+                    << "'" << object_path << "', "
+                    << "'" << interface << "', "
+                    << "'" << method << "', "
+                    << "params=" << (params ? g_variant_print(params, true) : "(none)")
+                    << ")");
         GError *err = nullptr;
         GVariant *ret = g_dbus_proxy_call_sync(proxy,
                                                method.c_str(),
@@ -311,6 +318,16 @@ class Proxy
                                          "D-Bus connection does not support file descriptor passing");
         }
 
+        GDBUSPP_LOG("Proxy::Client::"
+                    << (caller_fdlist ? "SendFD" : "GetFD")
+                    << "("
+                    << "'" << destination << "', "
+                    << "'" << object_path << "', "
+                    << "'" << interface << "', "
+                    << "'" << method << "', "
+                    << "params=" << (params ? g_variant_print(params, true) : "(none)")
+                    << ") ");
+
         GUnixFDList *ret_fd = nullptr;
         GError *error = nullptr;
         GVariant *ret = g_dbus_proxy_call_with_unix_fd_list_sync(proxy,
@@ -361,7 +378,7 @@ class Proxy
     {
         if (!res || error)
         {
-            GDBUSPP_LOG("Proxy::Client::Call("
+            GDBUSPP_LOG("Proxy::Client call result ("
                         << "'" << destination << "', "
                         << "'" << object_path << "', "
                         << "'" << interface << "', "
@@ -378,7 +395,7 @@ class Proxy
                                          "Failed calling D-Bus method '" + method + "'",
                                          error);
         }
-        GDBUSPP_LOG("Proxy::Client::Call("
+        GDBUSPP_LOG("Proxy::Client call result ("
                     << "'" << destination << "', "
                     << "'" << object_path << "', "
                     << "'" << interface << "', "
