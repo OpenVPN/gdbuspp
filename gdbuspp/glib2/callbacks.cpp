@@ -100,7 +100,18 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
                 req->object->MethodCall(req);
             }
         }
-        catch (DBus::Exception &excp)
+        catch (const DBus::Object::Method::Exception &excp)
+        {
+            // If a method callback throws Method::Exception, it's an error
+            // to be returned to the caller - not an error in the application
+            // itself - so don't trigger additional error logging.
+            GError *dbuserr = g_dbus_error_new_for_dbus_error(excp.DBusErrorDomain(),
+                                                              excp.GetRawError());
+            dbuserr->domain = g_quark_from_string(excp.DBusErrorDomain());
+            g_dbus_method_invocation_return_gerror(req->invocation, dbuserr);
+            g_error_free(dbuserr);
+        }
+        catch (const DBus::Exception &excp)
         {
             // TODO:  Extend this to include ReqType::GETPROP once that
             //        path is used here.  ReqType::SETPROP will probably
@@ -115,7 +126,9 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
                 g_error_free(dbuserr);
 
                 std::cerr << "** ERROR ** Async call failed: "
-                          << excp.what() << std::endl;
+                          << excp.what() << std::endl
+                          << "                 error domain: "
+                          << excp.DBusErrorDomain() << std::endl;
             }
             else
             {

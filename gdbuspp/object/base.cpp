@@ -163,14 +163,7 @@ const bool Object::Base::MethodExists(const std::string &meth_name) const
 
 void Object::Base::MethodCall(AsyncProcess::Request::UPtr &req)
 {
-    try
-    {
-        methods->Execute(req);
-    }
-    catch (const Object::Method::Exception &excp)
-    {
-        throw DBus::Object::Exception(req->object, excp.GetRawError());
-    }
+    methods->Execute(req);
 }
 
 
