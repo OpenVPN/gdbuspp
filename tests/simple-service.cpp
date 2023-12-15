@@ -216,6 +216,13 @@ class PropertyTests : public DBus::Object::Base
         AddPropertyBySpec("complex", "(bis)", complex_get, complex_set);
         AddPropertyBySpec("complex_readonly", "(bis)", complex_get);
 
+        AddPropertyBySpec("dictionary",
+                          "a{sv}",
+                          [this](const DBus::Object::Property::BySpec &prop)
+                          {
+                              return this->GetDictionary(prop);
+                          });
+
         Log(__func__, "Initialized");
     }
 
@@ -275,6 +282,29 @@ class PropertyTests : public DBus::Object::Base
         return r;
     }
 
+    GVariant *GetDictionary(const DBus::Object::Property::BySpec &property)
+    {
+        std::cout << "[Get Dictionary Property] name=" << property.GetName()
+                  << std::endl;
+        GVariantBuilder *dict = glib2::Builder::Create("a{sv}");
+        g_variant_builder_add(dict,
+                              "{sv}",
+                              "name",
+                              glib2::Value::Create(std::string("dictionary test")));
+        g_variant_builder_add(dict,
+                              "{sv}",
+                              "key",
+                              glib2::Value::Create(std::string("value")));
+        g_variant_builder_add(dict,
+                              "{sv}",
+                              "numbers",
+                              glib2::Value::Create(123));
+        g_variant_builder_add(dict,
+                              "{sv}",
+                              "bool",
+                              glib2::Value::Create(true));
+        return glib2::Builder::Finish(dict);
+    }
 
     DBus::Object::Property::Update::Ptr SetComplexProperty(const DBus::Object::Property::BySpec &property,
                                                            GVariant *value)

@@ -671,6 +671,43 @@ inline GVariant *CreateTupleWrapped(const std::vector<T> &input) noexcept
     return ret;
 }
 
+
+namespace Dict {
+
+/**
+ *  Extract a value from a GVariant based dictionary container object.
+ *  Such objects typically have D-Bus data type like 'a{sv}', which works
+ *  like the ordinay key/value based dictionary containers.
+ *
+ *  This takes a key to look up from a GVariant object and returns the
+ *  value as the data type it's declared as.  There must be a strict match
+ *  between the D-Bus and C++ data type.
+ *
+ * @tparam T     C++ data type of the value to retrieve
+ * @param dict   GVariant object containing the dictionary
+ * @param key    std::string with the dictionary key to look up
+ * @return T     The value retrieved from the dictionary
+ * @throw glib2::Utils::Exception if the value could not be retrieved
+ */
+template <typename T>
+T Lookup(GVariant *dict, const std::string &key)
+{
+    GVariant *v = g_variant_lookup_value(dict,
+                                         key.c_str(),
+                                         G_VARIANT_TYPE(DataType::DBus<T>()));
+    if (!v)
+    {
+        throw glib2::Utils::Exception("Dict::Lookup",
+                                      std::string("Could not retrieve the ")
+                                          + "value for key '" + key + "'");
+    }
+    T ret = Value::Get<T>(v);
+    g_variant_unref(v);
+    return ret;
+}
+
+} // namespace Dict
+
 } // namespace Value
 
 } // namespace glib2

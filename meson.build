@@ -363,6 +363,20 @@ test_fd_send = executable(
         install_dir: get_option('libexecdir') + '/gdbuspp/tests'
 )
 
+# Simple test of various D-Bus vs C++ data type "conversions"
+test_data_types = executable(
+        'test_data-types',
+        [
+                'tests/test-data-types.cpp',
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+                tests_lib,
+        ],
+        dependencies: [
+                glib2_deps,
+        ],
+)
 
 test_idle_detect = executable(
         'test_idle-detect',
@@ -475,6 +489,16 @@ test('signals',
         priority: 100,
         timeout: 60,
         is_parallel: false
+)
+
+test('test-data-types',
+        test_data_types,
+        depends: [
+                simple_service,
+        ],
+        priority: 50,
+        timeout: 10,
+        is_parallel: false,
 )
 
 if (get_option('long_tests'))
