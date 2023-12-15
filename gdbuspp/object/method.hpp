@@ -37,7 +37,7 @@ class CallbackArguments; // Forward declaration; declared in method.cpp
 class Exception : public DBus::Exception
 {
   public:
-    Exception(const std::string &errm);
+    Exception(const std::string &errm, GError *gliberr = nullptr);
 };
 
 

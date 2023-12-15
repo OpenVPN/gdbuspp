@@ -84,8 +84,8 @@ class CallbackArguments : public Arguments
 
 
 
-Exception::Exception(const std::string &errm)
-    : DBus::Exception("DBus::Object::Method", errm, nullptr)
+Exception::Exception(const std::string &errm, GError *gliberr)
+    : DBus::Exception("DBus::Object::Method", errm, gliberr)
 {
 }
 
