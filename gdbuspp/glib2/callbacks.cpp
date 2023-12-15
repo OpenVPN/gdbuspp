@@ -170,7 +170,7 @@ void _int_dbusobject_callback_method_call(GDBusConnection *conn,
     catch (const DBus::Exception &excp)
     {
         GDBUSPP_LOG("Method Callback (Queuing FAILED): " << excp.what());
-        excp.SetDBusError(invoc, "net.openvpn.gdbuspp.glib2.callback");
+        excp.SetDBusError(invoc);
     }
 }
 

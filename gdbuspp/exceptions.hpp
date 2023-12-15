@@ -54,6 +54,8 @@ class Exception : public std::exception
     virtual const char *GetRawError() const noexcept;
 
 
+    const char *DBusErrorDomain() const noexcept;
+
 #ifdef __G_IO_H__
     /**
      *  Wrapper for more easily returning a DBusException exception
@@ -66,8 +68,7 @@ class Exception : public std::exception
      * @param invocation Pointer to a invocation object of the on-going
      *                   method call
      */
-    virtual void SetDBusError(GDBusMethodInvocation *invocation,
-                              const std::string &errdomain) const noexcept;
+    void SetDBusError(GDBusMethodInvocation *invocation) const noexcept;
 
 
     /**
@@ -88,6 +89,8 @@ class Exception : public std::exception
                               gint code) const noexcept;
 
 #endif
+  protected:
+    std::string error_domain = "net.openvpn.gdbuspp";
 
   private:
     std::string classerr{}; ///< Full error message with class/group details

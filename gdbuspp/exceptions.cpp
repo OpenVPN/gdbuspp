@@ -53,16 +53,22 @@ const char *Exception::GetRawError() const noexcept
 }
 
 
-void Exception::SetDBusError(GDBusMethodInvocation *invocation,
-                             const std::string &errdomain) const noexcept
+const char *Exception::DBusErrorDomain() const noexcept
 {
-    std::string qdom = (!errdomain.empty() ? errdomain : "net.openvpn.gdbuspp");
+    return error_domain.c_str();
+}
+
+
+void Exception::SetDBusError(GDBusMethodInvocation *invocation) const noexcept
+{
 #ifdef GDBUSPP_DEBUG
-    GError *dbuserr = g_dbus_error_new_for_dbus_error(qdom.c_str(), classerr.c_str());
+    GError *dbuserr = g_dbus_error_new_for_dbus_error(error_domain.c_str(),
+                                                      classerr.c_str());
 #else
-    GError *dbuserr = g_dbus_error_new_for_dbus_error(qdom.c_str(), error.c_str());
+    GError *dbuserr = g_dbus_error_new_for_dbus_error(error_domain.c_str(),
+                                                      error.c_str());
 #endif
-    dbuserr->domain = g_quark_from_string(qdom.c_str());
+    dbuserr->domain = g_quark_from_string(error_domain.c_str());
     g_dbus_method_invocation_return_gerror(invocation, dbuserr);
     g_error_free(dbuserr);
 }
