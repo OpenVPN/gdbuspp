@@ -19,7 +19,7 @@ set -eu
 #        automated testing frameworks
 #
 
-SERVICE_PID=""
+export SERVICE_PID=""
 export FAILED_RESULT=0
 
 start_service()
