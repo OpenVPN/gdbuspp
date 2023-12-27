@@ -7,7 +7,7 @@
 
 project(
         'gdbuspp','cpp',
-        default_options : [ 'cpp_std=c++17', 'cpp_args=-Werror' ],
+        default_options : [ 'cpp_std=c++17', 'werror=true' ],
         license: 'AGPL-3.0-only',
         version: run_command('scripts/get-git-ref', check: true).stdout().strip(),
         meson_version: '>= 0.58'
