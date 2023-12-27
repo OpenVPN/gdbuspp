@@ -44,8 +44,11 @@ run_test()
     echo "-----------------------------------------------------------"
     echo "###  Running test: $@"
     echo
+    # Do not fail the test driver when the test fails
+    set +e
     eval $@
     ec=$?
+    set -e
     echo
     echo ".."
     if [ ${ec} -ne 0 ]; then
