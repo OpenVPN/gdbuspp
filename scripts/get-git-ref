@@ -32,7 +32,7 @@ ec=$?
 
 if [ $ec -ne 0  ]; then
 	# Presume not a version tag, so use commit reference
-	VERSION="$(git rev-parse --symbolic-full-name HEAD | cut -d/ -f3-)_$(git rev-parse --short=16 HEAD)"
+	VERSION="$(git rev-parse --symbolic-full-name HEAD | cut -d/ -f3- | sed -e 's@/@_@g')_$(git rev-parse --short=16 HEAD)"
 fi
 
 if [ "$1" == "--dist" ]; then
