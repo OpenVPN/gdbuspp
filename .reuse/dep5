@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: GDBus++
+Upstream-Contact: David Sommerseth <davids@openvpn.net>
+Source: https://codeberg.org/OpenVPN/gdbuspp/
+
+# Sample paragraph, commented out:
+#
+# Files: src/*
+# Copyright: $YEAR $NAME <$CONTACT>
+# License: ...

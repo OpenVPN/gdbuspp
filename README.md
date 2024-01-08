@@ -1,3 +1,9 @@
+<!--
+SPDX-License-Identifier: AGPL-3.0-only
+SPDX-FileCopyrightText: OpenVPN Inc <sales@openvpn.net>
+SPDX-FileCopyrightText: David Sommerseth <davids@openvpn.net>
+-->
+
 GDBus++ :: glib2 D-Bus C++ interface
 ====================================
 
