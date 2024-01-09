@@ -107,6 +107,18 @@ GVariantBuilder *Create(const char *type)
 }
 
 
+void OpenChild(GVariantBuilder *builder, const char *type)
+{
+    g_variant_builder_open(builder, G_VARIANT_TYPE(type));
+}
+
+
+void CloseChild(GVariantBuilder *builder)
+{
+    g_variant_builder_close(builder);
+}
+
+
 GVariant *CreateEmpty(const char *type)
 {
     GVariantBuilder *b = Builder::Create(type);

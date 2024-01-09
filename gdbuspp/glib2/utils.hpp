@@ -193,6 +193,28 @@ namespace Builder {
  */
 GVariantBuilder *Create(const char *type);
 
+
+/**
+ *  Simple wrapper around g_variant_builder_open() to provide a more
+ *  consistent C++ interface
+ *
+ * @param builder   GVariantBuilder object where to create the child nodes
+ * @param type      D-Bus data type this builder container expects
+ */
+void OpenChild(GVariantBuilder *builder, const char *type);
+
+
+/**
+ *  Simple wrapper around g_variant_builder_close() to provide a more
+ *  consistent C++ interface
+ *
+ * @param builder GVariantBuilder with the child node to close.  The
+ *                OpenChild() must have been called first to prepare a child
+ *                node
+ */
+void CloseChild(GVariantBuilder *builder);
+
+
 /**
  *  Creates an empty variant object based on more complex types.
  *  The implementation of this method is very basic and simple, without
@@ -269,6 +291,7 @@ inline void Add(GVariantBuilder *builder,
 {
     g_variant_builder_add_value(builder, value);
 }
+
 
 /**
  *  Converts a std::vector<T> to a D-Bus compliant
