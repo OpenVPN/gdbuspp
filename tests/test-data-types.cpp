@@ -128,10 +128,36 @@ TestResult check_data_type_gvariant(const std::string msg,
 {
     std::string type;
     std::ostringstream message;
+    bool pass = true;
 
-    message << msg << " - Expects '" << expect << "'";
+    message << msg << " - Expects '" << expect << "'  ";
+    message << "{ g_variant_get_type_string(...) -> ";
     type = std::string(g_variant_get_type_string(value));
-    return TestResult(message.str(), type == expect);
+    if (type != expect)
+    {
+        pass = false;
+        message << "FAILED, received: '" << type << "'";
+    }
+    else
+    {
+        message << "Pass";
+    }
+    message << " }  ::  ";
+
+    type = glib2::DataType::Extract(value);
+    message << "{ glib2::DataType::Exctract(...) -> ";
+    if (type != expect)
+    {
+        pass = false;
+        message << "  FAILED, received: " << type;
+    }
+    else
+    {
+        message << "Pass";
+    }
+    message << " } >>> Test";
+
+    return TestResult(message.str(), pass);
 }
 
 
@@ -237,7 +263,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<uint16_t>(...)",
+                                 "glib2::Value::Create<uint16_t>(...)   ",
                                  glib2::Value::Create(static_cast<uint16_t>(12345)),
                                  "q");
                          });
@@ -245,7 +271,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<int16_t>(...)",
+                                 "glib2::Value::Create<int16_t>(...)    ",
                                  glib2::Value::Create(static_cast<int16_t>(-12345)),
                                  "n");
                          });
@@ -253,7 +279,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<uint32_t>(...)",
+                                 "glib2::Value::Create<uint32_t>(...)   ",
                                  glib2::Value::Create(static_cast<uint32_t>(54321)),
                                  "u");
                          });
@@ -261,7 +287,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<int32_t>(...)",
+                                 "glib2::Value::Create<int32_t>(...)    ",
                                  glib2::Value::Create(static_cast<int32_t>(-54321)),
                                  "i");
                          });
@@ -270,7 +296,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<uint64_t>(...)",
+                                 "glib2::Value::Create<uint64_t>(...)   ",
                                  glib2::Value::Create(static_cast<uint64_t>(12345654321)),
                                  "t");
                          });
@@ -278,7 +304,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<int64_t>(...)",
+                                 "glib2::Value::Create<int64_t>(...)    ",
                                  glib2::Value::Create(static_cast<int64_t>(-12345654321)),
                                  "x");
                          });
@@ -286,7 +312,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<double>(...)",
+                                 "glib2::Value::Create<double>(...)     ",
                                  glib2::Value::Create(static_cast<double>(12345654321254321)),
                                  "d");
                          });
@@ -294,7 +320,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "glib2::Value::Create<bool>(...)",
+                                 "glib2::Value::Create<bool>(...)       ",
                                  glib2::Value::Create(static_cast<bool>(true)),
                                  "b");
                          });
@@ -311,7 +337,7 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "g_variant_new(\"(iuqntxdbs)\", ...)",
+                                 "g_variant_new(\"(iuqntxdbs)\", ...) ",
                                  g_variant_new("(iuqntxdbs)",
                                                static_cast<int32_t>(-4),
                                                static_cast<uint32_t>(4),

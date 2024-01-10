@@ -89,7 +89,19 @@ void checkParams(const char *func,
         throw Exception(func, err.str());
     }
 }
+
 } // namespace Utils
+
+
+
+namespace DataType {
+
+const std::string Extract(GVariant *value) noexcept
+{
+    return std::string(g_variant_get_type_string(value));
+}
+
+} // namespace DataType
 
 
 

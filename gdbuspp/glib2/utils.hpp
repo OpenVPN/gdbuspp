@@ -99,6 +99,19 @@ void checkParams(const char *func,
  */
 namespace DataType {
 
+/**
+ *  Retrieve the D-Bus notation of the data type stored
+ *  in a GVariant object.
+ *
+ *  This is just a simple wrapper around g_variant_get_type_string(),
+ *  but providing the result as a std::string value instead of char *
+ *
+ * @param v   GVariant object to inspect
+ * @return std::string of the D-Bus data type representation of the value
+ */
+const std::string Extract(GVariant *value) noexcept;
+
+
 // Declare template as prototype only so it cannot be used directly
 template <typename T>
 inline const char *DBus() noexcept;
