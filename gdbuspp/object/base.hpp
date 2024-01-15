@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "../authz-request.hpp"
+#include "../glib2/utils.hpp"
 #include "../signals/group.hpp"
 #include "exceptions.hpp"
 #include "method.hpp"
@@ -572,7 +573,6 @@ class Base : public std::enable_shared_from_this<Base>
             return resp;
         }
 
-
       private:
         const std::string override_dbus_type;
     };
@@ -629,10 +629,7 @@ class Base : public std::enable_shared_from_this<Base>
          */
         GVariant *GetValue() const noexcept override
         {
-            GVariantBuilder *bld = get_builder();
-            GVariant *ret = g_variant_builder_end(bld);
-            g_variant_builder_unref(bld);
-            return ret;
+            return glib2::Value::CreateVector(this->variable_ref);
         }
 
 
@@ -650,17 +647,12 @@ class Base : public std::enable_shared_from_this<Base>
          */
         Property::Update::Ptr SetValue(GVariant *value) override
         {
-            GVariantIter *list;
-            g_variant_get(value, dbus_array_type.c_str(), &list);
-
-            GVariant *iter = nullptr;
-            std::vector<T> newvalue;
-            while ((iter = g_variant_iter_next_value(list)))
-            {
-                newvalue.push_back(glib2::Value::Get<T>(iter));
-                g_variant_unref(iter);
-            }
-            g_variant_iter_free(list);
+            // The following ExtractVector() call will unref value. This
+            // seems to also be unref'd inside glib2's library; so we add
+            // an extra reference count to not completely free it in our
+            // own internal processing.
+            g_variant_ref_sink(value);
+            std::vector<T> newvalue = glib2::Value::ExtractVector<T>(value, glib2::DataType::DBus<T>(), false);
             this->variable_ref = newvalue;
 
             auto upd = Property::Interface::PrepareUpdate();
@@ -671,24 +663,6 @@ class Base : public std::enable_shared_from_this<Base>
 
       private:
         const std::string dbus_array_type; ///< D-Bus data type of the array
-
-
-        /**
-         *  Creates a proper GVariantBuilder of the corresponding D-Bus
-         *  array data type for this C++ std::vector data type.
-         *
-         * @return  Returns a GVariantBuilder object, populated with the data
-         *          of this objects data.
-         */
-        GVariantBuilder *get_builder() const noexcept
-        {
-            GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE(dbus_array_type.c_str()));
-            for (const auto &element : this->variable_ref)
-            {
-                glib2::Builder::Add(bld, element);
-            }
-            return bld;
-        }
     };
     // End of DBus::Object::PropertyType/PropertyTypeBase related classes
 
