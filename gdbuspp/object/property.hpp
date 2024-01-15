@@ -92,13 +92,12 @@ class Update
     template <typename T>
     void AddValue(const std::vector<T> &vals)
     {
-        GVariantBuilder *val_array = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
+        GVariantBuilder *val_array = glib2::Builder::Create("a*");
         for (const auto &v : vals)
         {
             glib2::Builder::Add(val_array, v);
         }
-        updated_vals.push_back(g_variant_builder_end(val_array));
-        g_variant_builder_unref(val_array);
+        updated_vals.push_back(glib2::Builder::Finish(val_array));
     }
 
 

@@ -19,6 +19,7 @@
 #include <memory>
 #include <glib.h>
 
+#include "../glib2/utils.hpp"
 #include "base.hpp"
 #include "exceptions.hpp"
 #include "property.hpp"
@@ -47,19 +48,21 @@ GVariant *Object::Property::Update::Finalize()
     }
     else
     {
-        GVariantBuilder *arvals = g_variant_builder_new(G_VARIANT_TYPE(property.GetDBusType()));
+        GVariantBuilder *arvals = glib2::Builder::Create(property.GetDBusType());
         for (auto &val : updated_vals)
         {
-            g_variant_builder_add_value(arvals, val);
+            glib2::Builder::Add(arvals, val);
         }
-        vals = g_variant_builder_end(arvals);
-        g_variant_builder_unref(arvals);
+        vals = glib2::Builder::Finish(arvals);
     }
 
     // Build a single element array containing all updates
     // for this single property
-    GVariantBuilder *msg = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
-    g_variant_builder_add(msg, "{sv}", property.GetName().c_str(), vals);
+    GVariantBuilder *msg = glib2::Builder::Create("a*");
+    glib2::Builder::Add(msg,
+                        g_variant_new("{sv}",
+                                      property.GetName().c_str(),
+                                      vals));
 
     // Wrap this up into the needed format needed when sending the
     // org.freedesktop.DBus.Properties.PropertiesChanged signal
@@ -67,6 +70,7 @@ GVariant *Object::Property::Update::Finalize()
                                          property.GetInterface().c_str(),
                                          msg,
                                          nullptr);
+    // This is "finished" by g_variant_new() above; we only need to clean up
     g_variant_builder_unref(msg);
     updated_vals = {};
 
