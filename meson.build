@@ -210,6 +210,8 @@ tests_lib = static_library(
         ]
 )
 
+subdir('tests/regression')
+
 # A simple test service, exposing all the functionality
 # of the GDBus++ library
 simple_service = executable(
