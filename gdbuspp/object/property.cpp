@@ -200,7 +200,13 @@ Object::Property::Update::Ptr Object::Property::Collection::SetValue(const std::
         return nullptr;
     }
 
-    return prop->second->SetValue(value);
+    auto property = prop->second;
+    std::string value_type(g_variant_get_type_string(value));
+    if (property->GetDBusType() != value_type)
+    {
+        throw Object::Exception("Invalid data type for the property value");
+    }
+    return property->SetValue(value);
 }
 
 } // namespace DBus
