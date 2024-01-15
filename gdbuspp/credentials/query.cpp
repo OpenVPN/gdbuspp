@@ -41,7 +41,7 @@ const uid_t Credentials::Query::GetUID(const std::string &busname) const
         g_variant_unref(result);
         return ret;
     }
-    catch (DBus::Exception &excp)
+    catch (const DBus::Exception &excp)
     {
         throw Credentials::Exception("GetUID",
                                      "Failed to retrieve UID for bus name '"
@@ -61,7 +61,7 @@ const pid_t Credentials::Query::GetPID(const std::string &busname) const
         g_variant_unref(result);
         return pid;
     }
-    catch (DBus::Exception &excp)
+    catch (const DBus::Exception &excp)
     {
         throw Credentials::Exception("GetPID",
                                      "Failed to retrieve process ID for bus name '"
@@ -81,7 +81,7 @@ const std::string Credentials::Query::GetUniqueBusName(const std::string &busnam
         g_variant_unref(result);
         return ret;
     }
-    catch (DBus::Exception &excp)
+    catch (const DBus::Exception &excp)
     {
         throw Credentials::Exception("GetPID",
                                      "Failed to retrieve unique bus name for '"
