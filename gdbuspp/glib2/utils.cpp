@@ -61,19 +61,30 @@ void checkParams(const char *func,
 {
     std::string typestr{};
     size_t nchildren = 0;
+    bool container = false;
     if (params)
     {
         typestr = std::string(g_variant_get_type_string(params));
-        nchildren = g_variant_n_children(params);
+        const GVariantType *g_type = g_variant_get_type(params);
+        container = g_variant_type_is_container(g_type);
+        if (container)
+        {
+            nchildren = g_variant_n_children(params);
+        }
     }
 
-    if (format != typestr || (num > 0 && num != nchildren))
+    if (!container && num > 0)
+    {
+        throw glib2::Utils::Exception(func, "Parameter type is not a container, it has no children");
+    }
+
+    if (format != typestr || (container && num > 0 && num != nchildren))
     {
         std::ostringstream err;
         err << "Incorrect parameter format: "
             << (params ? typestr : "<null>")
             << ", expected " << format;
-        if (num > 0)
+        if (nchildren >= 0 && num > 0)
         {
             err << " (elements expected: " << std::to_string(num);
             if (params)
@@ -86,7 +97,7 @@ void checkParams(const char *func,
             }
             err << ")";
         }
-        throw Exception(func, err.str());
+        throw glib2::Utils::Exception(func, err.str());
     }
 }
 
