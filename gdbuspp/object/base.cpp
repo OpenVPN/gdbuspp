@@ -107,7 +107,14 @@ bool Object::Base::PropertyExists(const std::string &propname) const
 
 GVariant *Object::Base::GetProperty(const std::string &propname) const
 {
-    return properties->GetValue(propname);
+    try
+    {
+        return properties->GetValue(propname);
+    }
+    catch (const DBus::Exception &excp)
+    {
+        throw Property::Exception(this, propname, excp.GetRawError());
+    }
 }
 
 
@@ -117,7 +124,7 @@ Object::Property::Update::Ptr Object::Base::SetProperty(const std::string &propn
     {
         return properties->SetValue(propname, value);
     }
-    catch (const glib2::Utils::Exception &excp)
+    catch (const DBus::Exception &excp)
     {
         throw Property::Exception(this, propname, excp.GetRawError());
     }
