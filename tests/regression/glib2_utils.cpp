@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 #include <glib.h>
-#include "gdbuspp/glib2/utils.hpp"
+#include "../../gdbuspp/glib2/utils.hpp"
 
 
 bool expect_throw(std::function<void()> &&testfunc, const std::string &error_match)
