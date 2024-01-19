@@ -14,6 +14,7 @@
  *        glib2 g_thread_pool interface and the AsyncProcess::Request class
  */
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -94,9 +95,10 @@ void AsyncProcess::Request::SetProperty(const std::string &propname, GVariant *p
 
 AsyncProcess::Pool::Pool()
 {
+    int avail_procs = (g_get_num_processors() / 2);
     pool = g_thread_pool_new(glib2::Callbacks::_int_pool_processpool_cb,
                              nullptr,
-                             g_get_num_processors() / 2,
+                             std::max(1, avail_procs),
                              false,
                              nullptr);
     if (!pool)
