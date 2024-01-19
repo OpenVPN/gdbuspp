@@ -38,6 +38,7 @@ glib2_deps = [
         dependency('glib-2.0'),
         dependency('gio-2.0'),
         dependency('gio-unix-2.0'),
+        dependency('gthread-2.0'),
         dependency('threads')
 ]
 
