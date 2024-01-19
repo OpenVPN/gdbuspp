@@ -126,9 +126,10 @@ void test_exception(std::ostringstream &log,
                     const std::string &descr,
                     DBus::Proxy::Client::Ptr proxy,
                     FUNC &&testfunc,
-                    const std::string &exception)
+                    const std::vector<std::string> &exception_list)
 {
     bool result = false;
+    std::string error_msg{};
     try
     {
         testfunc();
@@ -136,13 +137,25 @@ void test_exception(std::ostringstream &log,
     }
     catch (const DBus::Exception &excp)
     {
-        result = (excp.GetRawError() == exception);
+        for (const auto &exception : exception_list)
+        {
+            error_msg = std::string(excp.GetRawError());
+            result = (error_msg == exception);
+            if (result)
+            {
+                break;
+            }
+        }
     }
     test_log(log,
-             "Exception[" + exception + "] " + descr,
+             "Exception[" + exception_list[0] + "] " + descr,
              proxy,
              result,
              true);
+    if (!result && !error_msg.empty())
+    {
+        log << "       Received exception message: " << error_msg << std::endl;
+    }
 }
 
 int main(int argc, char **argv)
@@ -231,7 +244,7 @@ int main(int argc, char **argv)
             {
                 query->ServiceVersion(incorrect_path, incorrect_interface);
             },
-            "Object path/interface does not exists");
+            {"Object path/interface does not exists"});
 
         // Run Utils::Query::Introspection() tetss
         {
@@ -262,9 +275,15 @@ int main(int argc, char **argv)
                 {
                     (void)bad_query->Introspect(incorrect_path);
                 },
-                "Failed calling D-Bus method 'Introspect': "
-                "GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: "
-                "The name non.existing.service was not provided by any .service files");
+                {// dbus-daemon error string
+                 "Failed calling D-Bus method 'Introspect': "
+                 "GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: "
+                 "The name non.existing.service was not provided by any .service files",
+
+                 // dbus-broker error string
+                 "Failed calling D-Bus method 'Introspect': "
+                 "GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: "
+                 "The name is not activatable"});
         }
 
 
@@ -286,10 +305,17 @@ int main(int argc, char **argv)
                 {
                     service_qry->StartServiceByName("non.existing.service");
                 },
-                "Failed querying service 'non.existing.service':"
-                "Failed calling D-Bus method 'StartServiceByName': "
-                "GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: "
-                "The name non.existing.service was not provided by any .service files");
+                {// dbus-daemon error string
+                 "Failed querying service 'non.existing.service':"
+                 "Failed calling D-Bus method 'StartServiceByName': "
+                 "GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: "
+                 "The name non.existing.service was not provided by any .service files",
+
+                 // dbus-broker error string
+                 "Failed querying service 'non.existing.service':"
+                 "Failed calling D-Bus method 'StartServiceByName': "
+                 "GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: "
+                 "The name is not activatable"});
 
 
             test_log(log,
@@ -318,10 +344,18 @@ int main(int argc, char **argv)
                 {
                     service_qry->GetNameOwner("non.existing.service");
                 },
-                "Failed querying service 'non.existing.service':"
-                "Failed calling D-Bus method 'GetNameOwner': "
-                "GDBus.Error:org.freedesktop.DBus.Error.NameHasNoOwner: "
-                "Could not get owner of name 'non.existing.service': no such name");
+                {// dbus-daemon error string
+                 "Failed querying service 'non.existing.service':"
+                 "Failed calling D-Bus method 'GetNameOwner': "
+                 "GDBus.Error:org.freedesktop.DBus.Error.NameHasNoOwner: "
+                 "Could not get owner of name 'non.existing.service': no such name",
+
+                 // dbus-broker error string
+                 "Failed querying service 'non.existing.service':"
+                 "Failed calling "
+                 "D-Bus method 'GetNameOwner': "
+                 "GDBus.Error:org.freedesktop.DBus.Error.NameHasNoOwner: "
+                 "The name does not have an owner"});
         }
 
 
