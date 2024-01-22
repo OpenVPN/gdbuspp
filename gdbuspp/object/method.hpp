@@ -188,6 +188,14 @@ class Arguments
     void SetMethodReturn(GVariant *result) noexcept;
 
 
+    /**
+     *  Retrieve the unique bus name of the caller of this method
+     *
+     * @return const std::string containing the caller's unique bus name
+     */
+    const std::string GetCallerBusName() const noexcept;
+
+
     friend std::ostream &operator<<(std::ostream &os, const Arguments::Ptr &args)
     {
         std::ostringstream ret;

@@ -544,6 +544,12 @@ if __name__ == "__main__":
                                         None,
                                         None))
 
+    simple1_methods.AddTest(TestMethod('GetCallerBusName',
+                                        {},
+                                        {'caller_busname': 's'},
+                                        None,
+                                        dbus.String(session_bus.get_unique_name())))
+
     simple1_methods.AddTest(TestMethod('StringLength',
                                         {'string': 's'},
                                         {'length': 'i'},

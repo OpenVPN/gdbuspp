@@ -227,6 +227,11 @@ void Arguments::SendFD(int &fd)
 }
 
 
+const std::string Arguments::GetCallerBusName() const noexcept
+{
+    return sender;
+}
+
 
 const bool Arguments::empty() const
 {

@@ -378,6 +378,17 @@ class MethodTests : public DBus::Object::Base
         stringlen_args->AddOutput("length", "i");
 
 
+        //  Return the bus name of the caller back to the caller.  This is
+        //  used so the proxy test program can check if that matches the
+        //  assigned bus name of the calling client
+        auto get_caller_args = AddMethod("GetCallerBusName",
+                                         [](DBus::Object::Method::Arguments::Ptr args)
+                                         {
+                                             args->SetMethodReturn(glib2::Value::CreateTupleWrapped(args->GetCallerBusName()));
+                                         });
+        get_caller_args->AddOutput("caller_busname", glib2::DataType::DBus<std::string>());
+
+
         //  This creates a new child object, as defined in the SimpleObject class
         //  The "name" of the object, becomes part of the D-Bus path which is
         //  given as an input string.  It returns the full D-Bus object path
