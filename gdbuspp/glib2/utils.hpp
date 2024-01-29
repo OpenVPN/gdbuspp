@@ -661,14 +661,18 @@ inline GVariant *Create(std::string value) noexcept
  *  Converts a std::vector<T> to a D-Bus compliant
  *  array of the corresponding D-Bus data type
  *
- * @param input  std::vector<T> to convert
+ * @param input          std::vector<T> to convert
+ * @param override_type  (optional) char * string with the D-Bus type string
+ *                       to use for the GVariant container instead of the
+ *                       template derived type.
  *
  * @return Returns a GVariant object containing the complete array
  */
 template <typename T>
-inline GVariant *CreateVector(const std::vector<T> &input) noexcept
+inline GVariant *CreateVector(const std::vector<T> &input,
+                              const char *override_type = nullptr) noexcept
 {
-    GVariantBuilder *bld = Builder::FromVector(input);
+    GVariantBuilder *bld = Builder::FromVector(input, override_type);
     GVariant *ret = g_variant_builder_end(bld);
     g_variant_builder_unref(bld);
 
@@ -684,13 +688,26 @@ inline GVariant *CreateVector(const std::vector<T> &input) noexcept
  *
  * @tparam T           C++ data type
  * @param value        C++ variable content to wrap in
+ * @param override_type  (optional) char * string with the D-Bus type string
+ *                       to use for the GVariant container instead of the
+ *                       template derived type.
  * @return GVariant*
  */
 template <typename T>
-inline GVariant *CreateTupleWrapped(const T &value) noexcept
+inline GVariant *CreateTupleWrapped(const T &value,
+                                    const char *override_type = nullptr) noexcept
 {
+    GVariant *v = nullptr;
+    if (!override_type)
+    {
+        v = Create(value);
+    }
+    else
+    {
+        v = CreateType(override_type, value);
+    }
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value(bld, Create(value));
+    g_variant_builder_add_value(bld, v);
     GVariant *ret = g_variant_builder_end(bld);
     g_variant_builder_unref(bld);
     return ret;
@@ -698,10 +715,11 @@ inline GVariant *CreateTupleWrapped(const T &value) noexcept
 
 
 template <typename T>
-inline GVariant *CreateTupleWrapped(const std::vector<T> &input) noexcept
+inline GVariant *CreateTupleWrapped(const std::vector<T> &input,
+                                    const char *override_type = nullptr) noexcept
 {
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value(bld, CreateVector(input));
+    g_variant_builder_add_value(bld, CreateVector(input, override_type));
     GVariant *ret = g_variant_builder_end(bld);
     g_variant_builder_unref(bld);
     return ret;
