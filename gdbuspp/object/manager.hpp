@@ -125,7 +125,7 @@ class Manager : public std::enable_shared_from_this<Manager>
      *              this new object immediately after creating it.
      */
     template <class C, typename... Args>
-    std::shared_ptr<C> CreateObject(Args... args)
+    std::shared_ptr<C> CreateObject(Args &&...args)
     {
         // Instantiate and register the new object
         std::shared_ptr<C> object = Object::Base::Create<C>(std::forward<Args>(args)...);
