@@ -51,9 +51,9 @@ class Base : public std::enable_shared_from_this<Base>
      * @return Base::Ptr  Returns a std::shared_ptr to the newly created object
      */
     template <typename C, typename... T>
-    static Base::Ptr Create(T &&...args)
+    static std::shared_ptr<C> Create(T &&...args)
     {
-        return Ptr(new C(std::forward<T>(args)...));
+        return std::shared_ptr<C>(new C(std::forward<T>(args)...));
     }
 
     virtual ~Base() noexcept = default;
