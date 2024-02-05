@@ -71,40 +71,6 @@ class SimpleLog : public DBus::Signals::Group
 
 
 /**
- *  Initialises a D-Bus service and registers the service unto the D-Bus
- *  given D-Bus connection.
- *
- *  Well-known bus name: net.openvpn.gdbuspp.test.simple
- */
-class SimpleService : public DBus::Service
-{
-  public:
-    SimpleService(DBus::Connection::Ptr con)
-        : DBus::Service(con, Constants::GenServiceName("simple"))
-    {
-    }
-
-    virtual ~SimpleService() = default;
-
-    //  This is a callback method which is called when this D-Bus service
-    //  is registered on the D-Bus connection
-    void BusNameAcquired(GDBusConnection *conn, const std::string &busname) override
-    {
-        std::cout << "Bus name acquired: " << busname << std::endl;
-    }
-
-    //  This callback method will be called if the D-Bus service for some reason
-    //  does not get the service registered on the D-Bus connection or the
-    //  registration is lost (the D-Bus daemon kicks the service off the D-Bus).
-    void BusNameLost(GDBusConnection *conn, const std::string &busname) override
-    {
-        std::cout << "** WARNING ** Bus name lost: " << busname << std::endl;
-        Stop();
-    }
-};
-
-
-/**
  *  A simple object created on-the-fly via the CreateSimpleObject D-Bus
  *  method in the gdbuspp.test.simple1 interface in the object path
  *  /gdbuspp/tests/simple1/methods
@@ -652,16 +618,18 @@ class FailingMethodTests : public DBus::Object::Base
 class SimpleHandler : public DBus::Object::Base
 {
   public:
-    SimpleHandler(SimpleService::Ptr service)
+    using Ptr = std::shared_ptr<SimpleHandler>;
+
+    SimpleHandler(DBus::Connection::Ptr conn,
+                  DBus::Object::Manager::Ptr object_mgr)
         : DBus::Object::Base(Constants::GenPath("simple1"),
                              Constants::GenInterface("simple1"))
     {
         DisableIdleDetector(true);
-        log = DBus::Signals::Group::Create<SimpleLog>(service->GetConnection());
+        log = DBus::Signals::Group::Create<SimpleLog>(conn);
         RegisterSignals(log);
         log->AddTarget("");
 
-        auto object_mgr = service->GetObjectManager();
         property_tests = object_mgr->CreateObject<PropertyTests>(log);
         method_tests = object_mgr->CreateObject<MethodTests>(object_mgr, log);
         failing_meths = object_mgr->CreateObject<FailingMethodTests>();
@@ -707,6 +675,48 @@ class SimpleHandler : public DBus::Object::Base
 };
 
 
+template <typename CLASS1, typename CLASS2>
+const bool compare_shared_ptr_obj(const std::shared_ptr<CLASS1> &lhs,
+                                  const std::shared_ptr<CLASS2> &rhs)
+{
+    return (lhs == rhs) && (lhs.get() == rhs.get());
+}
+
+
+/**
+ *  Initialises a D-Bus service and registers the service unto the D-Bus
+ *  given D-Bus connection.
+ *
+ *  Well-known bus name: net.openvpn.gdbuspp.test.simple
+ */
+class SimpleService : public DBus::Service
+{
+  public:
+    SimpleService(DBus::Connection::Ptr con)
+        : DBus::Service(con, Constants::GenServiceName("simple"))
+    {
+    }
+
+    virtual ~SimpleService() = default;
+
+    //  This is a callback method which is called when this D-Bus service
+    //  is registered on the D-Bus connection
+    void BusNameAcquired(GDBusConnection *conn, const std::string &busname) override
+    {
+        std::cout << "Bus name acquired: " << busname << std::endl;
+    }
+
+    //  This callback method will be called if the D-Bus service for some reason
+    //  does not get the service registered on the D-Bus connection or the
+    //  registration is lost (the D-Bus daemon kicks the service off the D-Bus).
+    void BusNameLost(GDBusConnection *conn, const std::string &busname) override
+    {
+        std::cout << "** WARNING ** Bus name lost: " << busname << std::endl;
+        Stop();
+    }
+};
+
+
 int main(int argc, char **argv)
 {
     try
@@ -720,7 +730,8 @@ int main(int argc, char **argv)
         // Create a new "root object", handling all the initial requests
         // This root object is the ServiceHandler; which can create child
         // objects with different functionality
-        simple_service->CreateServiceHandler<SimpleHandler>(simple_service);
+        simple_service->CreateServiceHandler<SimpleHandler>(dbuscon,
+                                                            simple_service->GetObjectManager());
 
         simple_service->PrepareIdleDetector(std::chrono::seconds(60));
 
