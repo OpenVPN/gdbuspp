@@ -666,6 +666,24 @@ class SimpleHandler : public DBus::Object::Base
     }
 
 
+    PropertyTests::Ptr GetPropertyTestsObject() const
+    {
+        return property_tests;
+    }
+
+
+    MethodTests::Ptr GetMethodTestsObject() const
+    {
+        return method_tests;
+    }
+
+
+    FailingMethodTests::Ptr GetFailingMethodsTestsObject() const
+    {
+        return failing_meths;
+    }
+
+
   private:
     SimpleLog::Ptr log = nullptr;
     PropertyTests::Ptr property_tests = nullptr;
@@ -714,6 +732,98 @@ class SimpleService : public DBus::Service
         std::cout << "** WARNING ** Bus name lost: " << busname << std::endl;
         Stop();
     }
+
+
+    void InternalTests(DBus::Object::Manager::Ptr object_mgr, SimpleHandler::Ptr handler)
+    {
+        std::cout << "** Internal tests - "
+                  << "DBus::Object::Manager::GetObject() / DBus::Object::Manager::GetAllObjects()"
+                  << std::endl;
+        std::map<std::string, DBus::Object::Base::Ptr> check;
+        check[handler->GetPath()] = handler;
+        auto retr_handler = object_mgr->GetObject<SimpleHandler>(Constants::GenPath("simple1"));
+        if (!compare_shared_ptr_obj(handler, retr_handler))
+        {
+            throw DBus::Exception("InternalTests",
+                                  "GetObject<SimpleHandler> failed");
+        }
+
+        auto h_prop_tests = handler->GetPropertyTestsObject();
+        auto r_prop_tests = object_mgr->GetObject<PropertyTests>(h_prop_tests->GetPath());
+        if (!compare_shared_ptr_obj(h_prop_tests, r_prop_tests))
+        {
+            throw DBus::Exception("InternalTests",
+                                  "GetObject<PropertyTests> failed");
+        }
+        check[r_prop_tests->GetPath()] = h_prop_tests;
+
+
+        auto h_meth_tests = handler->GetMethodTestsObject();
+        auto r_meth_tests = object_mgr->GetObject<MethodTests>(h_meth_tests->GetPath());
+        if (!compare_shared_ptr_obj(h_meth_tests, r_meth_tests))
+        {
+            throw DBus::Exception("InternalTests",
+                                  "GetObject<MethodTests> failed");
+        }
+        check[r_meth_tests->GetPath()] = h_meth_tests;
+
+        auto h_fmth_tests = handler->GetFailingMethodsTestsObject();
+        auto r_fmth_tests = object_mgr->GetObject<FailingMethodTests>(h_fmth_tests->GetPath());
+        if (!compare_shared_ptr_obj(h_fmth_tests, r_fmth_tests))
+        {
+            throw DBus::Exception("InternalTests",
+                                  "GetObject<FailingMethodTests> failed");
+        }
+        check[r_fmth_tests->GetPath()] = h_fmth_tests;
+
+        std::cout << "   Collected paths:" << std::endl;
+        for (const auto &[p, o] : check)
+        {
+            std::cout << "       - " << p << std::endl;
+        }
+
+        auto non_existing = object_mgr->GetObject<SimpleHandler>("/nonexisting/path");
+        if (nullptr != non_existing)
+        {
+            throw DBus::Exception("InternalTests",
+                                  "GetObject<>() on non-existing path failed");
+        }
+
+        std::cout << "   Validating paths and objects from "
+                  << "DBus::Object::Manager::GetAllObjects()" << std::endl;
+        bool failed = false;
+        for (const auto &[obj_path, obj] : object_mgr->GetAllObjects())
+        {
+            std::cout << "       - Looking up " << obj_path << " ... ";
+            try
+            {
+                const auto chk = check.at(obj_path);
+                std::cout << "found, ";
+
+                if (!compare_shared_ptr_obj(obj, chk))
+                {
+                    std::cout << " OBJECT MATCH FAILED";
+                    failed = true;
+                }
+                else
+                {
+                    std::cout << " object match passed";
+                }
+                std::cout << std::endl;
+            }
+            catch (const std::out_of_range &)
+            {
+                std::cout << "NOT FOUND" << std::endl;
+                failed = true;
+            }
+        }
+        if (failed)
+        {
+            throw DBus::Exception("InternalTests", "GetAllObject failed");
+        }
+        std::cout << "** Internal tests PASSED" << std::endl
+                  << std::endl;
+    }
 };
 
 
@@ -730,10 +840,14 @@ int main(int argc, char **argv)
         // Create a new "root object", handling all the initial requests
         // This root object is the ServiceHandler; which can create child
         // objects with different functionality
-        simple_service->CreateServiceHandler<SimpleHandler>(dbuscon,
-                                                            simple_service->GetObjectManager());
+        auto handler = simple_service->CreateServiceHandler<SimpleHandler>(dbuscon,
+                                                                           simple_service->GetObjectManager());
 
         simple_service->PrepareIdleDetector(std::chrono::seconds(60));
+
+        // Run internal tests first
+        simple_service->InternalTests(simple_service->GetObjectManager(),
+                                      handler);
 
         // Start the service
         simple_service->Run();

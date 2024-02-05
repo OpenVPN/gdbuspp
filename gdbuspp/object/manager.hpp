@@ -181,6 +181,36 @@ class Manager : public std::enable_shared_from_this<Manager>
      */
     void RemoveObject(const std::string &path);
 
+    /**
+     *  Retrieve a shared_ptr to the DBus::Object::Base object with the
+     *  real implementation class used when registering the object.
+     *
+     * @tparam C    Class implementation of registered object
+     * @param path  std::string containing the D-Bus path to the object
+     *
+     * @return std::shared_ptr<C>
+     */
+    template <typename C>
+    std::shared_ptr<C> GetObject(const std::string &path) const
+    {
+        Object::Base::Ptr obj_ptr = get_object(path);
+        if (obj_ptr)
+        {
+            std::shared_ptr<C> obj = std::static_pointer_cast<C>(obj_ptr);
+            return obj;
+        }
+        return nullptr;
+    }
+
+    /**
+     *  Retrieve a std::map<> of all the DBus::Object::Base managed objects
+     *  with the registered D-Bus path to the object as the key.
+     *
+     * @return const std::map<std::string, Object::Base::Ptr>
+     */
+
+    const std::map<std::string, Object::Base::Ptr> GetAllObjects() const;
+
 
   private:
     //
@@ -242,6 +272,15 @@ class Manager : public std::enable_shared_from_this<Manager>
      */
     void register_object(const DBus::Object::Base::Ptr object);
 
+    /**
+     *  Internal method to retrieve the shared_ptr to a DBus::Object::Base
+     *  object by D-Bus path
+     *
+     * @param path                std::string containing a valid D-Bus path
+     * @return Object::Base::Ptr  shared_ptr to the DBus::Object::Base object.
+     *         Returns nullptr if the object path is not found.
+     */
+    Object::Base::Ptr get_object(const std::string &path) const;
 
     /**
      *  Internal callback method which deletes the DBus::Object::Base object

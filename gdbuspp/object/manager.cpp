@@ -133,6 +133,29 @@ void Manager::RemoveObject(const std::string &path)
 }
 
 
+const std::map<std::string, Object::Base::Ptr> Manager::GetAllObjects() const
+{
+    // Loop through all object managed by this Object::Manager
+    std::map<std::string, Object::Base::Ptr> ret{};
+    for (const auto &[obj_id, cbl] : object_map)
+    {
+        // Look up the D-Bus object path from the object path/object ID index
+        for (const auto &[map_path, map_id] : path_index)
+        {
+            // When there is a match between the object ID in the object_map
+            // with the object ID in the path_index, the path_index will point
+            // at the correct D-Bus path ...
+            if (map_id == obj_id)
+            {
+                // And we can extract the Base::Ptr to the D-Bus object.
+                ret[map_path] = cbl->object;
+            }
+        }
+    }
+    return ret;
+}
+
+
 void Manager::_destructObjectCallback(const std::string &path)
 {
     const auto path_it = path_index.find(path);
@@ -212,6 +235,21 @@ void Manager::register_object(const DBus::Object::Base::Ptr object)
     // be used when a D-Bus object wants to be removed from the D-Bus service.
     object_map[oid] = cblink;
     path_index[object->GetPath()] = oid;
+}
+
+
+Object::Base::Ptr Manager::get_object(const std::string &path) const
+{
+    try
+    {
+        unsigned int id = path_index.at(path);
+        CallbackLink::Ptr cbl = object_map.at(id);
+        return cbl->object;
+    }
+    catch (const std::out_of_range &)
+    {
+        return nullptr;
+    }
 }
 
 } // namespace Object
