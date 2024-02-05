@@ -127,9 +127,9 @@ class Service : public std::enable_shared_from_this<Service>
      *               constructor
      */
     template <class C, typename... Args>
-    void CreateServiceHandler(Args... args)
+    std::shared_ptr<C> CreateServiceHandler(Args... args)
     {
-        object_manager->CreateObject<C>(std::forward<Args>(args)...);
+        return object_manager->CreateObject<C>(std::forward<Args>(args)...);
     }
 
 
