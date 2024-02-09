@@ -8,32 +8,49 @@
 //
 
 /**
- * @file   gen-constants.hpp
+ * @file gen-constants.hpp
  *
- * @brief  Generates compile-time constant strings
+ * @brief This is a fragment header, to be included after a Constants::Base
+ *        namespace has been declared with a few std::string_view "constants"
+ *        declaring the base prefix for D-Bus service names, object paths and
+ *        interface names.
  *
- *  This include file is weird by design.  It MUST be included AFTER
- *  a set of constant strings has been prepared.  These constants must
- *  be located in the Constants::Base namespace
+ *        The purpose of this header is to create compile-time constant strings
+ *        while being a bit more flexible when needing a slight variation at
+ *        the implementation point.  This is an alternative to using #define
+ *        macros, where this approach will ensure the end result is always
+ *        of a std::string data type.
  *
- *  Required constant std::string_view:
+ *        An example:
  *
- *   namespace Constants::Base {
- *       constexpr std::string_view BUSNAME{"..."};
- *       constexpr std::string_view ROOT_PATH{"..."};
- *       constexpr std::string_view INTERFACE{"..."};
- *   }
+ *        @code
+ *        namespace Constants {
+ *        namespace Base {
  *
- *  What the functions in this header provides is to generate constant
- *  strings for bus names, object paths and interfaces by prefixing them
- *  with the Constants::Base declared constant strings.
+ *        constexpr std::string_view BUSNAME{"net.openvpn.example."};
+ *        constexpr std::string_view ROOT_PATH{"/gdbuspp/example/"};
+ *        constexpr std::string_view INTERFACE{"gdbuspp.example."};
  *
- *  Constant strings created using the functions below cannot be based on
- *  a variable string input.  This ensures bus name, object paths and
- *  interfaces generated this way cannot be modified at runtime.
+ *        }
+ *        #include <gdbuspp/gen-constants.hpp>
+ *        }
  *
- *  See tests/test-constants.hpp for an example how to use this header file.
+ *        //
+ *        // Generating a service name, an object path and an interface
+ *        //
  *
+ *        std::string service_name = Constants::GenServiceName("service");
+ *        // result:  "net.openvpn.example.service";
+ *
+ *        std::string object_path = Constants::GenPath("object_path");
+ *        // result:  "/gdbuspp/example/object_path";
+ *
+ *        std::string service_name = Constants::GenInterface("interface");
+ *        // result:  "gdbuspp.example.interface";
+ *
+ *        @endcode
+ *
+ *        See also tests/test-constants.hpp for another example
  */
 
 #pragma once
@@ -60,9 +77,14 @@ constexpr auto GenServiceName(const char (&name)[sz])
  *  Generates a constant object path, prefixed by the ROOT_PATH constant
  *  from the Constants::Base namespace
  *
+ *  This function will return std::string, and not DBus::Object::Path, since
+ *  the object_path provided to this function may not be the final and complete
+ *  path.  And that would make the path validation check in DBus::Object::Path
+ *  throw an exception.
+ *
  * @tparam sz              Size of the input string, deduced at compile time
  * @param  object_path     String containing the service name to append
- * @return constexpr auto  Returns a constant (string) with the ROOT_PATH
+ * @return constexpr auto  Returns a constant (std::string) with the ROOT_PATH
  *                         constant appended with the input object path.
  */
 template <size_t sz>
