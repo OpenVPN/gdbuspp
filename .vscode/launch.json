@@ -7,6 +7,14 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "test :: data-types",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_data-types",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "test :: fd-receive-read",
             "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_fd-receive-read",
             "args": [],

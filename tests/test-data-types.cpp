@@ -126,13 +126,21 @@ TestResult check_data_type_gvariant(const std::string msg,
                                     GVariant *value,
                                     const std::string &expect)
 {
-    std::string type;
     std::ostringstream message;
-    bool pass = true;
 
     message << msg << " - Expects '" << expect << "'  ";
+
+    if (nullptr == value)
+    {
+        message << "GVariant == nullptr";
+        return TestResult(message.str(), false);
+    }
+
+
+    bool pass = true;
     message << "{ g_variant_get_type_string(...) -> ";
-    type = std::string(g_variant_get_type_string(value));
+    const char *type_c = g_variant_get_type_string(value);
+    std::string type = std::string(type_c ? type_c : "");
     if (type != expect)
     {
         pass = false;
