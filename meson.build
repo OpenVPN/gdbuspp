@@ -73,6 +73,7 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/object/manager.cpp',
                 'gdbuspp/object/method.cpp',
                 'gdbuspp/object/operation.cpp',
+                'gdbuspp/object/path.cpp',
                 'gdbuspp/object/property.cpp',
                 'gdbuspp/proxy.cpp',
                 'gdbuspp/proxy/utils.cpp',
@@ -113,6 +114,7 @@ install_headers(
         'gdbuspp/object/manager.hpp',
         'gdbuspp/object/method.hpp',
         'gdbuspp/object/operation.hpp',
+        'gdbuspp/object/path.hpp',
         'gdbuspp/object/property.hpp',
         'gdbuspp/object/base.hpp',
         subdir: 'gdbuspp/object'

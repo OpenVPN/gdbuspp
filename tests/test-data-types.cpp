@@ -17,6 +17,7 @@
 #include <string>
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
+#include "../gdbuspp/object/path.hpp"
 #include "../gdbuspp/proxy.hpp"
 
 #include "test-constants.hpp"
@@ -265,6 +266,91 @@ int test_base_data_types()
                                  "s");
                          });
 
+    failures += run_test([]()
+                         {
+                             DBus::Object::Path type_o = "/hello/world";
+                             return check_data_type_cpp(
+                                 "DBus::Object::Path",
+                                 type_o,
+                                 "o");
+                         });
+
+    failures += run_test([]()
+                         {
+                             bool res = false;
+                             try
+                             {
+                                 DBus::Object::Path wrong_path = "/trailing/slash/";
+                             }
+                             catch (const DBus::Object::Exception &excp)
+                             {
+                                 std::string err(excp.what());
+                                 if (err.find("Invalid D-Bus path") != std::string::npos)
+                                 {
+                                     res = true;
+                                 }
+                             }
+                             return TestResult("DBus::Object::Path [trailing slash]",
+                                               res);
+                         });
+
+    failures += run_test([]()
+                         {
+                             bool res = false;
+                             try
+                             {
+                                 DBus::Object::Path wrong_path = "trailing/slash/";
+                             }
+                             catch (const DBus::Object::Exception &excp)
+                             {
+                                 std::string err(excp.what());
+                                 if (err.find("Invalid D-Bus path") != std::string::npos)
+                                 {
+                                     res = true;
+                                 }
+                             }
+                             return TestResult("DBus::Object::Path [not absolute path]",
+                                               res);
+                         });
+
+    failures += run_test([]()
+                         {
+                             bool res = false;
+                             try
+                             {
+                                 DBus::Object::Path wrong_path = "";
+                             }
+                             catch (const DBus::Object::Exception &excp)
+                             {
+                                 std::string err(excp.what());
+                                 if (err.find("Invalid D-Bus path") != std::string::npos)
+                                 {
+                                     res = true;
+                                 }
+                             }
+                             return TestResult("DBus::Object::Path [empty path]",
+                                               res);
+                         });
+
+    failures += run_test([]()
+                         {
+                             bool res = false;
+                             try
+                             {
+                                 DBus::Object::Path wrong_path = "/path/invalid-chars";
+                             }
+                             catch (const DBus::Object::Exception &excp)
+                             {
+                                 std::string err(excp.what());
+                                 if (err.find("Invalid D-Bus path") != std::string::npos)
+                                 {
+                                     res = true;
+                                 }
+                             }
+                             return TestResult("DBus::Object::Path [invalid chars]",
+                                               res);
+                         });
+
     //
     // GVariant tests
     //
@@ -361,20 +447,29 @@ int test_base_data_types()
 
     failures += run_test([]()
                          {
-                             GVariantBuilder *b = glib2::Builder::Create("(sibnut)");
+                             GVariantBuilder *b = glib2::Builder::Create("(soibnut)");
                              auto s = std::string("string");
                              glib2::Builder::Add(b, s);
+                             glib2::Builder::Add(b, DBus::Object::Path("/struct/test"));
                              glib2::Builder::Add(b, static_cast<int32_t>(22));
                              glib2::Builder::Add(b, static_cast<bool>(true));
                              glib2::Builder::Add(b, static_cast<int16_t>(-4444));
                              glib2::Builder::Add(b, static_cast<uint32_t>(55555));
                              glib2::Builder::Add(b, static_cast<uint64_t>(666666));
                              return check_data_type_gvariant(
-                                 "glib2::Builder::Create(\"(sibnut)\")",
+                                 "glib2::Builder::Create(\"(soibnut)\")",
                                  glib2::Builder::Finish(b),
-                                 "(sibnut)");
+                                 "(soibnut)");
                          });
 
+    failures += run_test([]()
+                         {
+                             DBus::Object::Path path = "/hello/world";
+                             return check_data_type_gvariant(
+                                 "glib2::Value::Create<DBus::Object::Path>(...)",
+                                 glib2::Value::Create(path),
+                                 "o");
+                         });
 
     std::cout << ":: Base data type test failures: " << failures
               << std::endl

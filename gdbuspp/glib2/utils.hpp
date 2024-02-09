@@ -26,6 +26,7 @@
 #include <gio/gunixfdlist.h>
 
 #include "../exceptions.hpp"
+#include "../object/path.hpp"
 
 
 namespace glib2 {
@@ -178,6 +179,12 @@ inline const char *DBus<bool>() noexcept
 }
 
 template <>
+inline const char *DBus<DBus::Object::Path>() noexcept
+{
+    return "o";
+}
+
+template <>
 inline const char *DBus<std::string>() noexcept
 {
     return "s";
@@ -266,6 +273,31 @@ inline void Add(GVariantBuilder *builder,
     }
 }
 
+
+/**
+ *   Variant of @GVariantBuilderAdd() which tackles C++ DBus::Object::Path
+ *
+ *   @param builder  GVariantBuilder object where to add the value
+ *   @param value    DBus::Object::Path to add the GVariantBuilder object
+ *   @param override_type (optional) If set, it will use the given type instead
+ *                        of using std::string as the expected type
+ */
+template <>
+inline void Add(GVariantBuilder *builder,
+                const DBus::Object::Path &path,
+                const char *override_type) noexcept
+{
+    if (override_type)
+    {
+        g_variant_builder_add(builder, override_type, path.c_str());
+    }
+    else
+    {
+        g_variant_builder_add(builder,
+                              DataType::DBus<DBus::Object::Path>(),
+                              path.c_str());
+    }
+}
 
 /**
  *   Variant of @GVariantBuilderAdd() which tackles C++ std::string
@@ -454,6 +486,14 @@ inline bool Get<bool>(GVariant *v) noexcept
 }
 
 template <>
+inline DBus::Object::Path Get<DBus::Object::Path>(GVariant *v) noexcept
+{
+    const char *val = g_variant_get_string(v, nullptr);
+    return DBus::Object::Path((val ? val : ""));
+}
+
+
+template <>
 inline std::string Get<std::string>(GVariant *v) noexcept
 {
     const char *val = g_variant_get_string(v, nullptr);
@@ -546,6 +586,15 @@ inline bool Extract<bool>(GVariant *v, int elm) noexcept
 }
 
 template <>
+inline DBus::Object::Path Extract<DBus::Object::Path>(GVariant *v, int elm) noexcept
+{
+    GVariant *bv = g_variant_get_child_value(v, elm);
+    DBus::Object::Path ret{Get<DBus::Object::Path>(bv)};
+    g_variant_unref(bv);
+    return ret;
+}
+
+template <>
 inline std::string Extract<std::string>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
@@ -615,6 +664,22 @@ inline GVariant *CreateType(const char *dbustype, const T &value) noexcept
 
 /**
  *  Variant of the @Create function above, which converts the
+ *  C++ DBus::Object::Path type to a C type string, via the
+ *  std::string::c_str() method
+ *
+ * @param dbustype     D-Bus data type to use
+ * @param value        DBus::Object::Path the GVariant object shall carry
+ * @return GVariant*
+ */
+template <>
+inline GVariant *CreateType(const char *dbustype, const DBus::Object::Path &value) noexcept
+{
+    return g_variant_new(dbustype, value.c_str());
+}
+
+
+/**
+ *  Variant of the @Create function above, which converts the
  *  C++ std::string type to a C type string, via the
  * std::string::c_str() method
 
@@ -641,6 +706,19 @@ template <typename T>
 inline GVariant *Create(const T value) noexcept
 {
     return g_variant_new(DataType::DBus<T>(), value);
+}
+
+/**
+ *  Variant of the @Create function above, handling C++ DBus::Object::Path
+ *  and converting it into a C type string (std::string::c_str())
+ *
+ * @param value        DBus::Object::Path with the value to store in GVariant
+ * @return GVariant*
+ */
+template <>
+inline GVariant *Create(DBus::Object::Path value) noexcept
+{
+    return g_variant_new("o", value.c_str());
 }
 
 /**
