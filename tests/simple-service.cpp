@@ -86,12 +86,12 @@ class SimpleObject : public DBus::Object::Base
 {
   public:
     SimpleObject(DBus::Object::Manager::Ptr obj_mgr,
-                 const std::string &path,
+                 const DBus::Object::Path &path,
                  const std::string &name)
         : DBus::Object::Base(path, Constants::GenInterface("simple1.child")),
           object_manager(obj_mgr), my_path(path), my_name(name)
     {
-        AddProperty("my_path", my_path, false, "o");
+        AddProperty("my_path", my_path, false);
 
         auto getmyname_args = AddMethod("GetMyName",
                                         [this](DBus::Object::Method::Arguments::Ptr args)
@@ -126,7 +126,7 @@ class SimpleObject : public DBus::Object::Base
 
   private:
     DBus::Object::Manager::Ptr object_manager = nullptr;
-    std::string my_path;
+    DBus::Object::Path my_path;
     const std::string my_name;
 };
 

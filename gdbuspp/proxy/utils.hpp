@@ -20,6 +20,7 @@
 #include <string>
 
 #include "../connection.hpp"
+#include "../object/path.hpp"
 #include "../proxy.hpp"
 
 
@@ -65,11 +66,11 @@ class Query
      *  Calls the org.freedesktop.DBus.Introspectable.Introspect method
      *  and returns the XML introspection data as a plain string.
      *
-     * @param path                D-Bus object path to introspect in the service
+     * @param path    D-Bus::Object::Path to introspect in the service
      *
      * @return const std::string  XML introspection data
      */
-    const std::string Introspect(const std::string &path) const;
+    const std::string Introspect(const Object::Path &path) const;
 
     /**
      *  Does a few checks to try to reach a D-Bus object in the service.
@@ -79,7 +80,7 @@ class Query
      *
      * @return true if the object exists and is reachable, otherwise false
      */
-    const bool CheckObjectExists(const std::string &path,
+    const bool CheckObjectExists(const Object::Path &path,
                                  const std::string interface) const noexcept;
 
 
@@ -87,14 +88,14 @@ class Query
      *  Retrieve the service version, based on the 'version' property in
      *  D-Bus object path provided.
      *
-     * @param path                D-Bus path where to find the version
+     * @param path                D-Bus::Object::Path where to find the version
      *                            information in the service
      * @param interface           D-Bus object interface holding the 'version'
      *                            property
      *
      * @return const std::string containing the 'version' property value
      */
-    const std::string ServiceVersion(const std::string &path,
+    const std::string ServiceVersion(const Object::Path &path,
                                      const std::string interface) const;
 
   private:

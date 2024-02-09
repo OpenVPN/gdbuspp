@@ -22,6 +22,7 @@
 
 #include "exceptions.hpp"
 #include "object/operation.hpp"
+#include "object/path.hpp"
 
 namespace DBus {
 
@@ -109,7 +110,7 @@ struct Request
      * @param gdbus_conn      glib2 GDBusConnection object where the request came from
      * @param dbus_object     DBus::Object::Ptr (shared_ptr) to the C++ object side
      * @param sender          std::string containing the unique bus name of the sender
-     * @param object_path     std::string with the D-Bus object path to operate on
+     * @param object_path     DBus::Object::Path with the D-Bus object path to operate on
      * @param interface       std::String with the D-Bus interface to operate on
      *
      * @returns a Request::Ptr (unique_ptr) to the new async request
@@ -117,7 +118,7 @@ struct Request
     static Request::UPtr Create(GDBusConnection *gdbus_conn,
                                 std::shared_ptr<Object::Base> dbus_object,
                                 const std::string &sender,
-                                const std::string &object_path,
+                                const DBus::Object::Path &object_path,
                                 const std::string &interface)
     {
         return UPtr(new Request(gdbus_conn,
@@ -205,13 +206,13 @@ struct Request
      * @param gdbus_conn      GDBusConnection pointer where the request came from
      * @param dbus_object     DBus::Object::Ptr (shared_ptr) to the C++ object side
      * @param sender          std::string containing the unique bus name of the sender
-     * @param object_path     std::string with the D-Bus object path to operate on
+     * @param object_path     DBus::Object::Path with the D-Bus object path to operate on
      * @param interface       std::String with the D-Bus interface to operate on
      */
     Request(GDBusConnection *gdbus_conn,
             std::shared_ptr<Object::Base> dbus_object,
             const std::string &sender,
-            const std::string &object_path,
+            const DBus::Object::Path &object_path,
             const std::string &interface);
 };
 

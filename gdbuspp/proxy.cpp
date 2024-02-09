@@ -24,8 +24,10 @@
 #include "proxy.hpp"
 #include "features/debug-log.hpp"
 #include "glib2/utils.hpp"
+#include "object/path.hpp"
 
 #define DBUS_PROXY_CALL_TIMEOUT 5000
+
 
 namespace glib2 {
 
@@ -56,7 +58,7 @@ class Proxy
      */
     Proxy(DBus::Connection::Ptr connection,
           const std::string &destination_,
-          const std::string &path_,
+          const DBus::Object::Path &path_,
           const std::string &interface_)
         : destination(destination_), object_path(path_), interface(interface_)
     {
@@ -213,7 +215,7 @@ class Proxy
   private:
     GDBusProxy *proxy = nullptr;
     const std::string destination;
-    const std::string object_path;
+    const DBus::Object::Path object_path;
     const std::string interface;
     int return_fd = -1;
 
@@ -420,7 +422,7 @@ Exception::Exception(const std::string &errm, GError *gliberr)
 
 
 Exception::Exception(const std::string &destination,
-                     const std::string &path,
+                     const DBus::Object::Path &path,
                      const std::string &interface,
                      const std::string &errm,
                      GError *gliberr)
@@ -430,7 +432,7 @@ Exception::Exception(const std::string &destination,
 }
 
 const std::string Exception::compose_error(const std::string &destination,
-                                           const std::string &path,
+                                           const DBus::Object::Path &path,
                                            const std::string &interface) const
 {
     std::ostringstream err;
@@ -442,7 +444,7 @@ const std::string Exception::compose_error(const std::string &destination,
 }
 
 
-TargetPreset::TargetPreset(const std::string &object_path_,
+TargetPreset::TargetPreset(const Object::Path &object_path_,
                            const std::string &interface_)
     : object_path(object_path_), interface(interface_)
 {
@@ -462,7 +464,7 @@ const std::string &Client::GetDestination() const noexcept
 }
 
 
-GVariant *Client::Call(const std::string &object_path,
+GVariant *Client::Call(const Object::Path &object_path,
                        const std::string &interface,
                        const std::string &method,
                        GVariant *params,
@@ -515,7 +517,7 @@ GVariant *Client::SendFD(const TargetPreset::Ptr preset,
 }
 
 
-GVariant *Client::GetPropertyGVariant(const std::string &object_path,
+GVariant *Client::GetPropertyGVariant(const Object::Path &object_path,
                                       const std::string &interface,
                                       const std::string &property_name) const
 {
@@ -550,7 +552,7 @@ GVariant *Client::GetPropertyGVariant(const TargetPreset::Ptr preset,
 }
 
 
-void Client::SetPropertyGVariant(const std::string &object_path,
+void Client::SetPropertyGVariant(const Object::Path &object_path,
                                  const std::string &interface,
                                  const std::string &property_name,
                                  GVariant *value) const

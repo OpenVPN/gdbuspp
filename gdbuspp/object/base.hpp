@@ -28,6 +28,7 @@
 #include "../signals/group.hpp"
 #include "exceptions.hpp"
 #include "method.hpp"
+#include "path.hpp"
 #include "property.hpp"
 
 
@@ -64,7 +65,7 @@ class Base : public std::enable_shared_from_this<Base>
      *
      * @return const std::string&
      */
-    const std::string &GetPath() const noexcept;
+    const Object::Path &GetPath() const noexcept;
 
     /**
      * Get the D-Bus interface name used by this object
@@ -363,7 +364,7 @@ class Base : public std::enable_shared_from_this<Base>
      * @param path    std::string with the D-Bus path to this object
      * @param interf  std::string with the D-Bus interface used by this object
      */
-    Base(const std::string &path, const std::string &interf);
+    Base(const Object::Path &path, const std::string &interf);
 
     /**
      *  If the DBus::Service implementation has enabled the idle detection,
@@ -671,7 +672,7 @@ class Base : public std::enable_shared_from_this<Base>
     //
 
     /// D-Bus object path this object is accessible from
-    const std::string object_path;
+    const Object::Path object_path;
 
     /// D-Bus object interface scope of this C++ is responsible for
     const std::string interface;

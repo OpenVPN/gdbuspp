@@ -17,6 +17,7 @@
 #include "authz-request.hpp"
 #include "object/base.hpp"
 #include "object/operation.hpp"
+#include "object/path.hpp"
 
 
 namespace DBus {
@@ -87,7 +88,7 @@ static inline const std::string extract_authzreq_target(const Object::Operation 
 
 Authz::Request::Request(const std::string &caller_,
                         const Object::Operation operation_,
-                        const std::string &object_path_,
+                        const Object::Path &object_path_,
                         const std::string &interace_,
                         const std::string &target_)
     : caller(caller_), operation(operation_),

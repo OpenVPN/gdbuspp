@@ -22,6 +22,7 @@
 #include <string>
 #include <glib.h>
 
+#include "../object/path.hpp"
 
 namespace DBus {
 namespace Signals {
@@ -39,7 +40,7 @@ class Event
      *   Creates a new signal event object
      *
      * @param sender           std::string with the D-Bus signal sender unique bus ID
-     * @param object_path      std::string with the D-Bus object path the signal is related to
+     * @param object_path      DBus::Object::Path with the D-Bus object path the signal is related to
      * @param object_interface std::string with the object interface scope of the signal
      * @param signal_name      std::string with the signal name of this event
      * @param params           GVariant * to the object containing additional signal values
@@ -47,7 +48,7 @@ class Event
      * @return Event::Ptr
      */
     static Event::Ptr Create(const std::string &sender,
-                             const std::string &object_path,
+                             const Object::Path &object_path,
                              const std::string &object_interface,
                              const std::string &signal_name,
                              GVariant *params)
@@ -75,14 +76,14 @@ class Event
 
 
     const std::string sender;
-    const std::string object_path;
+    const Object::Path object_path;
     const std::string object_interface;
     const std::string signal_name;
     GVariant *params;
 
   private:
     Event(const std::string &sender_,
-          const std::string &object_path_,
+          const Object::Path &object_path_,
           const std::string &object_interface_,
           const std::string &signal_name_,
           GVariant *params_)

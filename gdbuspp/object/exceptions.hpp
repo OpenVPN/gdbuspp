@@ -28,11 +28,12 @@ namespace DBus {
 namespace Object {
 
 class Base;
+class Path;
 
 class Exception : public DBus::Exception
 {
   public:
-    Exception(const std::string &path,
+    Exception(const Object::Path &path,
               const std::string &interface,
               const std::string &errmsg,
               GError *gliberr = nullptr,

@@ -13,6 +13,7 @@
  */
 
 
+#include "../object/path.hpp"
 #include "utils.hpp"
 
 
@@ -40,7 +41,7 @@ const bool Query::Ping() const noexcept
 }
 
 
-const std::string Query::Introspect(const std::string &path) const
+const std::string Query::Introspect(const Object::Path &path) const
 {
     GVariant *res = proxy->Call(path,
                                 "org.freedesktop.DBus.Introspectable",
@@ -52,7 +53,7 @@ const std::string Query::Introspect(const std::string &path) const
 }
 
 
-const bool Query::CheckObjectExists(const std::string &path,
+const bool Query::CheckObjectExists(const Object::Path &path,
                                     const std::string interface) const noexcept
 {
     auto target = Proxy::TargetPreset::Create(path,
@@ -85,7 +86,7 @@ const bool Query::CheckObjectExists(const std::string &path,
 }
 
 
-const std::string Query::ServiceVersion(const std::string &path,
+const std::string Query::ServiceVersion(const Object::Path &path,
                                         const std::string interface) const
 {
     if (!Ping())

@@ -19,6 +19,7 @@
 #include <glib.h>
 
 #include "../connection.hpp"
+#include "../object/path.hpp"
 #include "exceptions.hpp"
 #include "target.hpp"
 
@@ -61,11 +62,13 @@ class Emit
      *  At least one target must be added.
      *
      * @param busname       std::string of the recipient of a signal
-     * @param object_path   std::string of the D-Bus object the signal references
-     * @param interface     std::string of the interface scope of the D-Bus object
+     * @param object_path   DBus::Object::Path of the D-Bus object the
+     *                      signal references
+     * @param interface     std::string of the interface scope of the
+     *                      D-Bus object
      */
     void AddTarget(const std::string &busname,
-                   const std::string &object_path,
+                   const Object::Path &object_path,
                    const std::string &interface);
 
     /**

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "../connection.hpp"
+#include "../object/path.hpp"
 #include "emit.hpp"
 
 
@@ -145,7 +146,7 @@ class Group
      *
      * @param new_path
      */
-    void ModifyPath(const std::string &new_path) noexcept;
+    void ModifyPath(const Object::Path &new_path) noexcept;
 
     /**
      *  Add a signal recipient target.  Empty string are allowed, which
@@ -240,11 +241,11 @@ class Group
      * Signals::Group contructor
      *
      * @param conn              DBus::Connection object where signals will be sent
-     * @param object_path       std::string of the D-Bus object the signal references
+     * @param object_path       Object::Path of the D-Bus object the signal references
      * @param object_interface  std::string of the interface scope of the D-Bus object
      */
     Group(DBus::Connection::Ptr conn,
-          const std::string &object_path,
+          const Object::Path &object_path,
           const std::string &object_interface);
 
   private:
@@ -266,7 +267,7 @@ class Group
     std::map<std::string, std::string> type_cache;
 
     /// D-Bus object path these signals are sent from from
-    std::string object_path;
+    Object::Path object_path;
 
     /// D-Bus object interface these signals belongs to
     const std::string object_interface;

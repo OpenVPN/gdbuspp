@@ -26,6 +26,7 @@
 #include "../async-process.hpp"
 #include "base.hpp"
 #include "manager.hpp"
+#include "path.hpp"
 
 
 namespace DBus {
@@ -48,7 +49,7 @@ class CallbackLink
         Exception(const std::string &errmsg);
 
         Exception(const std::string &sender,
-                  const std::string &path,
+                  const Object::Path &path,
                   const std::string &interf,
                   const std::string &errm);
 
@@ -86,7 +87,7 @@ class CallbackLink
      *
      * @param conn       GDBusConnection pointer where the request came from
      * @param sender     std::string containing the unique bus name of the sender
-     * @param obj_path   std::string with the D-Bus object path to operate on
+     * @param obj_path   DBus::Object::Path with the D-Bus object path to operate on
      * @param intf_name  std::String with the D-Bus interface to operate on
      *
      * @return AsyncProcess::Request::UPtr to the request object which is to be
@@ -97,7 +98,7 @@ class CallbackLink
      */
     AsyncProcess::Request::UPtr NewObjectOperation(GDBusConnection *conn,
                                                    const std::string &sender,
-                                                   const std::string &obj_path,
+                                                   const Object::Path &obj_path,
                                                    const std::string &intf_name);
 
 

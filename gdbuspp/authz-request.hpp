@@ -19,6 +19,8 @@
 #include "async-process.hpp"
 #include "exceptions.hpp"
 #include "object/operation.hpp"
+#include "object/path.hpp"
+
 
 namespace DBus {
 
@@ -46,7 +48,7 @@ class Request
 
     const std::string caller;          ///< D-Bus unique bus ID of the caller
     const Object::Operation operation; ///< Operation requested by caller
-    const std::string object_path;     ///< D-Bus object path caller wants to access
+    const Object::Path object_path;    ///< D-Bus object path caller wants to access
     const std::string interface;       ///< D-Bus interface of the object
     const std::string target;          ///< Method/Property caller wants to access
 
@@ -67,7 +69,7 @@ class Request
      */
     [[nodiscard]] static Request::Ptr Create(const std::string &caller,
                                              const Object::Operation operation,
-                                             const std::string &object_path,
+                                             const Object::Path &object_path,
                                              const std::string &interface,
                                              const std::string &target)
     {
@@ -122,7 +124,7 @@ class Request
      */
     Request(const std::string &caller_,
             const Object::Operation operation_,
-            const std::string &object_path_,
+            const Object::Path &object_path_,
             const std::string &interace_,
             const std::string &target_);
 
@@ -143,5 +145,5 @@ class Exception : public DBus::Exception
     const std::string compose_error(const Request::Ptr req);
 };
 
-}; // namespace Authz
+} // namespace Authz
 } // namespace DBus

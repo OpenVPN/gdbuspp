@@ -22,9 +22,10 @@
 
 #include "base.hpp"
 #include "exceptions.hpp"
+#include "path.hpp"
 
 namespace _private::exception {
-static const std::string comppse_object_descr(const std::string &path,
+static const std::string comppse_object_descr(const DBus::Object::Path &path,
                                               const std::string &interface,
                                               const std::string &info)
 {
@@ -42,7 +43,7 @@ static const std::string comppse_object_descr(const std::string &path,
 
 namespace DBus {
 
-Object::Exception::Exception(const std::string &path,
+Object::Exception::Exception(const Object::Path &path,
                              const std::string &interface,
                              const std::string &errmsg,
                              GError *gliberr,

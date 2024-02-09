@@ -18,7 +18,7 @@
 #include <sstream>
 
 #include "callbacklink.hpp"
-
+#include "path.hpp"
 
 namespace DBus {
 namespace Object {
@@ -42,7 +42,7 @@ CallbackLink::Exception::Exception(const std::string &errm)
 
 
 CallbackLink::Exception::Exception(const std::string &sender,
-                                   const std::string &path,
+                                   const Object::Path &path,
                                    const std::string &interf,
                                    const std::string &errm)
     : DBus::Exception("Object::CallbackLink(sender=" + sender
@@ -66,7 +66,7 @@ CallbackLink::Exception::Exception(AsyncProcess::Request::UPtr &req,
 
 AsyncProcess::Request::UPtr CallbackLink::NewObjectOperation(GDBusConnection *conn,
                                                              const std::string &sender,
-                                                             const std::string &obj_path,
+                                                             const Object::Path &obj_path,
                                                              const std::string &intf_name)
 {
     if (!request_pool)

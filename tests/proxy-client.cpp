@@ -83,7 +83,7 @@ class ProxyOpts : protected TestUtils::OptionParser
                 destination = std::string(optarg);
                 break;
             case 'p':
-                object_path = std::string(optarg);
+                object_path = DBus::Object::Path(optarg);
                 break;
             case 'i':
                 object_interface = std::string(optarg);
@@ -161,7 +161,7 @@ class ProxyOpts : protected TestUtils::OptionParser
     DBus::BusType bustype = DBus::BusType::SESSION;
     Proxy::TargetPreset::Ptr preset = nullptr;
     std::string destination{};
-    std::string object_path{};
+    DBus::Object::Path object_path;
     std::string object_interface{};
     std::string method{};
     std::string property{};

@@ -43,7 +43,7 @@ namespace DBus {
 //
 
 
-Object::Base::Base(const std::string &path, const std::string &interf)
+Object::Base::Base(const Object::Path &path, const std::string &interf)
     : object_path(path), interface(interf)
 {
     methods = Object::Method::Collection::Create();
@@ -51,7 +51,7 @@ Object::Base::Base(const std::string &path, const std::string &interf)
 }
 
 
-const std::string &Object::Base::GetPath() const noexcept
+const Object::Path &Object::Base::GetPath() const noexcept
 {
     return object_path;
 }

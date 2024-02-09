@@ -117,7 +117,7 @@ void Manager::IdleActivityUpdate() const noexcept
 }
 
 
-void Manager::RemoveObject(const std::string &path)
+void Manager::RemoveObject(const Object::Path &path)
 {
     try
     {
@@ -133,10 +133,10 @@ void Manager::RemoveObject(const std::string &path)
 }
 
 
-const std::map<std::string, Object::Base::Ptr> Manager::GetAllObjects() const
+const std::map<Object::Path, Object::Base::Ptr> Manager::GetAllObjects() const
 {
     // Loop through all object managed by this Object::Manager
-    std::map<std::string, Object::Base::Ptr> ret{};
+    std::map<Object::Path, Object::Base::Ptr> ret{};
     for (const auto &[obj_id, cbl] : object_map)
     {
         // Look up the D-Bus object path from the object path/object ID index
@@ -156,7 +156,7 @@ const std::map<std::string, Object::Base::Ptr> Manager::GetAllObjects() const
 }
 
 
-void Manager::_destructObjectCallback(const std::string &path)
+void Manager::_destructObjectCallback(const Object::Path &path)
 {
     const auto path_it = path_index.find(path);
     if (path_index.end() == path_it)
@@ -238,7 +238,7 @@ void Manager::register_object(const DBus::Object::Base::Ptr object)
 }
 
 
-Object::Base::Ptr Manager::get_object(const std::string &path) const
+Object::Base::Ptr Manager::get_object(const Object::Path &path) const
 {
     try
     {

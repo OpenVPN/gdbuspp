@@ -14,6 +14,7 @@
 
 #include <glib.h>
 
+#include "../object/path.hpp"
 #include "exceptions.hpp"
 #include "group.hpp"
 
@@ -64,7 +65,7 @@ const std::string Group::GenerateIntrospection()
 }
 
 
-void Group::ModifyPath(const std::string &new_path) noexcept
+void Group::ModifyPath(const Object::Path &new_path) noexcept
 {
     object_path = new_path;
 }
@@ -204,7 +205,7 @@ void Group::GroupSendGVariant(const std::string &groupname,
 
 
 Group::Group(DBus::Connection::Ptr conn,
-             const std::string &object_path_,
+             const Object::Path &object_path_,
              const std::string &object_interface_)
     : connection(conn),
       object_path(object_path_), object_interface(object_interface_)

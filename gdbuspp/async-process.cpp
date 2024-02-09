@@ -45,7 +45,7 @@ AsyncProcess::Exception::Exception(const std::string &err)
 AsyncProcess::Request::Request(GDBusConnection *gdbus_conn_,
                                std::shared_ptr<Object::Base> dbus_object_,
                                const std::string &sender_,
-                               const std::string &object_path,
+                               const DBus::Object::Path &object_path,
                                const std::string &interface)
     : dbusconn(gdbus_conn_),
       object(dbus_object_),

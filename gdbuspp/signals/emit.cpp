@@ -19,6 +19,7 @@
 
 #include "../features/debug-log.hpp"
 #include "../glib2/strings.hpp"
+#include "../object/path.hpp"
 #include "exceptions.hpp"
 #include "emit.hpp"
 
@@ -27,7 +28,7 @@ namespace DBus {
 namespace Signals {
 
 void Emit::AddTarget(const std::string &busname,
-                     const std::string &object_path,
+                     const Object::Path &object_path,
                      const std::string &interface)
 {
     targets.push_back(Target::Create(busname, object_path, interface));

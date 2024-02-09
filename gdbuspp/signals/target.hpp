@@ -21,6 +21,7 @@
 #include <vector>
 #include <glib.h>
 
+#include "../object/path.hpp"
 
 namespace DBus {
 namespace Signals {
@@ -46,20 +47,20 @@ class Target
      *
      * @param busname       std::string with the D-Bus bus name (unique or
      *                      well-known)
-     * @param object_path   std::string with the D-Bus object path
+     * @param object_path   DBus::Object::Path with the D-Bus object path
      * @param interface     std::string with the D-Bus object interface scope
      *
      * @return Target::Ptr
      */
     [[nodiscard]] static Target::Ptr Create(const std::string &busname,
-                                            const std::string &object_path,
+                                            const Object::Path &object_path,
                                             const std::string &interface)
     {
         return Target::Ptr(new Target(busname, object_path, interface));
     }
 
     const std::string busname;
-    const std::string object_path;
+    const Object::Path object_path;
     const std::string object_interface;
 
 
@@ -86,7 +87,7 @@ class Target
 
   private:
     Target(const std::string &busname_,
-           const std::string &object_path_,
+           const Object::Path &object_path_,
            const std::string &interface)
         : busname(busname_), object_path(object_path_),
           object_interface(interface)

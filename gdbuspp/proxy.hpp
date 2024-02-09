@@ -23,6 +23,7 @@
 #include "connection.hpp"
 #include "exceptions.hpp"
 #include "glib2/utils.hpp"
+#include "object/path.hpp"
 
 
 namespace DBus {
@@ -33,14 +34,14 @@ class Exception : public DBus::Exception
   public:
     Exception(const std::string &errm, GError *gliberr = nullptr);
     Exception(const std::string &destination,
-              const std::string &path,
+              const DBus::Object::Path &path,
               const std::string &interface,
               const std::string &errm,
               GError *gliberr = nullptr);
 
   private:
     const std::string compose_error(const std::string &destination,
-                                    const std::string &path,
+                                    const DBus::Object::Path &path,
                                     const std::string &interface) const;
 };
 
@@ -59,10 +60,10 @@ class TargetPreset
     /**
      *  Prepare a new Proxy target
 
-     * @param object_path_  std::string with the D-Bus object path of the target
+     * @param object_path_  DBus::Object::Path with the D-Bus object path to the target
      * @param interface_    std::string with the object interface in the target
      */
-    [[nodiscard]] static Ptr Create(const std::string &object_path_,
+    [[nodiscard]] static Ptr Create(const Object::Path &object_path_,
                                     const std::string &interface_)
     {
         return Ptr(new TargetPreset(object_path_, interface_));
@@ -70,7 +71,7 @@ class TargetPreset
 
     ~TargetPreset() = default;
 
-    const std::string object_path;
+    const Object::Path object_path;
     const std::string interface;
 
     friend std::ostream &operator<<(std::ostream &os, const TargetPreset *trgt)
@@ -80,7 +81,7 @@ class TargetPreset
     };
 
   private:
-    TargetPreset(const std::string &object_path_,
+    TargetPreset(const Object::Path &object_path_,
                  const std::string &interface_);
 };
 
@@ -126,7 +127,7 @@ class Client
      *  Call a D-Bus method in a D-Bus object on the D-Bus service this
      *  proxy is configured against
 
-     * @param object_path  std::string with the D-Bus object path
+     * @param object_path  DBus::Object::Path with the D-Bus object path
      * @param interface    std::string with the interface scope in the object
      * @param method       std::string with the D-Bus method to call
      * @param params       GVariant * with the arguments to used in the
@@ -140,7 +141,7 @@ class Client
      *                     D-Bus method.  Will be nullptr if no_response is
      *                     set to to true.
      */
-    GVariant *Call(const std::string &object_path,
+    GVariant *Call(const Object::Path &object_path,
                    const std::string &interface,
                    const std::string &method,
                    GVariant *params = nullptr,
@@ -215,14 +216,14 @@ class Client
      *  Retrieve the property value of a given property in an object in
      *  within an object interface scope
      *
-     * @param object_path    std::string with the D-Bus object path
+     * @param object_path    DBus::Object::Path with the D-Bus object path
      * @param interface      std::string with the interface scope in the
      *                       D-Bus object
      * @param property_name  std::string with the D-Bus object property name
      *
      * @return GVariant* object containing the D-Bus property value
      */
-    GVariant *GetPropertyGVariant(const std::string &object_path,
+    GVariant *GetPropertyGVariant(const Object::Path &object_path,
                                   const std::string &interface,
                                   const std::string &property_name) const;
 
@@ -252,7 +253,7 @@ class Client
      *        response.
      *
      * @tparam T             C++ data type to retrieve the data as
-     * @param object_path    std::string with the D-Bus object path
+     * @param object_path    DBus::Object::Path with the D-Bus object path
      * @param interface      std::string with the interface scope in the
      *                       D-Bus object
      * @param property_name  std::string with the D-Bus object property name
@@ -260,7 +261,7 @@ class Client
      * @return Returns the value as T
      */
     template <typename T>
-    T GetProperty(const std::string &object_path,
+    T GetProperty(const Object::Path &object_path,
                   const std::string &interface,
                   const std::string &property_name) const
     {
@@ -308,7 +309,7 @@ class Client
      *        response.
      *
      * @tparam T             C++ vector data type to retrieve the data as
-     * @param object_path    std::string with the D-Bus object path
+     * @param object_path    DBus::Object::Path with the D-Bus object path
      * @param interface      std::string with the interface scope in the
      *                       D-Bus object
      * @param property_name  std::string with the D-Bus object property name
@@ -316,7 +317,7 @@ class Client
      * @return Returns the value as std::vector<T>
      */
     template <typename T>
-    std::vector<T> GetPropertyArray(const std::string &object_path,
+    std::vector<T> GetPropertyArray(const Object::Path &object_path,
                                     const std::string &interface,
                                     const std::string &property_name) const
     {
@@ -353,7 +354,7 @@ class Client
     /**
      *  Assign a new value to a D-Bus object property
      *
-     * @param object_path    std::string with the D-Bus object path
+     * @param object_path    DBus::Object::Path with the D-Bus object path
      * @param interface      std::string with the interface scope in the
      *                       D-Bus object
      * @param property_name  std::string with the D-Bus object property name
@@ -363,7 +364,7 @@ class Client
      *                       match the data type of the D-bus property data
      *                       type.
      */
-    void SetPropertyGVariant(const std::string &object_path,
+    void SetPropertyGVariant(const Object::Path &object_path,
                              const std::string &interface,
                              const std::string &property_name,
                              GVariant *params) const;
@@ -395,7 +396,7 @@ class Client
      *        variable type to the D-Bus property type.
      *
      * @tparam T             C++ vector data type of the value variable
-     * @param object_path    std::string with the D-Bus object path
+     * @param object_path    DBus::Object::Path with the D-Bus object path
      * @param interface      std::string with the interface scope in the
      *                       D-Bus object
      * @param property_name  std::string with the D-Bus object property name
@@ -405,7 +406,7 @@ class Client
      *                       D-Bus data type of property value.
      */
     template <typename T>
-    void SetProperty(const std::string &object_path,
+    void SetProperty(const Object::Path &object_path,
                      const std::string &interface,
                      const std::string &property_name,
                      const T &value) const
