@@ -44,12 +44,12 @@ Path::Path()
 
 const std::string Path::process_str(const char *str) const
 {
-    if (!str || ::strlen(str) < 1)
+    if (!str)
     {
         throw Object::Exception("Invalid D-Bus path; cannot be empty");
     }
     std::string ret(str);
-    if (!g_variant_is_object_path(str))
+    if (!ret.empty() && !g_variant_is_object_path(str))
     {
         throw Object::Exception("Invalid D-Bus path: " + ret);
     }

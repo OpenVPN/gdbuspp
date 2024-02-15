@@ -318,25 +318,6 @@ int test_base_data_types()
                              bool res = false;
                              try
                              {
-                                 DBus::Object::Path wrong_path = "";
-                             }
-                             catch (const DBus::Object::Exception &excp)
-                             {
-                                 std::string err(excp.what());
-                                 if (err.find("Invalid D-Bus path") != std::string::npos)
-                                 {
-                                     res = true;
-                                 }
-                             }
-                             return TestResult("DBus::Object::Path [empty path]",
-                                               res);
-                         });
-
-    failures += run_test([]()
-                         {
-                             bool res = false;
-                             try
-                             {
                                  DBus::Object::Path wrong_path = "/path/invalid-chars";
                              }
                              catch (const DBus::Object::Exception &excp)
