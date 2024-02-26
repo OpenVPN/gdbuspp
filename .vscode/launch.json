@@ -31,6 +31,14 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "test :: idle-detect",
+            "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_idle-detect",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "test :: proxy client",
             "program": "${workspaceFolder}/${config:mesonbuild.buildFolder}/test_proxy",
             "args": [
