@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <mutex>
 #include <gio/gio.h>
 
 #include "../async-process.hpp"
@@ -27,6 +28,10 @@
 
 namespace DBus {
 namespace Object {
+
+namespace _private::Manager {
+std::mutex objectmgr_update_mtx;
+}
 
 Manager::Exception::Exception(const std::string &errmsg, GError *gliberr)
     : DBus::Exception("ObjectManager", errmsg, gliberr)
@@ -158,6 +163,8 @@ const std::map<Object::Path, Object::Base::Ptr> Manager::GetAllObjects() const
 
 void Manager::_destructObjectCallback(const Object::Path &path)
 {
+    std::lock_guard<std::mutex> lg(_private::Manager::objectmgr_update_mtx);
+
     const auto path_it = path_index.find(path);
     if (path_index.end() == path_it)
     {
@@ -201,6 +208,7 @@ void Manager::register_object(const DBus::Object::Base::Ptr object)
 
     // Prepare a CallbackLink which provides access to this new object,
     // this object manager and the AsyncProcess based request pool
+    std::lock_guard<std::mutex> lg(_private::Manager::objectmgr_update_mtx);
     CallbackLink::Ptr cblink = CallbackLink::Create(object, GetWPtr(), request_pool);
 
     // Register the new object, via the CallbackLink object, on the D-Bus.
