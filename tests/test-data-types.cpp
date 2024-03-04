@@ -551,15 +551,26 @@ int test_base_data_types()
 
 
 
-int main()
+int main(int argc, char **argv)
 {
-    auto conn = DBus::Connection::Create(DBus::BusType::SESSION);
-    auto prx = DBus::Proxy::Client::Create(conn,
-                                           Test::Constants::GenServiceName("simple"));
+    DBus::Proxy::Client::Ptr prx = nullptr;
+    if ((argc > 1 && (std::string(argv[1]) == "--service-simple")))
+    {
+        auto conn = DBus::Connection::Create(DBus::BusType::SESSION);
+        prx = DBus::Proxy::Client::Create(conn,
+                                          Test::Constants::GenServiceName("simple"));
+    }
 
     int failures = 0;
-    failures += test_base_data_types();
-    failures += static_cast<int>(test_dictionary(prx));
+    if (!prx)
+    {
+        failures += test_base_data_types();
+    }
+
+    if (prx)
+    {
+        failures += static_cast<int>(test_dictionary(prx));
+    }
 
     if (failures > 0)
     {
