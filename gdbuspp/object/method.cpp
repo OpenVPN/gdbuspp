@@ -16,6 +16,8 @@
  *         callback function being executed in the running D-Bus service.
  */
 
+#include <algorithm>
+
 #include "../features/debug-log.hpp"
 #include "../glib2/utils.hpp"
 #include "method.hpp"

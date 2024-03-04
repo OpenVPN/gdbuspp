@@ -14,6 +14,8 @@
  *         callback methods to be called when they occurs
  */
 
+#include <algorithm>
+
 #include "subscriptionmgr.hpp"
 #include "../glib2/callbacks.hpp"
 #include "../glib2/strings.hpp"
