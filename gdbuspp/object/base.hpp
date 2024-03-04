@@ -600,10 +600,10 @@ class Base : public std::enable_shared_from_this<Base>
          * @param vector_var      Reference to a std::vector<> container
          *                        variable holding the data.
          */
-        PropertyType<std::vector<T>>(const std::string &interface_arg,
-                                     const std::string &name_arg,
-                                     const bool readwrite,
-                                     std::vector<T> &vector_var)
+        PropertyType(const std::string &interface_arg,
+                     const std::string &name_arg,
+                     const bool readwrite,
+                     std::vector<T> &vector_var)
             : PropertyTypeBase<std::vector<T>>(interface_arg, name_arg, readwrite, vector_var),
               dbus_array_type("a" + std::string(glib2::DataType::DBus<T>()))
         {
