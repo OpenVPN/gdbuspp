@@ -411,6 +411,106 @@ int test_base_data_types()
 
     failures += run_test([]()
                          {
+                             DBus::Object::Path path = "/hello/world";
+                             return check_data_type_gvariant(
+                                 "glib2::Value::Create<DBus::Object::Path>(...)",
+                                 glib2::Value::Create(path),
+                                 "o");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<uint16_t> d = {1, 2, 3, 4, 5};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<uint16_t>>(...)   ",
+                                 glib2::Value::CreateVector(d),
+                                 "aq");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<int16_t> d = {-1, 2, -3, 4, -5, 0};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<int16_t>>(...)    ",
+                                 glib2::Value::CreateVector(d),
+                                 "an");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<uint32_t> d = {1, 2, 3, 4, 5};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<uint32_t>>(...)   ",
+                                 glib2::Value::CreateVector(d),
+                                 "au");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<int32_t> d = {-1, 2, -3, 4, -5, 0};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<int32_t>>(...)    ",
+                                 glib2::Value::CreateVector(d),
+                                 "ai");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<uint64_t> d = {1, 2, 3, 4, 5};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<uint64_t>>(...)   ",
+                                 glib2::Value::CreateVector(d),
+                                 "at");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<int64_t> d = {-1, 2, -3, 4, -5, 0};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<int64_t>>(...)    ",
+                                 glib2::Value::CreateVector(d),
+                                 "ax");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<double> d = {-1, 2, -3, 4, -5, 0};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<double>>(...)     ",
+                                 glib2::Value::CreateVector(d),
+                                 "ad");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<bool> d = {true, false, false, true};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<bool>>(...)       ",
+                                 glib2::Value::CreateVector(d),
+                                 "ab");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<std::string> d = {"line 1", "line 2", "line 3"};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<std::string>>(...)",
+                                 glib2::Value::CreateVector(d),
+                                 "as");
+                         });
+
+    failures += run_test([]()
+                         {
+                             std::vector<DBus::Object::Path> d = {
+                                 "/path_1", "/path_2", "/path/3"};
+                             return check_data_type_gvariant(
+                                 "glib2::Value::CreateVector<std::vector<DBus::Object::Path>>(...)",
+                                 glib2::Value::CreateVector(d),
+                                 "ao");
+                         });
+
+    failures += run_test([]()
+                         {
                              return check_data_type_gvariant(
                                  "g_variant_new(\"(iuqntxdbs)\", ...) ",
                                  g_variant_new("(iuqntxdbs)",
@@ -441,15 +541,6 @@ int test_base_data_types()
                                  "glib2::Builder::Create(\"(soibnut)\")",
                                  glib2::Builder::Finish(b),
                                  "(soibnut)");
-                         });
-
-    failures += run_test([]()
-                         {
-                             DBus::Object::Path path = "/hello/world";
-                             return check_data_type_gvariant(
-                                 "glib2::Value::Create<DBus::Object::Path>(...)",
-                                 glib2::Value::Create(path),
-                                 "o");
                          });
 
     std::cout << ":: Base data type test failures: " << failures
