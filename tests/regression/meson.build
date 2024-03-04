@@ -23,5 +23,6 @@ test('regression-glib2-utils',
     regr_glib2_utils,
     priority: 100,
     timeout: 5,
-    is_parallel: false
+    is_parallel: true,
+    suite: 'standalone'
 )

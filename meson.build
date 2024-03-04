@@ -404,30 +404,22 @@ test_idle_detect = executable(
 #
 
 
-# This is a simple wrapper script, which kicks off the test_simple-server
-# service in the background before running the real test script
-#
-add_test_setup(
-        'simple_service',
-        env: {'BUILD_DIR': meson.current_build_dir()},
-        exe_wrapper: find_program('tests/scripts/run-simple-server-test'),
-        is_default: true
-)
-
 #  Tests all the functionality exposed by the test_simple-service
 test('service-tests',
-        find_program('tests/scripts/test-simple-service-1'),
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [find_program('tests/scripts/test-simple-service-1').full_path()],
         depends: [
                 simple_service,
         ],
-        priority: 100,
+        priority: 98,
 )
 
 #  Tests the D-Bus proxy client aspect of GDBus++, by accessing
 #  the test_simple-service service.  Not as comprehensive service testing
 #  as 'service-tests', but the goal here is to test the client side proxy API.
 test('proxy-tests',
-        find_program('tests/scripts/test-proxy'),
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [find_program('tests/scripts/test-proxy').full_path()],
         depends: [
                 simple_service,
                 test_proxy
@@ -437,7 +429,8 @@ test('proxy-tests',
 )
 
 test('proxy-utils',
-        test_proxy_utils,
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [test_proxy_utils.full_path()],
         depends: [
                 simple_service,
                 test_proxy_utils
@@ -447,7 +440,8 @@ test('proxy-utils',
 )
 
 test('credentials',
-        find_program('tests/scripts/test-credentials'),
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [find_program('tests/scripts/test-credentials').full_path()],
         depends: [
                 simple_service,
                 test_credentials
@@ -460,7 +454,8 @@ test('credentials',
 #  test_simple-service service and write the content of that to a new
 #  file.  Check that the file content is identical.
 test('pass-fd-receive',
-        find_program('tests/scripts/test-fd-receive'),
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [find_program('tests/scripts/test-fd-receive').full_path()],
         depends: [
                 simple_service,
                 test_fd_recv
@@ -474,7 +469,8 @@ test('pass-fd-receive',
 #  should return the UID, GID and file size back to the caller.  This
 #  is verified against a local run of 'stat'
 test('pass-fd-send',
-        find_program('tests/scripts/test-fd-send'),
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [find_program('tests/scripts/test-fd-send').full_path()],
         depends: [
                 simple_service,
                 test_fd_send
@@ -485,30 +481,41 @@ test('pass-fd-send',
 
 #  Tests D-Bus signals, both subscribing to them and emitting them
 test('signals',
-        find_program('tests/scripts/test-signals'),
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [find_program('tests/scripts/test-signals').full_path()],
         depends: [
                 signal_emit,
                 signal_group,
                 signal_subscribe
         ],
-        priority: 100,
+        priority: 90,
         timeout: 60,
         is_parallel: false
 )
 
-test('test-data-types',
+test('test-data-types-plain',
         test_data_types,
+        priority: 100,
+        timeout: 10,
+        is_parallel: true,
+        suite: 'standalone',
+)
+
+test('test-data-types-dbus',
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [test_data_types.full_path(), '--simple-service'],
         depends: [
                 simple_service,
         ],
-        priority: 50,
+        priority: 99,
         timeout: 10,
         is_parallel: false,
 )
 
 if (get_option('long_tests'))
     test('idle-detect',
-         test_idle_detect,
+        find_program('tests/scripts/run-simple-server-test'),
+        args: [test_idle_detect.full_path()],
          priority: 50,
          timeout: 60,
          is_parallel: true
