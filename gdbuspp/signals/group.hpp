@@ -137,7 +137,8 @@ class Group
      * @param signal_type SignalArgList containing all the arguments this signal
      *                    will contain
      */
-    void RegisterSignal(const std::string &signal_name, const SignalArgList signal_type);
+    void RegisterSignal(const std::string &signal_name, const SignalArgList &signal_type);
+
 
 
     /**

@@ -35,7 +35,7 @@ const std::string SignalArgSignature(const SignalArgList &list)
 }
 
 
-void Group::RegisterSignal(const std::string &signal_name, const SignalArgList signal_type)
+void Group::RegisterSignal(const std::string &signal_name, const SignalArgList &signal_type)
 {
     try
     {
