@@ -23,6 +23,7 @@
 #include "../gdbuspp/glib2/utils.hpp"
 #include "../gdbuspp/proxy.hpp"
 #include "../gdbuspp/signals/group.hpp"
+#include "../gdbuspp/signals/signal.hpp"
 #include "../gdbuspp/signals/target.hpp"
 #include "test-utils.hpp"
 #include "test-constants.hpp"
@@ -109,6 +110,44 @@ class Options : public TestUtils::OptionParser
 };
 
 
+class DebugSignal : public Signals::Signal
+{
+  public:
+    /**
+     *  Constructing an object to be used to send the "Debug" signal.
+     *  This class does not define a D-Bus path or interface with the origin
+     *  of this signal; that is handled via the Signal::Group object
+     *
+     * @param emitter   Signals::Emit::Ptr, provided automatically by
+     *                  Signals::Group::CreateSignal<>()
+     * @param prgnam    std::string with some debug details for the signal
+     */
+    DebugSignal(Signals::Emit::Ptr emitter, const std::string &prgnam)
+        : Signals::Signal(emitter, "Debug"), program_name(prgnam)
+    {
+        SetArguments({
+            {"code", glib2::DataType::DBus<uint64_t>()},
+            {"message", glib2::DataType::DBus<std::string>()},
+            {"details", glib2::DataType::DBus<std::string>()},
+            {"program", glib2::DataType::DBus<std::string>()},
+        });
+    }
+
+    void Send(const unsigned int code,
+              const std::string &msg,
+              const std::string &details)
+    {
+        Signal::EmitSignal(g_variant_new("(tsss)",
+                                         code,
+                                         msg.c_str(),
+                                         details.c_str(),
+                                         program_name.c_str()));
+    }
+
+  private:
+    const std::string program_name;
+};
+
 
 class LogExample : public Signals::Group
 {
@@ -121,16 +160,13 @@ class LogExample : public Signals::Group
           program_name(progname)
     {
         RegisterSignal("Info",
-                       {{"id", "i"},
-                        {"message", "s"}});
+                       {
+                           {"id", "i"},
+                           {"message", "s"},
+                       });
         RegisterSignal("Error",
                        {{"code", "u"},
                         {"message", "s"},
-                        {"object_name", "s"}});
-        RegisterSignal("Debug",
-                       {{"code", "t"},
-                        {"message", "s"},
-                        {"details", "s"},
                         {"object_name", "s"}});
     }
 
@@ -144,14 +180,6 @@ class LogExample : public Signals::Group
     {
         GVariant *p = g_variant_new("(uss)", code, msg.c_str(), program_name.c_str());
         SendGVariant("Error", p);
-    }
-
-    void Debug(const unsigned int code,
-               const std::string &msg,
-               const std::string &details)
-    {
-        GVariant *p = g_variant_new("(tsss)", code, msg.c_str(), details.c_str(), program_name.c_str());
-        SendGVariant("Debug", p);
     }
 
     void Invalid()
@@ -187,6 +215,7 @@ int main(int argc, char **argv)
                                                       opts.object_path,
                                                       opts.object_interface,
                                                       "signal-group");
+        auto debug = log->CreateSignal<DebugSignal>("signal-group");
 
         if (opts.show_introspection)
         {
@@ -211,7 +240,7 @@ int main(int argc, char **argv)
             }
             else if ("debug" == log_type)
             {
-                log->Debug(3, "A debug message", "With details here");
+                debug->Send(3, "A debug message", "With details here");
             }
             else if ("invalid" == log_type)
             {

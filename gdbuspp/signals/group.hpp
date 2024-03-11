@@ -140,6 +140,32 @@ class Group
     void RegisterSignal(const std::string &signal_name, const SignalArgList &signal_type);
 
 
+    /**
+     *  Create a new Signals::Signal object and tie it to default signal target
+     *  list
+     *
+     *  Note: The Signals::Signal constructor expects a Signal::Emit::Ptr
+     *        as the first argument.  This argument is handled automatically by
+     *        this method.  Because of this, the Signals::Signal implementation
+     *        must implement the Signal::Emit::Ptr as the first argument in its
+     *        implementation
+     *
+     * @tparam C         Signal::Signal implementation class
+     * @tparam T         Argument forward type
+     * @param args       Arguments to the Signals::Signal implementation's
+     *                   constructor, without the Signal::Emit::Ptr argument
+     *
+     * @return std::shared_ptr<C> to the created  Signals::Signal object
+     *         implementation
+     */
+    template <typename C, typename... T>
+    std::shared_ptr<C> CreateSignal(T &&...args)
+    {
+        auto sig = std::shared_ptr<C>(new C(signal_groups.at("__default__"),
+                                            std::forward<T>(args)...));
+        RegisterSignal(sig->GetName(), sig->GetArguments());
+        return sig;
+    }
 
     /**
      *  Generates the D-Bus introspection data for all the registered
@@ -231,6 +257,36 @@ class Group
      * @param groupname
      */
     void GroupClearTargets(const std::string &groupname);
+
+
+    /**
+     *  Create a new Signals::Signal object and tie it to the Signal::Emit
+     *  target group used when sending the signal from this object.
+     *
+     *  Note: The Signals::Signal constructor expects a Signal::Emit::Ptr
+     *        as the first argument.  This argument is handled automatically by
+     *        this method.  Because of this, the Signals::Signal implementation
+     *        must implement the Signal::Emit::Ptr as the first argument in its
+     *        implementation
+     *
+     * @tparam C         Signal::Signal implementation class
+     * @tparam T         Argument forward type
+     * @param groupname  std::string with the group name to tie this signal
+     *                   object to
+     * @param args       Arguments to the Signals::Signal implementation's
+     *                   constructor, without the Signal::Emit::Ptr argument
+     *
+     * @return std::shared_ptr<C> to the created  Signals::Signal object
+     *         implementation
+     */
+    template <typename C, typename... T>
+    std::shared_ptr<C> GroupCreateSignal(const std::string &groupname, T &&...args)
+    {
+        auto sig = std::shared_ptr<C>(new C(get_group_emitter(groupname),
+                                            std::forward<T>(args)...));
+        RegisterSignal(sig->GetName(), sig->GetArguments());
+        return sig;
+    }
 
 
     /**
