@@ -124,18 +124,7 @@ void Group::GroupRemove(const std::string &groupname)
 void Group::GroupAddTarget(const std::string &groupname,
                            const std::string &busname)
 {
-    if ("__default__" == groupname)
-    {
-        throw Signals::Exception("Cannot use reserved group name (__default__)");
-    }
-    try
-    {
-        signal_groups.at(groupname)->AddTarget(busname, object_path, object_interface);
-    }
-    catch (const std::out_of_range &)
-    {
-        throw Signals::Exception("Group name '" + groupname + "' is not created");
-    }
+    get_group_emitter(groupname)->AddTarget(busname, object_path, object_interface);
 }
 
 
@@ -151,15 +140,7 @@ void Group::GroupAddTargetList(const std::string &groupname,
 
 void Group::GroupClearTargets(const std::string &groupname)
 {
-    try
-    {
-        Signals::Emit::Ptr emitter = signal_groups[groupname];
-        emitter->ClearTargets();
-    }
-    catch (const std::out_of_range &)
-    {
-        throw Signals::Exception("Group name '" + groupname + "' is not created");
-    }
+    get_group_emitter(groupname)->ClearTargets();
 }
 
 
@@ -192,16 +173,6 @@ void Group::GroupSendGVariant(const std::string &groupname,
         throw Signals::Exception("Not a registered signal: " + signal_name);
     }
 
-    Signals::Emit::Ptr emitter{nullptr};
-    try
-    {
-        emitter = signal_groups[groupname];
-    }
-    catch (const std::out_of_range &)
-    {
-        throw Signals::Exception("Group name '" + groupname + "' is not created");
-    }
-
     // ... and validate it with what we have recevied
     std::string param_type(g_variant_get_type_string(param));
     if (exp_type != param_type)
@@ -212,6 +183,8 @@ void Group::GroupSendGVariant(const std::string &groupname,
             << "but received '" << param_type << "'";
         throw Signals::Exception(err.str());
     }
+
+    auto emitter = get_group_emitter(groupname, true);
     emitter->SendGVariant(signal_name, param);
     g_variant_unref(param);
 }
@@ -226,6 +199,27 @@ Group::Group(DBus::Connection::Ptr conn,
     // Create a default target group
     signal_groups["__default__"] = Signals::Emit::Create(connection);
 }
+
+
+
+Signals::Emit::Ptr Group::get_group_emitter(const std::string &groupname,
+                                            const bool internal) const
+{
+    if (!internal && ("__default__" == groupname))
+    {
+        throw Signals::Exception("Cannot use reserved group name (__default__)");
+    }
+    try
+    {
+        return signal_groups.at(groupname);
+    }
+    catch (const std::out_of_range &)
+    {
+        throw Signals::Exception("Group name '" + groupname + "' is not created");
+    }
+}
+
+
 
 } // namespace Signals
 } // namespace DBus

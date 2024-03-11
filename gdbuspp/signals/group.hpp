@@ -290,6 +290,21 @@ class Group
      *  any of the Group methods.
      */
     std::map<std::string, Signals::Emit::Ptr> signal_groups{};
+
+
+    /**
+     *  Private: Retrieve the Signals::Emit object for a specific signal
+     *  target group
+     *
+     * @param groupname   std::string with the groupname to lookup
+     * @param internal    bool flag, the caller is an internal object caller,
+     *                    which may have access to the __default__ group.
+     *
+     * @return Signals::Emit::Ptr Pointer to the Emit object for this signal
+     *         target group
+     */
+    Signals::Emit::Ptr get_group_emitter(const std::string &groupname,
+                                         const bool internal = false) const;
 };
 
 } // namespace Signals
