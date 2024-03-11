@@ -47,6 +47,15 @@ struct SignalArgument
  */
 using SignalArgList = std::vector<struct SignalArgument>;
 
+/**
+ *  Generate the D-Bus signal signature (composed data type) of a
+ *  SignalArgList
+ *
+ * @param list  SignalArgList to compose a data type signature for
+ * @return const std::string
+ */
+const std::string SignalArgSignature(const SignalArgList &list);
+
 
 /**
  *  The Signals::Group class is a helper class to easily create

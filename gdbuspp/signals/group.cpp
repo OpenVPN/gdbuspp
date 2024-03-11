@@ -12,6 +12,7 @@
  * @brief  Implementation of the DBus::Signals::Group
  */
 
+#include <string>
 #include <glib.h>
 
 #include "../object/path.hpp"
@@ -21,6 +22,18 @@
 
 namespace DBus {
 namespace Signals {
+
+const std::string SignalArgSignature(const SignalArgList &list)
+{
+    std::string typestr = "(";
+    for (const auto &e : list)
+    {
+        typestr += e.type;
+    }
+    typestr += ")";
+    return typestr;
+}
+
 
 void Group::RegisterSignal(const std::string &signal_name, const SignalArgList signal_type)
 {
