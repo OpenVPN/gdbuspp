@@ -81,6 +81,7 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/signals/emit.cpp',
                 'gdbuspp/signals/exceptions.cpp',
                 'gdbuspp/signals/group.cpp',
+                'gdbuspp/signals/signal.cpp',
                 'gdbuspp/signals/single-subscription.cpp',
                 'gdbuspp/signals/subscriptionmgr.cpp'
         ],
@@ -130,6 +131,7 @@ install_headers(
         'gdbuspp/signals/event.hpp',
         'gdbuspp/signals/exceptions.hpp',
         'gdbuspp/signals/group.hpp',
+        'gdbuspp/signals/signal.hpp',
         'gdbuspp/signals/single-subscription.hpp',
         'gdbuspp/signals/subscriptionmgr.hpp',
         'gdbuspp/signals/target.hpp',
@@ -319,6 +321,23 @@ signal_group = executable(
         'test_signal-group',
         [
                 'tests/signal-group.cpp',
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+                tests_lib,
+        ],
+        dependencies: [
+                glib2_deps,
+        ],
+        install: get_option('install_testprogs'),
+        install_dir: get_option('libexecdir') + '/gdbuspp/tests'
+)
+
+#  Tests the DBus::Signals::Signal API
+signal_signal = executable(
+        'test_signal-signal',
+        [
+                'tests/signal-signal.cpp',
         ],
         link_with: [
                 gdbuspp_lib.get_static_lib(),

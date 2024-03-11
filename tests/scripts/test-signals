@@ -88,6 +88,25 @@ def run_signal_emit(args, expect_fail, timeout=None):
     return True
 
 
+def run_signal_signal(args, expect_fail, timeout=None):
+    build_dir = os.getenv('BUILD_DIR')
+    if build_dir is None:
+        build_dir='.'
+
+    all_args = [prog('test_signal-signal')] + args
+    print('signal emit: {}'.format(' '.join(all_args)))
+    p = subprocess.run(all_args + ['-q'], stdout=subprocess.PIPE, timeout=timeout)
+    if (expect_fail == False and p.returncode > 0) \
+        or (expect_fail == True and p.returncode == 0):
+        print('~'*40)
+        print('FAILED: {}'.format(" ".join(all_args)))
+        print('        >> Expected {}, exit code: {}'.format(expect_fail and "failure" or "success", p.returncode))
+        print(p.stdout.decode('utf-8'))
+        print('~'*40)
+        return False
+    return True
+
+
 def run_signal_group(args, expect_fail, timeout=None):
     build_dir = os.getenv('BUILD_DIR')
     if build_dir is None:
@@ -127,6 +146,13 @@ s = run_signal_subscribe(['-X','sub','-x','Structured data test','-x','314159265
 err = run_signal_emit(['-t','sub','-v','Structured data test','-v','3141592653','-v','1','-s','StructSignal','-r','7000'], False)
 err2 = run_signal_emit(['-t','sub','-v','Structured data test','-v','3141592653','-v','1','-s','StructSignal','-r','3000'], False)
 if not (parse_result(s, False) or err or err2):
+    errors = errors + 1
+
+
+# Test the Signals::Signal API
+s = run_signal_subscribe(['-X', 'sbu', '-x' , 'Test Signal 1', '-x', 'false', '-x', '101', '-C', '1'])
+err = run_signal_signal([], False)
+if (not (parse_result(s, True) or err)):
     errors = errors + 1
 
 #
