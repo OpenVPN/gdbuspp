@@ -164,7 +164,7 @@ class Interface
      *
      * @return GVariant* object containing the property value.
      */
-    virtual GVariant *GetValue() const noexcept = 0;
+    virtual GVariant *GetValue() const = 0;
 
     /**
      *  Changes the property value.  This is normally called by the
@@ -284,7 +284,7 @@ class BySpec : public Interface
      * @return GVariant*  object containing the prepared value of this
      *         property
      */
-    GVariant *GetValue() const noexcept override;
+    GVariant *GetValue() const override;
 
     /**
      *  Assign a new value from an incoming D-Bus request.  This
@@ -390,7 +390,7 @@ class Collection
      * @return GVariant*  Returns a pointer to a populated GVariant object
      *         containing the value of the property
      */
-    GVariant *GetValue(const std::string &property_name) const noexcept;
+    GVariant *GetValue(const std::string &property_name) const;
 
     /**
      *  Extracts a new value from a GVariant object for a named property

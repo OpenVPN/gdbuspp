@@ -546,7 +546,7 @@ class Base : public std::enable_shared_from_this<Base>
          *                    the property value retrieved from assigned
          *                    the C++ variable.
          */
-        GVariant *GetValue() const noexcept override
+        GVariant *GetValue() const override
         {
             return glib2::Value::CreateType(GetDBusType(), PropertyTypeBase<T>::variable_ref);
         }
@@ -628,7 +628,7 @@ class Base : public std::enable_shared_from_this<Base>
          *
          * @return GVariant object populated with this objects vector contents
          */
-        GVariant *GetValue() const noexcept override
+        GVariant *GetValue() const override
         {
             return glib2::Value::CreateVector(this->variable_ref);
         }

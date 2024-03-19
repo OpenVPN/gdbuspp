@@ -118,7 +118,7 @@ const char *Object::Property::BySpec::GetDBusType() const noexcept
 }
 
 
-GVariant *Object::Property::BySpec::GetValue() const noexcept
+GVariant *Object::Property::BySpec::GetValue() const
 {
     return get_callback(*this);
 }
@@ -179,7 +179,7 @@ const std::string Object::Property::Collection::GenerateIntrospection() const no
 }
 
 
-GVariant *Object::Property::Collection::GetValue(const std::string &property_name) const noexcept
+GVariant *Object::Property::Collection::GetValue(const std::string &property_name) const
 {
     auto prop = properties.find(property_name);
     if (prop == properties.end())
