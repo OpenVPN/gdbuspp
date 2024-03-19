@@ -40,7 +40,7 @@ void Group::RegisterSignal(const std::string &signal_name, const SignalArgList &
     try
     {
         (void)registered_signals.at(signal_name);
-        throw Signals::Exception("Signal data type enforcement cannot be redefined");
+        throw Signals::Exception("Signal '" + signal_name + "' is already registered");
     }
     catch (const std::out_of_range &)
     {
