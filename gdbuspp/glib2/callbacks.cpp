@@ -267,7 +267,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         excp.SetDBusErrorProperty(error);
         return nullptr;
     }
-    catch (DBus::Exception &excp)
+    catch (const DBus::Exception &excp)
     {
         GDBUSPP_LOG("Get Property Callback FAIL (DBus::Exception):"
                     << " -- Property:" << property_name
@@ -370,7 +370,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
                                           property_name,
                                           "Failed signaling new property value");
     }
-    catch (Object::Exception &err)
+    catch (const Object::Exception &err)
     {
         GDBUSPP_LOG("Set Property Callback FAIL:"
                     << " -- Property:" << property_name
@@ -378,7 +378,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         err.SetDBusError(error, G_IO_ERROR, G_IO_ERROR_FAILED);
         return false;
     }
-    catch (DBus::Exception &err)
+    catch (const DBus::Exception &err)
     {
         GDBUSPP_LOG("Set Property Callback FAIL (DBus::Exception):"
                     << " -- Property:" << property_name
