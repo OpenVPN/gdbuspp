@@ -43,10 +43,13 @@ int main(int argc, char **argv)
                                                         "net.example.myinterface");
 
         // Doing a method call; prepare the argument values required for the
-        // 'MethodWithArgs'  D-Bus method, which takes two strings
-        GVariant *arguments = g_variant_new("(ss)",
-                                            "My first string",
-                                            "My Second String");
+        // 'MethodWithArgs'  D-Bus method, which takes two strings.  We use
+        // the glib2::Builder APIs for creating the complete "argument package"
+        // for the method call
+        GVariantBuilder *args_builder = glib2::Builder::Create("(ss)");
+        glib2::Builder::Add(args_builder, std::string("My first string"));
+        glib2::Builder::Add(args_builder, std::string("My Second String"));
+        GVariant *arguments = glib2::Builder::Finish(args_builder);
 
         // Perform the D-Bus method call
         GVariant *response = proxy->Call(preset, "MethodWithArgs", arguments);
@@ -58,7 +61,7 @@ int main(int argc, char **argv)
         std::cout << "Method call result: " << result << std::endl;
 
         // Retrieve the content of the D-Bus object property, which is a string
-        std::string my_property = proxy->GetProperty<std::string>(preset, "my_property");
+        auto my_property = proxy->GetProperty<std::string>(preset, "my_property");
         std::cout << "my_property: " << my_property << std::endl;
 
         // Change this property to a new string

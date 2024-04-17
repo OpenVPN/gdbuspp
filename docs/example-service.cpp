@@ -35,16 +35,15 @@ class MySignalGroup : public DBus::Signals::Group
                                "/example/myobject",
                                "net.example.myinterface")
     {
-        RegisterSignal("MySignal", {{"message", "s"}});
+        RegisterSignal("MySignal",
+                       {{"message", glib2::DataType::DBus<std::string>()}});
     }
 
 
     void MySignal(const std::string &message_content)
     {
-        // NOTE: D-Bus signals can be a bit picky on the data.  If
-        // more values are sent in a signal, you can use the g_variant_new()
-        // function.  But if it is a single value (like here), it needs to be
-        // formatted as a string inside a tuple container.
+        // NOTE: D-Bus signals are picky on the data type.  Signals
+        // must always be sent as a tuple, even if it's just a single value
         GVariant *message = glib2::Value::CreateTupleWrapped(message_content);
         SendGVariant("MySignal", message);
     }
@@ -81,12 +80,12 @@ class MyObject : public DBus::Object::Base
 
                                   // Prepare the response to the caller
                                   std::string result = string1 + " <=> " + string2;
-                                  GVariant *ret = g_variant_new("(s)", result.c_str());
+                                  GVariant *ret = glib2::Value::CreateTupleWrapped(result);
                                   args->SetMethodReturn(ret);
                               });
-        args->AddInput("string_1", "s");
-        args->AddInput("string_2", "s");
-        args->AddOutput("result", "s");
+        args->AddInput("string_1", glib2::DataType::DBus<std::string>());
+        args->AddInput("string_2", glib2::DataType::DBus<std::string>());
+        args->AddOutput("result", glib2::DataType::DBus<std::string>());
 
         // Declaring a D-Bus property
         bool readwrite = true;

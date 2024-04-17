@@ -104,6 +104,15 @@ The `Base` class in the `DBus::Object` namespace provides the needed
 glue to bind your own C++ object into a D-Bus object.  Inheritance is
 used here as well.
 
+In relation to `DBus::Object`, there is also `DBus::Object::Path`
+implementation available.  This behaves just like `std::string`, but
+does have some additional checks to ensure it's a valud D-Bus object path.
+It is recommended to use this as container for object paths, since the
+GDBus++ APIs will also treat this as an object path instead of a string
+data type when passing the data over the D-Bus.  Using `std::string` will
+in these cases require overriding the data type if the D-Bus interface
+expects an object path.
+
 ```C++
 class MyObject : public DBus::Object::Base
 {
@@ -164,9 +173,9 @@ To add arguments to a D-bus method, you use the `AddInput()` and
                           // Code performed on access
                         }
       );
-  args->AddInput("string_1", "s");
-  args->AddInput("string_2", "s");
-  args->AddOutput("result", "s");
+  args->AddInput("string_1", glib2::DataType::DBus<std::string>());
+  args->AddInput("string_2", glib2::DataType::DBus<std::string>());
+  args->AddOutput("result", glib2::DataType::DBus<std::string>());
 ```
 
 With these two methods declared, the D-Bus object introspection will look
@@ -179,8 +188,8 @@ node /example/myobject {
     methods:
       MyMethod();
       MethodWithArgs(in  s string_1,
-                      in  s string_2,
-                      out s result);
+                     in  s string_2,
+                     out s result);
   // ...
   };
 };
@@ -240,9 +249,12 @@ class MySignalGroup : public DBus::Signals::Group
     using Ptr = std::shared_ptr<MySignalGroup>;
 
     MySignalGroup(DBus::Connection::Ptr connection)
-        : DBus::Signals::Group(connection)
+        : DBus::Signals::Group(connection,
+                               "/example/myobject",
+                               "net.example.myinterface")
     {
-        RegisterSignal("MySignal", {{"message", "s"}});
+        RegisterSignal("MySignal",
+                       {{"message", glib2::DataType::DBus<std::string>()}});
     }
 
     void MySignal(const std::string &message_content)
@@ -264,7 +276,7 @@ constructor:
   {
     // ...
     my_signals = DBus::Signals::Group::Create<MySignalGroup>(connection);
-    my_signals->AddTarget("", GetPath(), GetInterface());
+    my_signals->AddTarget("")
     RegisterSignals(my_signals);
   }
 
@@ -321,7 +333,7 @@ To return a value back to the caller:
 {
   // ....
   std::string result = string1 + " <=> " + string2;
-  GVariant *ret = g_variant_new("(s)", result.c_str());
+  GVariant *ret = glib2::Value::CreateTupleWrapped(result);
   args->SetMethodReturn(ret);
 }
 ```
@@ -346,7 +358,7 @@ will remove the object from the service.
 
 ```C++
   auto my_new_object = object_manager->CreateObject<MY_CLASS>(MY_CLASS_CONSTRUCTOR_ARGUMENTS)
-  object_manager->RemoveObject(std::string &object_path)
+  object_manager->RemoveObject(DBus::Object::Path &object_path)
 ```
 
 The D-Bus path this new object will use comes from the
@@ -390,9 +402,12 @@ auto proxy = Proxy::Client::Create(connection, "net.example.myservice");
 
 auto preset = Proxy::TargetPreset::Create("/example/myobject",
                                           "net.example.myinterface");
-GVariant *arguments = g_variant_new("(ss)",
-            "My first string",
-            "My Second String");
+
+GVariantBuilder *args_builder = glib2::Builder::Create("(ss)");
+glib2::Builder::Add(args_builder, std::string("My first string"));
+glib2::Builder::Add(args_builder, std::string("My Second String"));
+GVariant *arguments = glib2::Builder::Finish(args_builder);
+
 GVariant *response = proxy->Call(preset, "MethodWithArgs", arguments);
 auto result = glib2::Value::Extract<std::string>(response, 0);
 g_variant_unref(response);
