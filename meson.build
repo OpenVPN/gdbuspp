@@ -153,7 +153,8 @@ install_data(
         sources: [
                 'docs/dbus-primer.md',
                 'docs/example-service.cpp',
-                'docs/example-proxy.cpp'
+                'docs/example-proxy.cpp',
+                'docs/example-proxy2.cpp'
         ]
 )
 
@@ -193,6 +194,19 @@ executable(
         'example-proxy',
         [
                 'docs/example-proxy.cpp'
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+        ],
+        dependencies: [
+                glib2_deps,
+        ]
+)
+
+executable(
+        'example-proxy2',
+        [
+                'docs/example-proxy2.cpp'
         ],
         link_with: [
                 gdbuspp_lib.get_static_lib(),

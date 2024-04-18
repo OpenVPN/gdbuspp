@@ -106,7 +106,7 @@ used here as well.
 
 In relation to `DBus::Object`, there is also `DBus::Object::Path`
 implementation available.  This behaves just like `std::string`, but
-does have some additional checks to ensure it's a valud D-Bus object path.
+does have some additional checks to ensure it's a valid D-Bus object path.
 It is recommended to use this as container for object paths, since the
 GDBus++ APIs will also treat this as an object path instead of a string
 data type when passing the data over the D-Bus.  Using `std::string` will
@@ -392,8 +392,8 @@ thorough implementation how to use this functionality.
 
 #### `DBus::Proxy::Client`
 This is the main class used to connect to a D-Bus service.  This can
-be used both as a stand-alone class or being inherited to create your
-own, more direct, C++ API to a D-Bus service.
+be used both as a stand-alone class or being implemented into your
+own class providing a more direct C++ API to a D-Bus service.
 
 To call a D-Bus method:
 ```C++
@@ -425,6 +425,10 @@ To modify a D-Bus object property:
 std::string new_property_value = "A changed property";
 proxy->SetProperty(preset, "my_property", new_property_value);
 ```
+
+See the [example-proxy.cpp](docs/example-proxy.cpp) and
+[example-proxy2.cpp](docs/example-proxy2.cpp) for the a full example of
+the code snippets above.
 
 #### `DBus::MainLoop`
 This class contains the glib2 main loop logic.  Unless there is a need
@@ -500,6 +504,12 @@ project.  All the test programs are indirectly used when running
   A very simple D-Bus client proxy, accessing a D-Bus object provided
   by [example-service.cpp](docs/example-service.cpp).  All the client proxy
   examples comes in this README from this example code.
+
+* [example-proxy2.cpp](docs/example-proxy2.cpp)
+  An alternative `example-proxy.cpp` implementation, implementing the proxy
+  as an object which is used directly from the `main()` function.  This also
+  uses the service implemented in
+  [example-service.cpp](docs/example-service.cpp).
 
 * [simple-service.cpp](tests/simple-service.cpp)
   This implements a simple D-Bus test service using the Session Bus
