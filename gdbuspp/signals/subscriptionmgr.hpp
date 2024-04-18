@@ -44,6 +44,9 @@ class SubscriptionManager
         return SubscriptionManager::Ptr(new SubscriptionManager(conn));
     }
 
+    ~SubscriptionManager() noexcept;
+
+
     /**
      *  Add a subscription for a specific D-Bus signal name, with a
      *  match based on the description in the Signals::Target object

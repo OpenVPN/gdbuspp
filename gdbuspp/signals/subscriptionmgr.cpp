@@ -65,6 +65,7 @@ void SubscriptionManager::Unsubscribe(Signals::Target::Ptr target, const std::st
     }
     g_dbus_connection_signal_unsubscribe(connection->ConnPtr(),
                                          it->get()->GetSignalID());
+    subscription_list.erase(it);
 }
 
 
@@ -72,6 +73,21 @@ void SubscriptionManager::Unsubscribe(Signals::Target::Ptr target, const std::st
 SubscriptionManager::SubscriptionManager(DBus::Connection::Ptr conn)
     : connection(conn)
 {
+}
+
+
+SubscriptionManager::~SubscriptionManager() noexcept
+{
+    // All subscribed signals need to be unsubscribed when this subscription
+    // manager is deleted, otherwise the D-Bus service will continue to
+    // trigger the callback method for these signals - and the callbacks
+    // defined via this subscription manager will be deleted.
+    for (const auto &sub : subscription_list)
+    {
+        g_dbus_connection_signal_unsubscribe(connection->ConnPtr(),
+                                             sub->GetSignalID());
+    }
+    subscription_list.clear();
 }
 
 } // namespace Signals
