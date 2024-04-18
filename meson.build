@@ -417,10 +417,10 @@ test_idle_detect = executable(
 #
 #
 
-
 #  Tests all the functionality exposed by the test_simple-service
+server_runner = find_program('tests/scripts/run-simple-server-test')
 test('service-tests',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [find_program('tests/scripts/test-simple-service-1').full_path()],
         depends: [
                 simple_service,
@@ -432,7 +432,7 @@ test('service-tests',
 #  the test_simple-service service.  Not as comprehensive service testing
 #  as 'service-tests', but the goal here is to test the client side proxy API.
 test('proxy-tests',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [find_program('tests/scripts/test-proxy').full_path()],
         depends: [
                 simple_service,
@@ -443,7 +443,7 @@ test('proxy-tests',
 )
 
 test('proxy-utils',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [test_proxy_utils.full_path()],
         depends: [
                 simple_service,
@@ -454,7 +454,7 @@ test('proxy-utils',
 )
 
 test('credentials',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [find_program('tests/scripts/test-credentials').full_path()],
         depends: [
                 simple_service,
@@ -468,7 +468,7 @@ test('credentials',
 #  test_simple-service service and write the content of that to a new
 #  file.  Check that the file content is identical.
 test('pass-fd-receive',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [find_program('tests/scripts/test-fd-receive').full_path()],
         depends: [
                 simple_service,
@@ -483,7 +483,7 @@ test('pass-fd-receive',
 #  should return the UID, GID and file size back to the caller.  This
 #  is verified against a local run of 'stat'
 test('pass-fd-send',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [find_program('tests/scripts/test-fd-send').full_path()],
         depends: [
                 simple_service,
@@ -495,7 +495,7 @@ test('pass-fd-send',
 
 #  Tests D-Bus signals, both subscribing to them and emitting them
 test('signals',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [find_program('tests/scripts/test-signals').full_path()],
         depends: [
                 signal_emit,
@@ -516,7 +516,7 @@ test('test-data-types-plain',
 )
 
 test('test-data-types-dbus',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [test_data_types.full_path(), '--simple-service'],
         depends: [
                 simple_service,
@@ -528,7 +528,7 @@ test('test-data-types-dbus',
 
 if (get_option('long_tests'))
     test('idle-detect',
-        find_program('tests/scripts/run-simple-server-test'),
+        server_runner,
         args: [test_idle_detect.full_path()],
          priority: 50,
          timeout: 60,
