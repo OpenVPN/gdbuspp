@@ -98,6 +98,16 @@ const std::string Connection::GetUniqueBusName() const
 }
 
 
+const DBus::BusType Connection::GetBusType() const noexcept
+{
+    if (!G_IS_DBUS_CONNECTION(dbuscon))
+    {
+        return DBus::BusType::UNKNOWN;
+    }
+    return type;
+}
+
+
 const bool Connection::Check() const
 {
     return dbuscon

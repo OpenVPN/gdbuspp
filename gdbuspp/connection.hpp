@@ -99,6 +99,16 @@ class Connection
      */
     const std::string GetUniqueBusName() const;
 
+
+    /**
+     *  Retrieve the bus type this connection is connected to
+     *
+     * @return const DBus::BusType  Returns the bustype of this connection.
+     *         Will return DBus::BusType::UNKNOWN if no valid connection or
+     *         the connection object has been setup via a GDBusConnection ptr
+     */
+    const DBus::BusType GetBusType() const noexcept;
+
     /**
      *  Check if the D-Bus connection is still valid
      *
