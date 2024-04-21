@@ -140,6 +140,7 @@ class Client
      * @return GVariant*   GVariant object with the results provided by the
      *                     D-Bus method.  Will be nullptr if no_response is
      *                     set to to true.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     GVariant *Call(const Object::Path &object_path,
                    const std::string &interface,
@@ -165,6 +166,7 @@ class Client
      * @return GVariant*   GVariant object with the results provided by the
      *                     D-Bus method.  Will be nullptr if no_response is
      *                     set to to true.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     GVariant *Call(const TargetPreset::Ptr preset,
                    const std::string &method,
@@ -175,7 +177,7 @@ class Client
      *  Do a D-Bus call and attach a file descriptor to be sent together
      *  with the call.  The D-Bus service will then get access to whatever
      *  this file descriptor accesses.
-
+     *
      * @param preset       TargetPreset::Ptr containing the object path
      *                     and interface to perform the method call against
      * @param method       std::string with the D-Bus method to call
@@ -185,6 +187,7 @@ class Client
      *
      * @return GVariant*   GVariant object with the results provided by the
      *                     D-Bus method.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     GVariant *SendFD(const TargetPreset::Ptr preset,
                      const std::string &method,
@@ -206,6 +209,7 @@ class Client
      * @return GVariant*   GVariant object with the results provided by the
      *                     D-Bus method.  The file descriptor is available
      *                     via this GVariant object.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     GVariant *GetFD(int &fd,
                     const TargetPreset::Ptr preset,
@@ -222,6 +226,7 @@ class Client
      * @param property_name  std::string with the D-Bus object property name
      *
      * @return GVariant* object containing the D-Bus property value
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     GVariant *GetPropertyGVariant(const Object::Path &object_path,
                                   const std::string &interface,
@@ -237,6 +242,7 @@ class Client
      * @param property_name  std::string with the D-Bus object property name
      *
      * @return GVariant* object containing the D-Bus property value
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     GVariant *GetPropertyGVariant(const TargetPreset::Ptr preset,
                                   const std::string &property_name) const;
@@ -259,6 +265,7 @@ class Client
      * @param property_name  std::string with the D-Bus object property name
      *
      * @return Returns the value as T
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>
     T GetProperty(const Object::Path &object_path,
@@ -287,6 +294,7 @@ class Client
      * @param property_name  std::string with the D-Bus object property name
      *
      * @return Returns the value as T
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>
     T GetProperty(const TargetPreset::Ptr preset,
@@ -315,6 +323,7 @@ class Client
      * @param property_name  std::string with the D-Bus object property name
      *
      * @return Returns the value as std::vector<T>
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>
     std::vector<T> GetPropertyArray(const Object::Path &object_path,
@@ -342,6 +351,7 @@ class Client
      * @param property_name  std::string with the D-Bus object property name
      *
      * @return Returns the value as std::vector<T>
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>
     std::vector<T> GetPropertyArray(const TargetPreset::Ptr preset,
@@ -363,6 +373,7 @@ class Client
      *                       property.  The data type in this container MUST
      *                       match the data type of the D-bus property data
      *                       type.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     void SetPropertyGVariant(const Object::Path &object_path,
                              const std::string &interface,
@@ -381,6 +392,7 @@ class Client
      *                       property.  The data type in this container MUST
      *                       match the data type of the D-bus property data
      *                       type.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     void SetPropertyGVariant(const TargetPreset::Ptr preset,
                              const std::string &property_name,
@@ -404,6 +416,7 @@ class Client
      * @param params         GVariant object containing the new value of the
      *                       property.  The data type of T must match the
      *                       D-Bus data type of property value.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>
     void SetProperty(const Object::Path &object_path,
@@ -434,6 +447,7 @@ class Client
      * @param params         GVariant object containing the new value of the
      *                       property.  The data type of T must match the
      *                       D-Bus data type of property value.
+     * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>
     void SetProperty(const TargetPreset::Ptr preset,
