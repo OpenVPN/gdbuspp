@@ -198,14 +198,35 @@ int main(int argc, char **argv)
         std::string interface = options.object_interface;
 
         // Bad proxy setup
-        auto bad_proxy = DBus::Proxy::Client::Create(conn, "non.existing.service");
-        auto bad_query = DBus::Proxy::Utils::Query::Create(bad_proxy);
+        DBus::Proxy::Client::Ptr bad_proxy = nullptr;
+        DBus::Proxy::Utils::Query::Ptr bad_query = nullptr;
+
+        test_exception(log,
+                       "bad proxy: non.existing.service",
+                       bad_proxy,
+                       [&]()
+                       {
+                           bad_proxy = DBus::Proxy::Client::Create(conn, "non.existing.service");
+                       },
+                       {// dbus-daemon error string
+                        "Failed querying service 'non.existing.service': "
+                        "Could not get owner of name 'non.existing.service': no such name",
+
+                        // dbus-broker error string
+                        "Failed querying service 'non.existing.service': "
+                        "The name does not have an owner"});
+
+        test_exception(log,
+                       "bad query: non.existing.service",
+                       bad_proxy,
+                       [&]()
+                       {
+                           bad_query = DBus::Proxy::Utils::Query::Create(bad_proxy);
+                       },
+                       {"Invalid DBus::Proxy::Client object"});
+
         std::string incorrect_path = "/nonexisting/path";
         std::string incorrect_interface = "no.such.interface";
-
-        // Run Utils::Query::Ping() tests
-        test_log(log, "query->Ping()", proxy, query->Ping(), true);
-        test_log(log, "!bad_query->Ping()", bad_proxy, !bad_query->Ping(), false);
 
         // Run Utils::Query::CheckObjectExists() tests
         test_log(log,
@@ -266,22 +287,6 @@ int main(int argc, char **argv)
                      proxy,
                      query->Introspect(incorrect_path) == chk_value,
                      false);
-
-            test_exception(
-                log,
-                "bad_query->Introspect('" + incorrect_path + "')",
-                bad_proxy,
-                [bad_query, incorrect_path]()
-                {
-                    (void)bad_query->Introspect(incorrect_path);
-                },
-                {// dbus-daemon error string
-                 "Failed calling D-Bus method 'Introspect': "
-                 "GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: "
-                 "The name non.existing.service was not provided by any .service files",
-
-                 // dbus-broker error string
-                 "The name is not activatable"});
         }
 
 

@@ -25,6 +25,7 @@
 #include "features/debug-log.hpp"
 #include "glib2/utils.hpp"
 #include "object/path.hpp"
+#include "proxy/utils.hpp"
 
 #define DBUS_PROXY_CALL_TIMEOUT 5000
 
@@ -457,6 +458,19 @@ TargetPreset::TargetPreset(const Object::Path &object_path_,
 Client::Client(Connection::Ptr conn, const std::string &dest)
     : connection(conn), destination(dest)
 {
+    if ("org.freedesktop.DBus" != dest)
+    {
+        // Don't do this if querying org.freedesktop.DBus.
+        // First, this need to be running anyhow - and it would
+        // result in a recursion, since DBusServiceQuery uses this Client
+        // implementation
+        auto srvqry = Proxy::Utils::DBusServiceQuery::Create(connection);
+        std::string busid = srvqry->GetNameOwner(destination);
+        if (busid.empty() && connection->GetBusType() == BusType::SYSTEM)
+        {
+            (void)srvqry->StartServiceByName(destination);
+        }
+    }
 }
 
 
