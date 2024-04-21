@@ -62,7 +62,7 @@ class Proxy
           const std::string &interface_)
         : destination(destination_), object_path(path_), interface(interface_)
     {
-        if (!connection->Check())
+        if (!connection || !connection->Check())
         {
             throw DBus::Proxy::Exception(destination,
                                          object_path,

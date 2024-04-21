@@ -49,10 +49,7 @@ class Query
      *                       be directed
      * @return Query::Ptr
      */
-    [[nodiscard]] static Query::Ptr Create(Proxy::Client::Ptr proxy)
-    {
-        return Query::Ptr(new Query(proxy));
-    }
+    [[nodiscard]] static Query::Ptr Create(Proxy::Client::Ptr proxy);
 
     /**
      *  Calls the org.freedesktop.DBus.Peer.Ping method, to check if the
@@ -129,10 +126,7 @@ class DBusServiceQuery
      *
      * @return DBusServiceQuery::Ptr
      */
-    [[nodiscard]] static DBusServiceQuery::Ptr Create(DBus::Connection::Ptr connection)
-    {
-        return DBusServiceQuery::Ptr(new DBusServiceQuery(connection));
-    }
+    [[nodiscard]] static DBusServiceQuery::Ptr Create(DBus::Connection::Ptr connection);
 
 
     /**

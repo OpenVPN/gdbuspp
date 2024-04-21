@@ -22,6 +22,16 @@ namespace Proxy {
 namespace Utils {
 
 
+Query::Ptr Query::Create(Proxy::Client::Ptr proxy)
+{
+    if (!proxy)
+    {
+        throw DBus::Proxy::Exception("Invalid DBus::Proxy::Client object");
+    }
+
+    return Query::Ptr(new Query(proxy));
+}
+
 const bool Query::Ping() const noexcept
 {
     auto target = Proxy::TargetPreset::Create("/", "org.freedesktop.DBus.Peer");
@@ -127,6 +137,15 @@ DBusServiceQuery::Exception::Exception(const std::string &service, const std::st
 {
 }
 
+
+DBusServiceQuery::Ptr DBusServiceQuery::Create(DBus::Connection::Ptr connection)
+{
+    if (!connection || !connection->Check())
+    {
+        throw DBus::Proxy::Exception("Invalid DBus::Connection object");
+    }
+    return DBusServiceQuery::Ptr(new DBusServiceQuery(connection));
+}
 
 
 const uint32_t DBusServiceQuery::StartServiceByName(const std::string &service) const
