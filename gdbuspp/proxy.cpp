@@ -391,10 +391,12 @@ class Proxy
             {
                 g_variant_unref(res);
             }
+            std::string err;
+            err = (!error ? "Failed calling D-Bus method '" + method + "'" : "");
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
-                                         "Failed calling D-Bus method '" + method + "'",
+                                         err,
                                          error);
         }
         GDBUSPP_LOG("Proxy::Client call result ("

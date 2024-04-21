@@ -30,7 +30,8 @@ Exception::Exception(const std::string &classn,
     errbuf << err;
     if (gliberr)
     {
-        errbuf << ": " << std::string(gliberr->message);
+        g_dbus_error_strip_remote_error(gliberr);
+        errbuf << (err.empty() ? "" : " ") << std::string(gliberr->message);
         g_error_free(gliberr);
     }
     error = errbuf.str();

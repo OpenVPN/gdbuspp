@@ -133,7 +133,7 @@ Query::Query(Proxy::Client::Ptr proxy_)
 
 DBusServiceQuery::Exception::Exception(const std::string &service, const std::string &msg)
     : DBus::Exception("Proxy::Utils::DBusQuery",
-                      "Failed querying service '" + service + "':" + msg)
+                      "Failed querying service '" + service + "': " + msg)
 {
 }
 
