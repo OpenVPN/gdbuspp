@@ -83,7 +83,8 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/signals/group.cpp',
                 'gdbuspp/signals/signal.cpp',
                 'gdbuspp/signals/single-subscription.cpp',
-                'gdbuspp/signals/subscriptionmgr.cpp'
+                'gdbuspp/signals/subscriptionmgr.cpp',
+                'gdbuspp/signals/target.cpp'
         ],
         dependencies: [
                 glib2_deps

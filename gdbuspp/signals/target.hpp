@@ -2,8 +2,8 @@
 //
 //  SPDX-License-Identifier: AGPL-3.0-only
 //
-//  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
-//  Copyright (C)  David Sommerseth <davids@openvpn.net>
+//  Copyright (C) 2023 -  OpenVPN Inc <sales@openvpn.net>
+//  Copyright (C) 2023 -  David Sommerseth <davids@openvpn.net>
 //
 
 /**
@@ -26,7 +26,6 @@
 namespace DBus {
 namespace Signals {
 
-
 /**
  *  Defines a target "address" for sending or receiving a D-Bus signal.
  */
@@ -42,6 +41,10 @@ class Target
      */
     using Collection = std::vector<Target::Ptr>;
 
+    const std::string busname;
+    const Object::Path object_path;
+    const std::string object_interface;
+
     /**
      *  Create a new target object
      *
@@ -54,27 +57,11 @@ class Target
      */
     [[nodiscard]] static Target::Ptr Create(const std::string &busname,
                                             const Object::Path &object_path,
-                                            const std::string &interface)
-    {
-        return Target::Ptr(new Target(busname, object_path, interface));
-    }
-
-    const std::string busname;
-    const Object::Path object_path;
-    const std::string object_interface;
+                                            const std::string &interface);
 
 
-    bool operator==(const Target::Ptr cmp)
-    {
-        return ((busname == cmp->busname)
-                && (object_path == cmp->object_path)
-                && (object_interface == cmp->object_interface));
-    }
-
-    bool operator!=(const Target::Ptr &cmp)
-    {
-        return !(this->operator==(cmp));
-    }
+    bool operator==(const Target::Ptr cmp);
+    bool operator!=(const Target::Ptr &cmp);
 
     friend std::ostream &operator<<(std::ostream &os, const Target::Ptr &tgt)
     {
@@ -88,11 +75,7 @@ class Target
   private:
     Target(const std::string &busname_,
            const Object::Path &object_path_,
-           const std::string &interface)
-        : busname(busname_), object_path(object_path_),
-          object_interface(interface)
-    {
-    }
+           const std::string &interface);
 };
 
 } // namespace Signals
