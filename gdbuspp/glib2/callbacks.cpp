@@ -441,6 +441,17 @@ void _int_dbus_connection_signal_handler(GDBusConnection *conn,
     //        come via "this_ptr".  And it is probably more suitable for
     //        DBus::Signals::Group based signal handling
 
+    // If the subscription is from a specific target, double check the
+    // sender of the signal
+    const char *busname = sigsub->target->GetBusName();
+    if (busname && strcmp(sender, busname) != 0)
+    {
+        GDBUSPP_LOG("SIGNAL MISMATCH:" << sigsub->target << std::endl
+                                       << ", sender=" << sender);
+        // This subscription does not expect this sender
+        return;
+    }
+
     auto event = Signals::Event::Create(sender, obj_path, intf_name, sign_name, params);
     GDBUSPP_LOG("Signal Callback:" << event);
     sigsub->callback(event);

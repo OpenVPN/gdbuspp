@@ -31,7 +31,7 @@ void SubscriptionManager::Subscribe(Signals::Target::Ptr target,
     SingleSubscription::Ptr sub = SingleSubscription::Create(target, signal_name, callback);
 
     guint sigid = g_dbus_connection_signal_subscribe(connection->ConnPtr(),
-                                                     str2gchar(target->busname),
+                                                     target->GetBusName(srvqry),
                                                      str2gchar(target->object_interface),
                                                      str2gchar(signal_name),
                                                      str2gchar(target->object_path),
@@ -73,6 +73,7 @@ void SubscriptionManager::Unsubscribe(Signals::Target::Ptr target, const std::st
 SubscriptionManager::SubscriptionManager(DBus::Connection::Ptr conn)
     : connection(conn)
 {
+    srvqry = DBus::Proxy::Utils::DBusServiceQuery::Create(conn);
 }
 
 

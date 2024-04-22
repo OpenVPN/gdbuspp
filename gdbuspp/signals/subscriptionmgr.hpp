@@ -20,6 +20,7 @@
 #include <glib.h>
 
 #include "../connection.hpp"
+#include "../proxy/utils.hpp"
 #include "single-subscription.hpp"
 #include "target.hpp"
 
@@ -70,6 +71,7 @@ class SubscriptionManager
 
   private:
     DBus::Connection::Ptr connection;
+    DBus::Proxy::Utils::DBusServiceQuery::Ptr srvqry = nullptr;
     std::vector<SingleSubscription::Ptr> subscription_list;
 
     SubscriptionManager(DBus::Connection::Ptr conn);
