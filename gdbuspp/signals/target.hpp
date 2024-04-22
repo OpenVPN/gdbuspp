@@ -24,6 +24,11 @@
 #include "../object/path.hpp"
 
 namespace DBus {
+
+namespace Proxy::Utils {
+class DBusServiceQuery; // forward declaration to avoid #include proxy/utils.hpp
+}
+
 namespace Signals {
 
 /**
@@ -59,6 +64,23 @@ class Target
                                             const Object::Path &object_path,
                                             const std::string &interface);
 
+    /**
+     *  Retrieve the bus name of the target.
+     *
+     *  If this method is given a DBus::Proxy::Utils::DBusServiceQuery
+     *  object, it will attempt to lookup and cache the unique busname if
+     *  the busname is a a well-known bus name (not starting with ':1.').
+     *
+     *  If the lookup has been successful, it will return the unique bus
+     *  name of the target bus name.  Otherwise it will return the
+     *  well-known bus name instead
+     *
+     *  This is aimed to be used directly by glib2 signal functions, so if
+     *  both unique and well-known bus names are empty, it will return nullptr
+     *
+     * @return const char*
+     */
+    const char *GetBusName(std::shared_ptr<Proxy::Utils::DBusServiceQuery> = nullptr);
 
     bool operator==(const Target::Ptr cmp);
     bool operator!=(const Target::Ptr &cmp);
@@ -73,6 +95,8 @@ class Target
 
 
   private:
+    std::string unique_busname{};
+
     Target(const std::string &busname_,
            const Object::Path &object_path_,
            const std::string &interface);

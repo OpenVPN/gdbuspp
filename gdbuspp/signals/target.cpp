@@ -16,6 +16,7 @@
 #include <string>
 
 #include "../object/path.hpp"
+#include "../proxy/utils.hpp"
 #include "target.hpp"
 
 
@@ -35,6 +36,29 @@ Target::Target(const std::string &busname_,
     : busname(busname_), object_path(object_path_),
       object_interface(interface)
 {
+}
+
+
+const char *Target::GetBusName(std::shared_ptr<Proxy::Utils::DBusServiceQuery> service_qry)
+{
+    // Only do a unique busname lookup if:
+    //  the busname does not contain a unique bus name (starts with ':1.')
+    //  && a service_qry object is available
+    //  && the well-known busname is not empty (expect matching on a bus name)
+    //  && it has not already looked it up (unique_busname is not empty)
+    if (busname.find(":1.") == std::string::npos
+        && service_qry
+        && !busname.empty()
+        && unique_busname.empty())
+    {
+        unique_busname = service_qry->GetNameOwner(busname);
+    }
+
+    // Only return the unique busname if we have it.  Otherwise use the
+    // well-known busname if set.  If both are unset, nullptr is returned
+    // as that is accepted by the glib2 APIs to not match on bus names
+    return (!unique_busname.empty() ? unique_busname.c_str()
+                                    : (!busname.empty() ? busname.c_str() : nullptr));
 }
 
 
