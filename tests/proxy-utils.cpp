@@ -215,13 +215,7 @@ int main(int argc, char **argv)
                        {
                            bad_proxy = DBus::Proxy::Client::Create(conn, "non.existing.service");
                        },
-                       {// dbus-daemon error string
-                        "Failed querying service 'non.existing.service': "
-                        "Could not get owner of name 'non.existing.service': no such name",
-
-                        // dbus-broker error string
-                        "Failed querying service 'non.existing.service': "
-                        "The name does not have an owner"});
+                       {"Service 'non.existing.service' cannot be reached"});
 
         test_exception(log,
                        "bad query: non.existing.service",
