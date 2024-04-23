@@ -162,6 +162,12 @@ const std::string Object::Base::GenerateIntrospection() const
 }
 
 
+void Object::Base::AuthorizationRejected(const Authz::Request::Ptr request) const noexcept
+{
+    // This is intended to be empty; this method is optional
+}
+
+
 const bool Object::Base::MethodExists(const std::string &meth_name) const
 {
     return methods->Exists(meth_name);

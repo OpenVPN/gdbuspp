@@ -282,13 +282,26 @@ class Base : public std::enable_shared_from_this<Base>
      *  If the implementation does not require any type of access control,
      *  this method can return true.
      *
-     * @param AuthReq::Ptr  The Authz request object with information
-     *                      about caller and object target
+     * @param request AuthReq::Ptr  The Authz request object with information
+     *                              about caller and object target
      *
      * @returns If the callback returns true, the requested operation is
      *          allowed, otherwise the operation will be rejected.
      */
     virtual const bool Authorize(const Authz::Request::Ptr request) = 0;
+
+
+    /**
+     *  Optional callback function when an authorization was rejected.
+     *  This can be used to trigger specific actions outside of the
+     *  Authorize() method.
+     *
+     *  This method MUST NOT throw any exceptions
+     *
+     * @param request AuthReq::Ptr  The Authz request object with information
+     *                              about caller and object target
+     */
+    virtual void AuthorizationRejected(const Authz::Request::Ptr request) const noexcept;
 
 
     /**

@@ -87,6 +87,7 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
             if (!authzres)
             {
                 // Authz failed; stop the request and return an error
+                req->object->AuthorizationRejected(azreq);
                 throw Authz::Exception(azreq);
             }
 
@@ -105,6 +106,14 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
             // If a method callback throws Method::Exception, it's an error
             // to be returned to the caller - not an error in the application
             // itself - so don't trigger additional error logging.
+            GError *dbuserr = g_dbus_error_new_for_dbus_error(excp.DBusErrorDomain(),
+                                                              excp.GetRawError());
+            dbuserr->domain = g_quark_from_string(excp.DBusErrorDomain());
+            g_dbus_method_invocation_return_gerror(req->invocation, dbuserr);
+            g_error_free(dbuserr);
+        }
+        catch (const Authz::Exception &excp)
+        {
             GError *dbuserr = g_dbus_error_new_for_dbus_error(excp.DBusErrorDomain(),
                                                               excp.GetRawError());
             dbuserr->domain = g_quark_from_string(excp.DBusErrorDomain());
@@ -232,6 +241,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
+            cbl->object->AuthorizationRejected(azreq);
             throw Authz::Exception(azreq);
         }
 
@@ -265,6 +275,14 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
                     << " -- Property:" << property_name
                     << " -- ERROR: " << excp.what());
         excp.SetDBusErrorProperty(error);
+        return nullptr;
+    }
+    catch (const Authz::Exception &err)
+    {
+        GDBUSPP_LOG("Get Property Authorization FAIL:"
+                    << " -- Property:" << property_name
+                    << " -- ERROR: " << err.what());
+        err.SetDBusError(error, G_IO_ERROR_FAILED, G_IO_ERROR_PERMISSION_DENIED);
         return nullptr;
     }
     catch (const DBus::Exception &excp)
@@ -319,6 +337,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
+            cbl->object->AuthorizationRejected(azreq);
             throw Authz::Exception(azreq);
         }
 
@@ -376,6 +395,14 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
                     << " -- Property:" << property_name
                     << " -- ERROR: " << err.what());
         err.SetDBusError(error, G_IO_ERROR, G_IO_ERROR_FAILED);
+        return false;
+    }
+    catch (const Authz::Exception &err)
+    {
+        GDBUSPP_LOG("Set Property Authorization FAIL:"
+                    << " -- Property:" << property_name
+                    << " -- ERROR: " << err.what());
+        err.SetDBusError(error, G_IO_ERROR_FAILED, G_IO_ERROR_PERMISSION_DENIED);
         return false;
     }
     catch (const DBus::Exception &err)
