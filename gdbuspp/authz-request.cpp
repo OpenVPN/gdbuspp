@@ -23,14 +23,20 @@
 namespace DBus {
 namespace Authz {
 
-Exception::Exception(const Request::Ptr req)
-    : DBus::Exception("AuthzReq", compose_error(req))
+Exception::Exception(const Request::Ptr req, const std::string &errmsg)
+    : DBus::Exception("AuthzReq", compose_error(req, errmsg))
 {
 }
 
 
-const std::string Exception::compose_error(const Request::Ptr req)
+const std::string Exception::compose_error(const Request::Ptr req,
+                                           const std::string &errmsg)
 {
+    if (!errmsg.empty())
+    {
+        return errmsg;
+    }
+
     std::ostringstream r;
     r << "Autorization failed for " << req->caller;
     switch (req->operation)

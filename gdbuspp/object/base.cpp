@@ -162,9 +162,12 @@ const std::string Object::Base::GenerateIntrospection() const
 }
 
 
-void Object::Base::AuthorizationRejected(const Authz::Request::Ptr request) const noexcept
+const std::string Object::Base::AuthorizationRejected(const Authz::Request::Ptr request) const noexcept
 {
     // This is intended to be empty; this method is optional
+    // The empty string message triggers Authz::Exception to generate the
+    // error message
+    return "";
 }
 
 

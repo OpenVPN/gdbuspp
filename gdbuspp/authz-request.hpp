@@ -139,10 +139,11 @@ class Request
 class Exception : public DBus::Exception
 {
   public:
-    Exception(const Authz::Request::Ptr req);
+    Exception(const Authz::Request::Ptr req, const std::string &errmsg);
 
   private:
-    const std::string compose_error(const Request::Ptr req);
+    const std::string compose_error(const Request::Ptr req,
+                                    const std::string &errmsg);
 };
 
 } // namespace Authz

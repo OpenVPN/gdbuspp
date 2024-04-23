@@ -87,8 +87,8 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
             if (!authzres)
             {
                 // Authz failed; stop the request and return an error
-                req->object->AuthorizationRejected(azreq);
-                throw Authz::Exception(azreq);
+                std::string msg = req->object->AuthorizationRejected(azreq);
+                throw Authz::Exception(azreq, msg);
             }
 
             // Authz granted; call the method
@@ -241,8 +241,8 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
-            cbl->object->AuthorizationRejected(azreq);
-            throw Authz::Exception(azreq);
+            std::string msg = req->object->AuthorizationRejected(azreq);
+            throw Authz::Exception(azreq, msg);
         }
 
         // Check if the requested property is accessible via the PropertyCollection,
@@ -337,8 +337,8 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
-            cbl->object->AuthorizationRejected(azreq);
-            throw Authz::Exception(azreq);
+            std::string msg = req->object->AuthorizationRejected(azreq);
+            throw Authz::Exception(azreq, msg);
         }
 
         // If the requested property is accessible via the PropertyCollection,

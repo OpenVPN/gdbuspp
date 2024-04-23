@@ -300,8 +300,11 @@ class Base : public std::enable_shared_from_this<Base>
      *
      * @param request AuthReq::Ptr  The Authz request object with information
      *                              about caller and object target
+     * @return std::string with the rejection message to send to the
+     *         calling user.  If the return string is empty, a standard error
+     *         message (more debug details) will be generated automatically.
      */
-    virtual void AuthorizationRejected(const Authz::Request::Ptr request) const noexcept;
+    virtual const std::string AuthorizationRejected(const Authz::Request::Ptr request) const noexcept;
 
 
     /**
