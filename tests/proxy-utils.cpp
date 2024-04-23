@@ -17,6 +17,7 @@
 
 #include <any>
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <string>
 #include <getopt.h>
@@ -147,14 +148,20 @@ void test_exception(std::ostringstream &log,
             }
         }
     }
-    test_log(log,
-             "Exception[" + exception_list[0] + "] " + descr,
-             proxy,
-             result,
-             true);
-    if (!result && !error_msg.empty())
+    std::ostringstream msg;
+    msg << "Expecting exception string["
+        << std::quoted(exception_list[0]) << "] " + descr;
+    test_log(log, msg.str(), proxy, result, true);
+    if (!result)
     {
-        log << "       Received exception message: " << error_msg << std::endl;
+        if (!error_msg.empty())
+        {
+            log << "       Received exception message: " << error_msg << std::endl;
+        }
+        else
+        {
+            log << "       EMPTY EXCEPTION MESSAGE" << std::endl;
+        }
     }
 }
 
