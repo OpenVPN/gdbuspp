@@ -351,6 +351,28 @@ int main(int argc, char **argv)
                  // dbus-broker error string
                  "Failed querying service 'non.existing.service': "
                  "The name does not have an owner"});
+
+            test_log(log,
+                     "service_qry->LookupService(org.freedesktop.DBus)",
+                     nullptr,
+                     service_qry->LookupService("org.freedesktop.DBus"),
+                     true);
+            test_log(log,
+                     "service_qry->LookupService(non.existing.service)",
+                     nullptr,
+                     service_qry->LookupService("non.existing.service"),
+                     false);
+
+            test_log(log,
+                     "service_qry->LookupActivatable(org.freedesktop.DBus)",
+                     nullptr,
+                     service_qry->LookupActivatable("org.freedesktop.DBus"),
+                     true);
+            test_log(log,
+                     "service_qry->LookupActivatable(non.existing.service)",
+                     nullptr,
+                     service_qry->LookupActivatable("non.existing.service"),
+                     false);
         }
 
 

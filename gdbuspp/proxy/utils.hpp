@@ -157,6 +157,29 @@ class DBusServiceQuery
 
 
     /**
+     *  Looks up a specific busname of a service to see if it
+     *  is running.  This will use the org.freedesktop.DBus.ListNames method
+     *  for the lookup search.
+     *
+     * @param service  std::string with the bus name of the service.
+     * @return true if the the service was found enlisted, otherwise false.
+     */
+    const bool LookupService(const std::string &service) const;
+
+
+    /**
+     *  Looks up a specific busname of a service to see if it
+     *  is can be activated by the D-Bus daemon on the system.  This will
+     *  use the org.freedesktop.DBus.ListActivatableNames method
+     *  for the lookup search.
+     *
+     * @param service  std::string with the bus name of the service.
+     * @return true if the the service was found enlisted, otherwise false.
+     */
+    const bool LookupActivatable(const std::string &service) const;
+
+
+    /**
      *  A more vigorous attempt of ensuring that a D-Bus service is alive and
      *  available.  This will try 5 times before giving up, sleeping for a short
      *  while in between each attempt.

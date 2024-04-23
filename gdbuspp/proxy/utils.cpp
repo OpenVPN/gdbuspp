@@ -186,6 +186,51 @@ const std::string DBusServiceQuery::GetNameOwner(const std::string &service) con
 }
 
 
+const bool DBusServiceQuery::LookupService(const std::string &service) const
+{
+    try
+    {
+        GVariant *res = proxy->Call("/",
+                                    "org.freedesktop.DBus",
+                                    "ListNames",
+                                    nullptr);
+        auto list = glib2::Value::ExtractVector<std::string>(res, 0);
+
+        for (const auto &srv : list)
+        {
+            if (srv == service)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    catch (const Proxy::Exception &excp)
+    {
+        throw DBusServiceQuery::Exception(service, excp.GetRawError());
+    }
+}
+
+
+const bool DBusServiceQuery::LookupActivatable(const std::string &service) const
+{
+    GVariant *res = proxy->Call("/",
+                                "org.freedesktop.DBus",
+                                "ListActivatableNames",
+                                nullptr);
+    auto list = glib2::Value::ExtractVector<std::string>(res, 0);
+
+    for (const auto &srv : list)
+    {
+        if (srv == service)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const noexcept
 {
     for (int i = 5; i > 0; --i)
