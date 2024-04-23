@@ -169,8 +169,8 @@ void _int_dbusobject_callback_method_call(GDBusConnection *conn,
                   << "interface=" << intf_name << ", "
                   << "method=" << meth_name << ") callback link is invalid" << std::endl;
         g_dbus_method_invocation_return_error(invoc,
-                                              G_IO_ERROR,
-                                              G_IO_ERROR_INVALID_DATA,
+                                              G_DBUS_ERROR,
+                                              G_DBUS_ERROR_INVALID_ARGS,
                                               "MethodCall failed; invalid callback link");
         return;
     }
@@ -277,12 +277,12 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         excp.SetDBusErrorProperty(error);
         return nullptr;
     }
-    catch (const Authz::Exception &err)
+    catch (const Authz::Exception &excp)
     {
         GDBUSPP_LOG("Get Property Authorization FAIL:"
                     << " -- Property:" << property_name
-                    << " -- ERROR: " << err.what());
-        err.SetDBusError(error, G_IO_ERROR_FAILED, G_IO_ERROR_PERMISSION_DENIED);
+                    << " -- ERROR: " << excp.what());
+        excp.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_ACCESS_DENIED);
         return nullptr;
     }
     catch (const DBus::Exception &excp)
@@ -290,7 +290,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         GDBUSPP_LOG("Get Property Callback FAIL (DBus::Exception):"
                     << " -- Property:" << property_name
                     << " -- ERROR: " << excp.what());
-        excp.SetDBusError(error, G_IO_ERROR, G_IO_ERROR_FAILED);
+        excp.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED);
         return nullptr;
     }
 }
@@ -394,7 +394,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         GDBUSPP_LOG("Set Property Callback FAIL:"
                     << " -- Property:" << property_name
                     << " -- ERROR: " << err.what());
-        err.SetDBusError(error, G_IO_ERROR, G_IO_ERROR_FAILED);
+        err.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED);
         return false;
     }
     catch (const Authz::Exception &err)
@@ -402,7 +402,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         GDBUSPP_LOG("Set Property Authorization FAIL:"
                     << " -- Property:" << property_name
                     << " -- ERROR: " << err.what());
-        err.SetDBusError(error, G_IO_ERROR_FAILED, G_IO_ERROR_PERMISSION_DENIED);
+        err.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_ACCESS_DENIED);
         return false;
     }
     catch (const DBus::Exception &err)
@@ -410,7 +410,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         GDBUSPP_LOG("Set Property Callback FAIL (DBus::Exception):"
                     << " -- Property:" << property_name
                     << " -- ERROR: " << err.what());
-        err.SetDBusError(error, G_IO_ERROR, G_IO_ERROR_FAILED);
+        err.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED);
         return false;
     }
 }

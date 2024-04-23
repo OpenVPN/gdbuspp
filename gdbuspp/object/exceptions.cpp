@@ -118,7 +118,7 @@ Object::Property::Exception::Exception(const Object::Base *object,
 
 void Object::Property::Exception::SetDBusErrorProperty(GError **error) const noexcept
 {
-    g_set_error(error, G_IO_ERROR, G_IO_ERROR_FAILED, "%s", GetRawError());
+    g_set_error(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED, "%s", GetRawError());
 }
 
 
