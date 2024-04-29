@@ -59,16 +59,6 @@ Connection::Connection(BusType bustype)
 }
 
 
-Connection::Connection(GDBusConnection *dbuscon)
-    : dbuscon(dbuscon), type(BusType::UNKNOWN)
-{
-    if (!G_IS_DBUS_CONNECTION(dbuscon))
-    {
-        throw Connection::Exception("Invalid connection pointer");
-    }
-}
-
-
 Connection::~Connection() noexcept
 {
     try

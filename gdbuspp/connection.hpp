@@ -66,16 +66,6 @@ class Connection
 
 
     /**
-     *  Prepares a new DBus::Connection object based on an already
-     *  ready glib2 raw connection pointer
-     *
-     * @param dbuscon  glib2 GDBusConnection object to use
-     *
-     * @return Returns a Connection::Ptr with the requested D-Bus connection
-     */
-    Connection(GDBusConnection *dbuscon);
-
-    /**
      * When the Connection object is being destructed, it will first
      * close all connections and release related resources.
      */
