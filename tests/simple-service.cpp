@@ -719,7 +719,7 @@ class SimpleService : public DBus::Service
 
     //  This is a callback method which is called when this D-Bus service
     //  is registered on the D-Bus connection
-    void BusNameAcquired(GDBusConnection *conn, const std::string &busname) override
+    void BusNameAcquired(const std::string &busname) override
     {
         std::cout << "Bus name acquired: " << busname << std::endl;
     }
@@ -727,7 +727,7 @@ class SimpleService : public DBus::Service
     //  This callback method will be called if the D-Bus service for some reason
     //  does not get the service registered on the D-Bus connection or the
     //  registration is lost (the D-Bus daemon kicks the service off the D-Bus).
-    void BusNameLost(GDBusConnection *conn, const std::string &busname) override
+    void BusNameLost(const std::string &busname) override
     {
         std::cout << "** WARNING ** Bus name lost: " << busname << std::endl;
         Stop();

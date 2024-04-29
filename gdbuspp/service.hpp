@@ -198,10 +198,9 @@ class Service : public std::enable_shared_from_this<Service>
     /**
      *  Called when the requested bus name has been successfully acquired.
      *
-     *  @param GDBusConnection*  glib2 connection object to the bus of event
      *  @param busname           std::string of the registered bus name
      */
-    virtual void BusNameAcquired(GDBusConnection *conn, const std::string &busname) = 0;
+    virtual void BusNameAcquired(const std::string &busname) = 0;
 
     /**
      *  Called if the bus name could not be acquired or was lost.  Either
@@ -211,10 +210,9 @@ class Service : public std::enable_shared_from_this<Service>
      *  gaining the bus name later on; in which the @BusNameAcquired() method
      *  will be called.
      *
-     *  @param GDBusConnection*  glib2 connection object to the bus of event
      *  @param busname           std::string of the registered bus name
      */
-    virtual void BusNameLost(GDBusConnection *conn, const std::string &busname) = 0;
+    virtual void BusNameLost(const std::string &busname) = 0;
 
 
   protected:

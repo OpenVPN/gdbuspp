@@ -79,12 +79,12 @@ class MyService : public DBus::Service
     {
     }
 
-    void BusNameAcquired(GDBusConnection *conn, const std::string &busname) override
+    void BusNameAcquired(const std::string &busname) override
     {
         // Code run when the name of your service is accepted
     }
 
-    void BusNameLost(GDBusConnection *conn, const std::string &busname) override
+    void BusNameLost(const std::string &busname) override
     {
         // Code run when your service could not get or keep the bus name
     }

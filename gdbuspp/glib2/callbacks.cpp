@@ -40,7 +40,7 @@ void _int_callback_name_acquired(GDBusConnection *conn,
                                  void *this_ptr)
 {
     DBus::Service *service = static_cast<DBus::Service *>(this_ptr);
-    service->BusNameAcquired(conn, std::string(name));
+    service->BusNameAcquired(std::string(name));
     GDBUSPP_LOG("Service registered:" << name);
     service->RunIdleDetector(true);
 }
@@ -49,7 +49,7 @@ void _int_callback_name_acquired(GDBusConnection *conn,
 void _int_callback_name_lost(GDBusConnection *conn, const gchar *name, void *this_ptr)
 {
     DBus::Service *service = static_cast<DBus::Service *>(this_ptr);
-    service->BusNameLost(conn, name);
+    service->BusNameLost(name);
     service->RunIdleDetector(false);
 }
 
