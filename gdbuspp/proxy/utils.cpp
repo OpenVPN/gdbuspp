@@ -233,20 +233,58 @@ const bool DBusServiceQuery::LookupActivatable(const std::string &service) const
 
 const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const noexcept
 {
+    // Identify if this service can be started via the
+    // org.freedesktop.DBus.StartServiceByName() call to the D-Bus daemon
+    bool activatable = true;
+    try
+    {
+        activatable = LookupActivatable(service);
+    }
+    catch (const DBus::Exception &)
+    {
+        // If this lookup failed, presume it is possible to activate the
+        // service.  If it is completely impossible to start the service,
+        // that will be caught in by the StartServiveByName() call below.
+    }
+
     for (int i = 5; i > 0; --i)
     {
         try
         {
-            uint32_t res = StartServiceByName(service);
-            if (2 == res) // DBUS_START_REPLY_ALREADY_RUNNING
+            // If the service is listed as an activatable service,
+            // The org.freedesktop.DBus.StartServiceByName() can be called
+            // without getting an error.  This indicates the service has
+            // a /usr/share/dbus-1/{services,system-services}/*.service file
+            // configured.
+            if (activatable)
             {
-                return true;
+                uint32_t res = StartServiceByName(service);
+                if (2 == res) // DBUS_START_REPLY_ALREADY_RUNNING
+                {
+                    return true;
+                }
             }
+
+            // All services registered with the D-Bus daemon will have a
+            // unique bus name it can be reached via.  If the method below
+            // does not throw an exception - the service is available.
             (void)GetNameOwner(service);
             return true;
         }
         catch (const DBusServiceQuery::Exception &)
         {
+            if (!activatable)
+            {
+                // Quick exit - if the service can't be auto-started
+                // via org.freedesktop.DBus.StartServiceByName(), there
+                // are no point retrying the same loop more times.
+                return false;
+            }
+
+            // If the service can be auto-started, the GetNameOwner()
+            // call failed - which can mean the service did respond to
+            // the auto-start request but hasn't settled yet - just wait
+            // a little bit before retrying.
             usleep(400000);
         }
     }
