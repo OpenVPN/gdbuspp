@@ -20,6 +20,8 @@
 #include "../proxy.hpp"
 #include "../glib2/utils.hpp"
 
+#include "exceptions.hpp"
+
 
 namespace DBus {
 namespace Credentials {
