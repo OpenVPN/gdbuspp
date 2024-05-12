@@ -83,7 +83,7 @@ const std::string Credentials::Query::GetUniqueBusName(const std::string &busnam
     }
     catch (const DBus::Exception &excp)
     {
-        throw Credentials::Exception("GetPID",
+        throw Credentials::Exception("GetUniqueBusName",
                                      "Failed to retrieve unique bus name for '"
                                          + busname + "': " + excp.GetRawError());
     }
