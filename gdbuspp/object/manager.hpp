@@ -37,6 +37,7 @@ namespace Object {
 
 class CallbackLink; // forward declaration; declared in object/callbacklink.hpp
 
+using RemoveObjectCallback = std::function<void(const Object::Path &)>;
 
 /**
  *  The DBus::Object::Manager object keeps track of all the D-Bus objects
@@ -182,6 +183,21 @@ class Manager : public std::enable_shared_from_this<Manager>
     void RemoveObject(const Object::Path &path);
 
     /**
+     *  Attaches a remove callback which will be called right before a given
+     *  D-Bus object will be removed from the D-Bus.
+     *
+     *  It is only possible to attach a single removal callback per object path
+     *
+     * @param path        DBus::Object::Path to the object to attach the
+     *                    removalcallback
+     * @param remove_cb   The removal callback lambda function.  This will
+     *                    receive the DBus::Object::Path of the object
+     *                    being removed
+     */
+    void AttachRemoveCallback(const Object::Path &path,
+                              RemoveObjectCallback remove_cb);
+
+    /**
      *  Retrieve a shared_ptr to the DBus::Object::Base object with the
      *  real implementation class used when registering the object.
      *
@@ -246,6 +262,14 @@ class Manager : public std::enable_shared_from_this<Manager>
      *  a specific D-Bus path
      */
     std::map<Object::Path, unsigned int> path_index = {};
+
+    /**
+     *  All attached object remove callbacks
+     *
+     *  The key is the glib2 object ID, available via the path_index lookup
+     *  index
+     */
+    std::map<unsigned int, RemoveObjectCallback> remove_callbacks = {};
 
     /**
      *  Callback function table for D-Bus; used by the private

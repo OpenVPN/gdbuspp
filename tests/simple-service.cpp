@@ -383,6 +383,16 @@ class MethodTests : public DBus::Object::Base
         rmobj_args->AddInput("name", "s");
 
 
+        auto get_removd_objs_args = AddMethod(
+            "GetRemovedObjects",
+            [this](DBus::Object::Method::Arguments::Ptr args)
+            {
+                GVariant *r = glib2::Value::CreateTupleWrapped(removed_objects);
+                args->SetMethodReturn(r);
+                removed_objects.clear();
+            });
+        get_removd_objs_args->AddOutput("paths", "ao");
+
         //  This method will open a file with the file name provided as an
         //  input argument and will return a file descriptor to the opened file.
         //  This is for testing sending file descriptors from the service to the
@@ -431,6 +441,7 @@ class MethodTests : public DBus::Object::Base
   private:
     DBus::Object::Manager::Ptr object_manager = nullptr;
     SimpleLog::Ptr log = nullptr;
+    std::vector<DBus::Object::Path> removed_objects = {};
 
 
     void Log(const std::string &func, const std::string &msg) const
@@ -465,6 +476,18 @@ class MethodTests : public DBus::Object::Base
         auto obj = object_manager->CreateObject<SimpleObject>(object_manager,
                                                               child_path,
                                                               name);
+        object_manager->AttachRemoveCallback(
+            child_path,
+            [&](const DBus::Object::Path &path)
+            {
+                // A bit complicated way - but showcasing the idea
+                // how to use this callback
+                auto obj = object_manager->GetObject<SimpleObject>(path);
+                removed_objects.push_back(obj->GetPath());
+                std::cout << "AttachRemoveCallback: Removed object "
+                          << path << std::endl;
+                Log("AttachRemoveCallback", "Object removed: " + path);
+            });
         std::cout << ">>>> NEW OBJECT: " << obj->GetPath() << std::endl;
         Log(__func__, "New child object created: " + obj->GetPath());
 

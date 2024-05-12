@@ -577,6 +577,12 @@ if __name__ == "__main__":
 
     tests.ExpectMissingObject('/gdbuspp/tests/simple1/childs/testscript1', 'gdbuspp.test.simple1.child')
 
+    simple1_methods.AddTest(TestMethod('GetRemovedObjects',
+                                        {},
+                                        {'paths': 'ao'},
+                                        None,
+                                        dbus.Array([dbus.ObjectPath('/gdbuspp/tests/simple1/childs/testscript1')], signature=dbus.Signature('o'))))
+
     #
     #  Testing a child object
     #

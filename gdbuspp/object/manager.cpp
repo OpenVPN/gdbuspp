@@ -127,11 +127,35 @@ void Manager::RemoveObject(const Object::Path &path)
     try
     {
         unsigned int obj_id = path_index.at(path);
+        const auto rm_callback_it = remove_callbacks.find(obj_id);
+        if (remove_callbacks.end() != rm_callback_it)
+        {
+            // Call the remove callback when found
+            remove_callbacks.at(obj_id)(path);
+        }
+
         g_dbus_connection_unregister_object(connection->ConnPtr(), obj_id);
     }
     catch (const std::out_of_range &)
     {
         throw Manager::Exception("RemoveObject: "
+                                 "Object path not found: "
+                                 + path);
+    }
+}
+
+
+void Manager::AttachRemoveCallback(const Object::Path &path,
+                                   RemoveObjectCallback remove_cb)
+{
+    try
+    {
+        unsigned int obj_id = path_index.at(path);
+        remove_callbacks[obj_id] = std::move(remove_cb);
+    }
+    catch (const std::out_of_range &)
+    {
+        throw Manager::Exception("AttachRemoveCallback: "
                                  "Object path not found: "
                                  + path);
     }
