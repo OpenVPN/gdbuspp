@@ -89,7 +89,7 @@ const bool Query::CheckObjectExists(const Object::Path &path,
             {
                 return false;
             }
-            usleep(300);
+            usleep(100000);
         }
     }
     return false;
