@@ -34,10 +34,10 @@ Exception::Exception(const std::string &classn,
         errbuf << (err.empty() ? "" : " ") << std::string(gliberr->message);
         g_error_free(gliberr);
     }
-    std::string tmperror = errbuf.str();
 
     // If the error is prefixed with a glib2 "GDBUs.Error:", it can be
     // split up into an error domain and an error message
+    std::string tmperror = errbuf.str();
     auto gdbuserr_start = tmperror.find("GDBus.Error:");
     if (std::string::npos != gdbuserr_start)
     {
@@ -59,8 +59,9 @@ Exception::Exception(const std::string &classn,
         error = tmperror;
     }
 
+
     std::ostringstream s;
-    s << "[" << classn << "] " << error;
+    s << "[" << classn << "] " << errbuf.str();
     classerr = s.str();
 }
 
