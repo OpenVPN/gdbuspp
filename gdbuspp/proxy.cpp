@@ -68,6 +68,7 @@ class Proxy
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
+                                         "",
                                          "DBus::Connection is not valid");
         }
         GError *err = nullptr;
@@ -86,6 +87,7 @@ class Proxy
                 throw DBus::Proxy::Exception(destination,
                                              object_path,
                                              interface,
+                                             "",
                                              "Failed preparing proxy: "
                                                  + std::string(err->message));
             }
@@ -94,6 +96,7 @@ class Proxy
                 throw DBus::Proxy::Exception(destination,
                                              object_path,
                                              interface,
+                                             "",
                                              "Failed preparing proxy");
             }
         }
@@ -194,6 +197,7 @@ class Proxy
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
+                                         method,
                                          erm.str());
         }
 
@@ -206,6 +210,7 @@ class Proxy
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
+                                         method,
                                          erm.str(),
                                          error);
         }
@@ -318,6 +323,7 @@ class Proxy
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
+                                         method,
                                          "D-Bus connection does not support file descriptor passing");
         }
 
@@ -354,6 +360,7 @@ class Proxy
                 throw DBus::Proxy::Exception(destination,
                                              object_path,
                                              interface,
+                                             method,
                                              erm.str(),
                                              error);
             }
@@ -397,6 +404,7 @@ class Proxy
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
+                                         method,
                                          err,
                                          error);
         }
@@ -427,22 +435,32 @@ Exception::Exception(const std::string &errm, GError *gliberr)
 Exception::Exception(const std::string &destination,
                      const DBus::Object::Path &path,
                      const std::string &interface,
+                     const std::string &method,
                      const std::string &errm,
                      GError *gliberr)
-    : DBus::Exception(compose_error(destination, path, interface), errm, gliberr)
+    : DBus::Exception(compose_error(destination, path, interface, method),
+                      errm,
+                      gliberr)
 
 {
 }
 
 const std::string Exception::compose_error(const std::string &destination,
                                            const DBus::Object::Path &path,
-                                           const std::string &interface) const
+                                           const std::string &interface,
+                                           const std::string &method) const
 {
     std::ostringstream err;
+    std::ostringstream method_info{};
+    if (!method.empty())
+    {
+        method_info << "', '" << method;
+    }
     err << "Proxy::Client("
         << "'" << destination << "', "
         << "'" << path << "', "
-        << "'" << interface << "')";
+        << "'" << interface << method_info.str()
+        << "')";
     return err.str();
 }
 

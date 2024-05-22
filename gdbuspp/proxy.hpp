@@ -36,13 +36,15 @@ class Exception : public DBus::Exception
     Exception(const std::string &destination,
               const DBus::Object::Path &path,
               const std::string &interface,
+              const std::string &method,
               const std::string &errm,
               GError *gliberr = nullptr);
 
   private:
     const std::string compose_error(const std::string &destination,
                                     const DBus::Object::Path &path,
-                                    const std::string &interface) const;
+                                    const std::string &interface,
+                                    const std::string &method) const;
 };
 
 

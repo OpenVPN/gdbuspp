@@ -104,6 +104,7 @@ const std::string Query::ServiceVersion(const Object::Path &path,
         throw Proxy::Exception(proxy->GetDestination(),
                                path,
                                interface,
+                               "ServiceVersion::Ping",
                                "Could not reach the service");
     }
 
@@ -112,6 +113,7 @@ const std::string Query::ServiceVersion(const Object::Path &path,
         throw Proxy::Exception(proxy->GetDestination(),
                                path,
                                interface,
+                               "ServiceVersion::CheckObjectExists",
                                "Object path/interface does not exists");
     }
 
