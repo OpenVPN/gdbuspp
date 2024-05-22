@@ -212,7 +212,7 @@ class Manager : public std::enable_shared_from_this<Manager>
         Object::Base::Ptr obj_ptr = get_object(path);
         if (obj_ptr)
         {
-            std::shared_ptr<C> obj = std::static_pointer_cast<C>(obj_ptr);
+            std::shared_ptr<C> obj = std::dynamic_pointer_cast<C>(obj_ptr);
             return obj;
         }
         return nullptr;
