@@ -32,6 +32,19 @@
 
 namespace glib2 {
 
+namespace proxy_callbacks {
+
+void result_handler(GDBusProxy *proxy, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = nullptr;
+    GVariant *result = g_dbus_proxy_call_finish(proxy,
+                                                res,
+                                                &error);
+    g_variant_unref(result);
+}
+
+} // namespace proxy_callbacks
+
 /**
  *  Internal helper class wrapping up the glib2 GDBusProxy related API
  *  into a C++ interface.
@@ -286,8 +299,8 @@ class Proxy
                           G_DBUS_CALL_FLAGS_NONE,
                           DBUS_PROXY_CALL_TIMEOUT,
                           nullptr, // GCancellable
-                          nullptr, // glib2 response callback function; not needed
-                          nullptr  // user_data, not needed - no callback used
+                          (GAsyncReadyCallback)proxy_callbacks::result_handler,
+                          nullptr // user_data, not needed - no callback used
         );
     }
 
