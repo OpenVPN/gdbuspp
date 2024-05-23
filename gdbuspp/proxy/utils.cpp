@@ -39,7 +39,8 @@ const bool Query::Ping() const noexcept
     {
         try
         {
-            proxy->Call(target, "Ping", nullptr, true);
+            GVariant *r = proxy->Call(target, "Ping", nullptr);
+            g_variant_unref(r);
             return true;
         }
         catch (const Proxy::Exception &excp)
