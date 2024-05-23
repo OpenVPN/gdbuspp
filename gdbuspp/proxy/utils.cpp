@@ -261,11 +261,7 @@ const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const
             // configured.
             if (activatable)
             {
-                uint32_t res = StartServiceByName(service);
-                if (2 == res) // DBUS_START_REPLY_ALREADY_RUNNING
-                {
-                    return true;
-                }
+                (void)StartServiceByName(service);
             }
 
             // All services registered with the D-Bus daemon will have a
