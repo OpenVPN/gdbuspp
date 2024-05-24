@@ -89,7 +89,7 @@ gdbuspp_lib = both_libraries(
         dependencies: [
                 glib2_deps
         ],
-        soversion: '0',
+        soversion: '1',
         install: true
 )
 gdbuspp_inc = include_directories('gdbuspp')
