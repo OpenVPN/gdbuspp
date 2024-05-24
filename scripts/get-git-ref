@@ -7,13 +7,31 @@
 #  Copyright (C)  David Sommerseth <davids@openvpn.net>
 #
 
+PROJECT_ROOT="$(dirname $0)/.."
+
+if [ ! -e "${PROJECT_ROOT}/.git" ]; then
+	cat "${PROJECT_ROOT}/version.txt"
+	exit 0
+fi
+
+if [ "$1" == "--dist" ]; then
+	cp -v ${MESON_BUILD_ROOT}/version.txt ${MESON_DIST_ROOT}/version.txt
+	exit 0
+fi
+
 #
 #  Retrieve the version based on the git tree
 #
 #  If a version tag is found (always prefixed with 'v'), this value
 #  is used.  Otherwise compose a version string based on branch name
 #  and commit reference
-VERSION="$(git describe --always --tags 2>/dev/null)"
+
+gitcmd()
+{
+	git --git-dir ${PROJECT_ROOT}/.git $*
+}
+
+VERSION="$(gitcmd describe --always --tags 2>/dev/null)"
 if [ $? -ne 0 ]; then
 	ver_file="$(dirname $0)/../version.txt"
 	if [ -r "$ver_file" ]; then
@@ -32,11 +50,7 @@ ec=$?
 
 if [ $ec -ne 0  ]; then
 	# Presume not a version tag, so use commit reference
-	VERSION="$(git rev-parse --symbolic-full-name HEAD | cut -d/ -f3- | sed -e 's@/@_@g')_$(git rev-parse --short=16 HEAD)"
+	echo "$(gitcmd rev-parse --symbolic-full-name HEAD | cut -d/ -f3- | sed -e 's@/@_@g')_$(gitcmd rev-parse --short=16 HEAD)"
+	exit 0
 fi
-
-if [ "$1" == "--dist" ]; then
-	echo ${VERSION} > ${MESON_DIST_ROOT}/version.txt
-else
-	echo ${VERSION}
-fi
+echo ${VERSION:1}

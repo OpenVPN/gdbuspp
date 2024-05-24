@@ -13,12 +13,15 @@ project(
         meson_version: '>= 0.58'
 )
 
-version_file = vcs_tag(
-        command: 'scripts/get-git-ref',
-        input:'version.txt.in',
-        output:'version.txt',
-        fallback:'git_unknown'
-)
+fs = import('fs')
+if fs.exists(meson.project_source_root() / '.git')
+        custom_target('version.txt',
+                command: find_program('scripts/get-git-ref'),
+                capture: true,
+                build_always_stale: true,
+                output:'version.txt',
+        )
+endif
 meson.add_dist_script('scripts/get-git-ref', '--dist')
 
 if (get_option('debug'))
