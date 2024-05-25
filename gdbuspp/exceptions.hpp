@@ -18,6 +18,7 @@
 #include <exception>
 #include <string>
 #include <glib.h>
+#include <gio/gio.h>
 
 namespace DBus {
 
@@ -56,7 +57,6 @@ class Exception : public std::exception
 
     const char *DBusErrorDomain() const noexcept;
 
-#ifdef __G_IO_H__
     /**
      *  Wrapper for more easily returning a DBusException exception
      *  back to an on going D-Bus method call.  This will transport the
@@ -88,7 +88,6 @@ class Exception : public std::exception
                               GQuark domain,
                               gint code) const noexcept;
 
-#endif
   protected:
     std::string error_domain = "net.openvpn.gdbuspp";
 

@@ -19,7 +19,6 @@
 
 #include <memory>
 #include <string>
-#include <gio/gio.h>
 
 #include "../exceptions.hpp"
 
