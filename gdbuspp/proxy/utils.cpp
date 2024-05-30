@@ -90,6 +90,10 @@ const bool Query::CheckObjectExists(const Object::Path &path,
             {
                 return false;
             }
+            if (err.find("No such interface") != std::string::npos)
+            {
+                return false;
+            }
             usleep(100000);
         }
     }
