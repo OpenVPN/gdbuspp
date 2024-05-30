@@ -624,7 +624,13 @@ void Client::SetPropertyGVariant(const Object::Path &object_path,
                                      property_name.c_str(),
                                      value);
 
-    prx.Call("Set", params, true);
+    // Even though there is no response expected, this need to be
+    // a synchronous call.  Programs only setting a property and then
+    // exiting will experience the property often not be modified at all.
+    // Doing this synchronously ensures we wait until the request has been
+    // processed by the service.
+    GVariant *r = prx.Call("Set", params, false);
+    g_variant_unref(r);
 }
 
 
