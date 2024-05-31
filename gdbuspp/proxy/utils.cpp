@@ -113,13 +113,27 @@ const std::string Query::ServiceVersion(const Object::Path &path,
                                "Could not reach the service");
     }
 
-    if (!CheckObjectExists(path, interface))
+    // This method is typically called early on and the service
+    // might not have settled yet, thus not responsive.
+    // So we give it a chance up to 750ms to settle down before
+    // declaring the service as inaccessible
+    bool found = false;
+    for (uint8_t i = 5; i > 0; i--)
+    {
+        found = CheckObjectExists(path, interface);
+        if (found)
+        {
+            break;
+        }
+        usleep(150000);
+    }
+    if (!found)
     {
         throw Proxy::Exception(proxy->GetDestination(),
                                path,
                                interface,
                                "ServiceVersion::CheckObjectExists",
-                               "Object path/interface does not exists");
+                               "Service is inaccessible");
     }
 
     auto target = Proxy::TargetPreset::Create(path, interface);

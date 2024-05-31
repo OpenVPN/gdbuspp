@@ -266,7 +266,7 @@ int main(int argc, char **argv)
             {
                 query->ServiceVersion(incorrect_path, incorrect_interface);
             },
-            {"Object path/interface does not exists"});
+            {"Service is inaccessible"});
 
         // Run Utils::Query::Introspection() tetss
         {
