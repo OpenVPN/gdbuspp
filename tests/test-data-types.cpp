@@ -185,6 +185,14 @@ int test_base_data_types()
 
     failures += run_test([]()
                          {
+                             std::byte type_y{255};
+                             return check_data_type_cpp(
+                                 "std::byte",
+                                 type_y,
+                                 "y");
+                         });
+    failures += run_test([]()
+                         {
                              uint16_t type_q = 9;
                              return check_data_type_cpp(
                                  "uint16_t",
@@ -338,6 +346,14 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
+                                 "glib2::Value::Create<std::byte>(...)  ",
+                                 glib2::Value::Create(static_cast<std::byte>(255)),
+                                 "y");
+                         });
+
+    failures += run_test([]()
+                         {
+                             return check_data_type_gvariant(
                                  "glib2::Value::Create<uint16_t>(...)   ",
                                  glib2::Value::Create(static_cast<uint16_t>(12345)),
                                  "q");
@@ -418,13 +434,18 @@ int test_base_data_types()
                                  "o");
                          });
 
+
     failures += run_test([]()
                          {
-                             std::vector<uint16_t> d = {1, 2, 3, 4, 5};
+                             std::vector<std::byte> d = {std::byte(1),
+                                                         std::byte(2),
+                                                         std::byte(3),
+                                                         std::byte(4),
+                                                         std::byte(5)};
                              return check_data_type_gvariant(
-                                 "glib2::Value::CreateVector<std::vector<uint16_t>>(...)   ",
+                                 "glib2::Value::CreateVector<std::vector<std::byte>>(...)  ",
                                  glib2::Value::CreateVector(d),
-                                 "aq");
+                                 "ay");
                          });
 
     failures += run_test([]()
@@ -512,8 +533,8 @@ int test_base_data_types()
     failures += run_test([]()
                          {
                              return check_data_type_gvariant(
-                                 "g_variant_new(\"(iuqntxdbs)\", ...) ",
-                                 g_variant_new("(iuqntxdbs)",
+                                 "g_variant_new(\"(iuqntxdbys)\", ...)  ",
+                                 g_variant_new("(iuqntxdbys)",
                                                static_cast<int32_t>(-4),
                                                static_cast<uint32_t>(4),
                                                static_cast<uint16_t>(111),
@@ -522,13 +543,14 @@ int test_base_data_types()
                                                static_cast<int64_t>(-444),
                                                static_cast<double>(-55555),
                                                static_cast<bool>(false),
+                                               static_cast<std::byte>(66),
                                                "Large test"),
-                                 "(iuqntxdbs)");
+                                 "(iuqntxdbys)");
                          });
 
     failures += run_test([]()
                          {
-                             GVariantBuilder *b = glib2::Builder::Create("(soibnut)");
+                             GVariantBuilder *b = glib2::Builder::Create("(soibnuty)");
                              auto s = std::string("string");
                              glib2::Builder::Add(b, s);
                              glib2::Builder::Add(b, DBus::Object::Path("/struct/test"));
@@ -537,10 +559,11 @@ int test_base_data_types()
                              glib2::Builder::Add(b, static_cast<int16_t>(-4444));
                              glib2::Builder::Add(b, static_cast<uint32_t>(55555));
                              glib2::Builder::Add(b, static_cast<uint64_t>(666666));
+                             glib2::Builder::Add(b, static_cast<std::byte>(77));
                              return check_data_type_gvariant(
-                                 "glib2::Builder::Create(\"(soibnut)\")",
+                                 "glib2::Builder::Create(\"(soibnuty)\")",
                                  glib2::Builder::Finish(b),
-                                 "(soibnut)");
+                                 "(soibnuty)");
                          });
 
     std::cout << ":: Base data type test failures: " << failures

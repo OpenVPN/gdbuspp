@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -100,6 +101,7 @@ void checkParams(const char *func,
  */
 namespace DataType {
 
+
 /**
  *  Retrieve the D-Bus notation of the data type stored
  *  in a GVariant object.
@@ -164,6 +166,15 @@ template <>
 inline const char *DBus<int64_t>() noexcept
 {
     return "x";
+}
+
+template <>
+inline const char *DBus<std::byte>() noexcept
+{
+    // The D-Bus spec declares 'y' (BYTE) as "unsigned 8-bit integer",
+    // but in C/C++ uint8_t has an ambiguity and is typedefed to
+    // unsigned char
+    return "y";
 }
 
 template <>
@@ -454,6 +465,15 @@ Get(GVariant *v) noexcept
     return g_variant_get_int32(v);
 }
 #endif
+
+template <>
+inline std::byte Get<std::byte>(GVariant *v) noexcept
+{
+    // The D-Bus spec declares 'y' as "unsigned 8-bit integer",
+    // but in C/C++ uint8_t has an ambiguity and is typedefed to
+    // unsigned char
+    return static_cast<std::byte>(g_variant_get_byte(v));
+}
 
 template <>
 inline uint16_t Get<uint16_t>(GVariant *v) noexcept
