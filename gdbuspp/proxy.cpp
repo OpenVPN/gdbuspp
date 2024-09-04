@@ -73,7 +73,8 @@ class Proxy
     Proxy(DBus::Connection::Ptr connection,
           const std::string &destination_,
           const DBus::Object::Path &path_,
-          const std::string &interface_)
+          const std::string &interface_,
+          const std::string &error_details_ = "")
         : destination(destination_), object_path(path_), interface(interface_)
     {
         if (!connection || !connection->Check())
@@ -81,7 +82,7 @@ class Proxy
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
-                                         "",
+                                         error_details_,
                                          "DBus::Connection is not valid");
         }
         GError *err = nullptr;
@@ -100,7 +101,7 @@ class Proxy
                 throw DBus::Proxy::Exception(destination,
                                              object_path,
                                              interface,
-                                             "",
+                                             error_details_,
                                              "Failed preparing proxy: "
                                                  + std::string(err->message));
             }
@@ -109,7 +110,7 @@ class Proxy
                 throw DBus::Proxy::Exception(destination,
                                              object_path,
                                              interface,
-                                             "",
+                                             error_details_,
                                              "Failed preparing proxy");
             }
         }
@@ -528,7 +529,8 @@ GVariant *Client::Call(const Object::Path &object_path,
     glib2::Proxy prx(connection,
                      destination,
                      object_path,
-                     interface);
+                     interface,
+                     method);
     return prx.Call(method, params, no_response);
 }
 
@@ -541,7 +543,8 @@ GVariant *Client::Call(const TargetPreset::Ptr preset,
     glib2::Proxy prx(connection,
                      destination,
                      preset->object_path,
-                     preset->interface);
+                     preset->interface,
+                     method);
     return prx.Call(method, params, no_response);
 }
 
@@ -554,7 +557,8 @@ GVariant *Client::GetFD(int &fd,
     glib2::Proxy prx(connection,
                      destination,
                      preset->object_path,
-                     preset->interface);
+                     preset->interface,
+                     method);
     return prx.CallGetFD(&fd, method, params);
 }
 
@@ -567,7 +571,8 @@ GVariant *Client::SendFD(const TargetPreset::Ptr preset,
     glib2::Proxy prx(connection,
                      destination,
                      preset->object_path,
-                     preset->interface);
+                     preset->interface,
+                     method);
     return prx.CallSendFD(method, params, fd);
 }
 
@@ -579,7 +584,8 @@ GVariant *Client::GetPropertyGVariant(const Object::Path &object_path,
     glib2::Proxy prx(connection,
                      destination,
                      object_path,
-                     "org.freedesktop.DBus.Properties");
+                     "org.freedesktop.DBus.Properties",
+                     "Get(" + property_name + ")");
 
     // The Get method needs the property interface scope of the property
     // and the property name
@@ -615,7 +621,8 @@ void Client::SetPropertyGVariant(const Object::Path &object_path,
     glib2::Proxy prx(connection,
                      destination,
                      object_path,
-                     "org.freedesktop.DBus.Properties");
+                     "org.freedesktop.DBus.Properties",
+                     "Set(" + property_name + ")");
 
     // The Set method needs the property interface scope of the property
     // and the property name
