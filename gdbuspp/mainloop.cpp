@@ -24,16 +24,21 @@
 namespace DBus {
 
 /**
- *  This is purely a hack to avoid exposing an internal glib2 related variable
- *  into the mainloop.hpp, which would require including a glib2 header files
- *  into mainloop.hpp - or expose it as a void * member in the DBus::MainLoop
- *  class.
+ *  This namespace is only used for holding library internal data.
  *
- *  Since this is intended to only be used
+ *  The intention is to avoid hiding information useful while debugging,
+ *  but at the same time keep it in a separate namespace indicating it
+ *  is not to be directly exposed to the users of the library.
  */
 namespace _private {
+
+/**
+ *  Internal mainloop object.  One process can only have one active
+ *  mainloop
+ */
 GMainLoop *_int_glib2_mainloop = nullptr;
-}
+} // namespace _private
+
 
 MainLoop::Exception::Exception(const std::string &errm)
     : DBus::Exception("DBus::MainLoop", errm, nullptr)

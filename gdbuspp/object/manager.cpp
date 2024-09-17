@@ -29,9 +29,24 @@
 namespace DBus {
 namespace Object {
 
+/**
+ *  This namespace is only used for holding library internal data.
+ *
+ *  The intention is to avoid hiding information useful while debugging,
+ *  but at the same time keep it in a separate namespace indicating it
+ *  is not to be directly exposed to the users of the library.
+ */
 namespace _private::Manager {
+
+/**
+ *  Mutex to avoid multiple callers to modify the object indices in parallel.
+ *
+ *  This is used by the Manager::_destructObjectCallback() and
+ *  Manager::register_object() methods.
+ */
 std::mutex objectmgr_update_mtx;
-}
+} // namespace _private::Manager
+
 
 Manager::Exception::Exception(const std::string &errmsg, GError *gliberr)
     : DBus::Exception("ObjectManager", errmsg, gliberr)

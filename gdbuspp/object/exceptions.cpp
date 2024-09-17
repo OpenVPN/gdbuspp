@@ -24,8 +24,25 @@
 #include "exceptions.hpp"
 #include "path.hpp"
 
+/**
+ *  This namespace is only used for holding library internal data.
+ *
+ *  The intention is to avoid hiding information useful while debugging,
+ *  but at the same time keep it in a separate namespace indicating it
+ *  is not to be directly exposed to the users of the library.
+ */
 namespace _private::exception {
-static const std::string comppse_object_descr(const DBus::Object::Path &path,
+
+/**
+ *  Compose a string based on details referring to a DBus::Object
+ *
+ * @param path         DBus::Object::Path of the referenced object
+ * @param interface    std::string with the interface part of the object
+ * @param info         std::string which is added when not empty
+ *
+ * @return const std::string
+ */
+static const std::string compose_object_descr(const DBus::Object::Path &path,
                                               const std::string &interface,
                                               const std::string &info)
 {
@@ -48,7 +65,7 @@ Object::Exception::Exception(const Object::Path &path,
                              const std::string &errmsg,
                              GError *gliberr,
                              const std::string &object_info)
-    : DBus::Exception(_private::exception::comppse_object_descr(
+    : DBus::Exception(_private::exception::compose_object_descr(
                           path,
                           interface,
                           object_info),
@@ -62,7 +79,7 @@ Object::Exception::Exception(const std::shared_ptr<Object::Base> obj,
                              const std::string &errmsg,
                              GError *gliberr,
                              const std::string &object_info)
-    : DBus::Exception(_private::exception::comppse_object_descr(
+    : DBus::Exception(_private::exception::compose_object_descr(
                           obj->GetPath(), obj->GetInterface(), object_info),
                       errmsg,
                       gliberr)
@@ -74,7 +91,7 @@ Object::Exception::Exception(const Object::Base *obj,
                              const std::string &errmsg,
                              GError *gliberr,
                              const std::string &object_info)
-    : DBus::Exception(_private::exception::comppse_object_descr(
+    : DBus::Exception(_private::exception::compose_object_descr(
                           obj->GetPath(), obj->GetInterface(), object_info),
                       errmsg,
                       gliberr)

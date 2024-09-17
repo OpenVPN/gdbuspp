@@ -24,7 +24,21 @@
 namespace DBus {
 namespace Signals {
 
+/**
+ *  This namespace is only used for holding library internal data.
+ *
+ *  The intention is to avoid hiding information useful while debugging,
+ *  but at the same time keep it in a separate namespace indicating it
+ *  is not to be directly exposed to the users of the library.
+ */
 namespace _private {
+
+/**
+ *  Composes a string containing the details of a Signals::Target
+ *
+ * @param target               Signals::Target object to retrieve info from
+ * @return const std::string
+ */
 const std::string compose_errclass(Target::Ptr target)
 {
     std::ostringstream erc;
@@ -45,6 +59,7 @@ const std::string compose_errclass(Target::Ptr target)
     return erc.str();
 }
 } // namespace _private
+
 
 Exception::Exception(const std::string &errm, GError *gliberr)
     : DBus::Exception("DBus::Signals", errm, gliberr)

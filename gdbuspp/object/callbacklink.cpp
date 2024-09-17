@@ -24,7 +24,22 @@ namespace DBus {
 namespace Object {
 
 
+/**
+ *  This namespace is only used for holding library internal data.
+ *
+ *  The intention is to avoid hiding information useful while debugging,
+ *  but at the same time keep it in a separate namespace indicating it
+ *  is not to be directly exposed to the users of the library.
+ */
 namespace _private {
+
+/**
+ *  Helper function which extracts information from a Request object
+ *  into a string useful for error reporting
+
+ * @param req            AsyncProcess::Request::UPtr to the object
+ * @return std::string   Formatted request details
+ */
 static inline std::string compose_errorclass(AsyncProcess::Request::UPtr &req)
 {
     std::stringstream s;
