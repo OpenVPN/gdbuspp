@@ -39,7 +39,7 @@ namespace _private {
  * @param target               Signals::Target object to retrieve info from
  * @return const std::string
  */
-const std::string compose_errclass(Target::Ptr target)
+static std::string compose_errclass(Target::Ptr target)
 {
     std::ostringstream erc;
     erc << "DBus::Signal::Target(";

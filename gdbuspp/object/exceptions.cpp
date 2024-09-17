@@ -42,9 +42,9 @@ namespace _private::exception {
  *
  * @return const std::string
  */
-static const std::string compose_object_descr(const DBus::Object::Path &path,
-                                              const std::string &interface,
-                                              const std::string &info)
+static std::string compose_object_descr(const DBus::Object::Path &path,
+                                        const std::string &interface,
+                                        const std::string &info)
 {
     std::ostringstream ret;
     ret << "DBus::Object('" << path << "', '" << interface << "'";
