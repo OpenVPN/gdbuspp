@@ -62,6 +62,7 @@ gdbuspp_lib = both_libraries(
         [
                 'gdbuspp/async-process.cpp',
                 'gdbuspp/authz-request.cpp',
+                'gdbuspp/bus-watcher.cpp',
                 'gdbuspp/glib2/callbacks.cpp',
                 'gdbuspp/glib2/utils.cpp',
                 'gdbuspp/connection.cpp',
@@ -99,6 +100,7 @@ gdbuspp_inc = include_directories('gdbuspp')
 install_headers(
         'gdbuspp/async-process.hpp',
         'gdbuspp/authz-request.hpp',
+        'gdbuspp/bus-watcher.hpp',
         'gdbuspp/connection.hpp',
         'gdbuspp/exceptions.hpp',
         'gdbuspp/gen-constants.hpp',
@@ -258,6 +260,22 @@ test_proxy = executable(
         'test_proxy',
         [
                 'tests/proxy-client.cpp'
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+                tests_lib,
+        ],
+        dependencies: [
+                glib2_deps,
+        ],
+        install: get_option('install_testprogs'),
+        install_dir: get_option('libexecdir') + '/gdbuspp/tests'
+)
+
+test_bus_watcher = executable(
+        'test_bus_watcher',
+        [
+                'tests/bus-watcher.cpp'
         ],
         link_with: [
                 gdbuspp_lib.get_static_lib(),
