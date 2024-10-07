@@ -651,11 +651,13 @@ inline std::vector<T> ExtractVector(GVariant *params,
     GVariantIter *list = nullptr;
     g_variant_get(params, type.str().c_str(), &list);
 
-    std::vector<T> ret = {};
+    std::vector<T> ret;
+    ret.reserve(g_variant_iter_n_children(list));
+
     GVariant *rec = nullptr;
     while ((rec = g_variant_iter_next_value(list)))
     {
-        ret.push_back(Value::Get<T>(rec));
+        ret.emplace_back(Value::Get<T>(rec));
         g_variant_unref(rec);
     }
     g_variant_unref(params);

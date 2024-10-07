@@ -170,6 +170,36 @@ TestResult check_data_type_gvariant(const std::string msg,
 }
 
 
+template <typename T1, typename T2>
+TestResult compare_vector(const std::string &msg,
+                          T1 &vect1,
+                          T2 &vect2)
+
+{
+
+    std::ostringstream message;
+    message << "[std::vector check]  " << msg << " - Vector size: ";
+    if (vect1.size() != vect2.size())
+    {
+        message << "Different - FAILED";
+        return TestResult(message.str(), false);
+    }
+    message << "Pass, ";
+
+    message << "Content: ";
+    for (size_t i = 0; i < vect1.size(); i++)
+    {
+        if (vect1[i] != vect2[i])
+        {
+            message << "Differs ('" << vect1[i] << "', '" << vect2[i] << "'): FAILED";
+            return TestResult(message.str(), false);
+        }
+    }
+    message << "Pass";
+    return TestResult(message.str(), true);
+}
+
+
 template <typename FUNC>
 inline int run_test(FUNC &&testfunc)
 {
@@ -574,6 +604,127 @@ int test_base_data_types()
 
 
 
+int test_base_vector()
+{
+    std::cout << ":: Testing base data types ..." << std::endl;
+    int failures = 0;
+
+#if 0 // FIXME: Need better data type logic in compare_vector
+    // std::byte
+    failures += run_test([]()
+                         {
+                             std::vector<std::byte> d = {
+                                 std::byte{1},
+                                 std::byte{8},
+                                 std::byte{0},
+                                 std::byte{15},
+                                 std::byte{16},
+                                 std::byte{255}};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<std::byte>(vector);
+                             return compare_vector("std::byte", d, res);
+                         });
+#endif
+
+    // uint16_t
+    failures += run_test([]()
+                         {
+                             std::vector<uint16_t> d = {430, 10439, 5039, 102, 0, 994};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<uint16_t>(vector);
+                             return compare_vector("uint16_t", d, res);
+                         });
+
+    // int16_t
+    failures += run_test([]()
+                         {
+                             std::vector<int16_t> d = {304, -103, 4, -32405, 304, 506};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<int16_t>(vector);
+                             return compare_vector("int16_t", d, res);
+                         });
+
+    // uint32_t
+    failures += run_test([]()
+                         {
+                             std::vector<uint32_t> d = {95817395, 103945850, 40913, 0, 59, 958274958};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<uint32_t>(vector);
+                             return compare_vector("uint32_t", d, res);
+                         });
+
+    // int32_t
+    failures += run_test([]()
+                         {
+                             std::vector<int32_t> d = {3049, 0, -1049581045, -309185019, 6610495, 86371, 9483, 6610495};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<int32_t>(vector);
+                             return compare_vector("int32_t", d, res);
+                         });
+
+    // uint64_t
+    failures += run_test([]()
+                         {
+                             std::vector<uint64_t> d = {8476164390, 1034985710104950195, 0, 10495871};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<uint64_t>(vector);
+                             return compare_vector("uint64_t", d, res);
+                         });
+
+    // int64_t
+    failures += run_test([]()
+                         {
+                             std::vector<int64_t> d = {-1043958104856, 309858106037, -5098282759120942699, 999999999999999999, 19485601895, 0, 2984585, 104959185, -999999999999999999};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<int64_t>(vector);
+                             return compare_vector("int64_t", d, res);
+                         });
+
+    // double
+    failures += run_test([]()
+                         {
+                             std::vector<double> d = {1.0, -0.4, 3.14159267, 0, 4958194920958193.9471683, -9482748750.22593};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<double>(vector);
+                             return compare_vector("double", d, res);
+                         });
+
+    // bool
+    failures += run_test([]()
+                         {
+                             std::vector<bool> d = {false, true, 0, 1, false, false, true};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<bool>(vector);
+                             return compare_vector("bool", d, res);
+                         });
+
+    // std::string
+    failures += run_test([]()
+                         {
+                             std::vector<std::string> d = {"line 1", "line 2", "line 3"};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<std::string>(vector);
+                             return compare_vector("std::string", d, res);
+                         });
+
+    // DBus::Object::Path
+    failures += run_test([]()
+                         {
+                             std::vector<DBus::Object::Path> d = {
+                                 "/net/openvpn/gdbus/object_path/test1",
+                                 "/net/openvpn/gdbus/object_path/test2",
+                                 "/net/openvpn/gdbus/object_path/test3",
+                                 "/net/openvpn/gdbus/object_path/test4",
+                                 "/net/openvpn/gdbus/object_path/test5"};
+                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             auto res = glib2::Value::ExtractVector<DBus::Object::Path>(vector);
+                             return compare_vector("DBus::Object::Path", d, res);
+                         });
+
+
+    return failures;
+};
+
 int main(int argc, char **argv)
 {
     DBus::Proxy::Client::Ptr prx = nullptr;
@@ -588,6 +739,7 @@ int main(int argc, char **argv)
     if (!prx)
     {
         failures += test_base_data_types();
+        failures += test_base_vector();
     }
 
     if (prx)
