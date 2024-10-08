@@ -57,6 +57,19 @@ class BusWatcher
     BusWatcher(BusType bus_type, const std::string &bus_name, bool start = false);
 
     /**
+     *  Sets up a watch on a bus name using an existing DBus::Connection object
+     *
+     * @param conn      DBus::Connection to use setting up the watcher
+     * @param bus_name  The name of the bus we want to know about.
+     * @param start     If this is `true`, and the bus name has not yet appeared on
+     *                  the bus, registering for watching the bus will also try to
+     *                  activate the service that owns the bus name.
+     */
+    BusWatcher(DBus::Connection::Ptr conn,
+               const std::string &bus_name,
+               bool start = false);
+
+    /**
      *  Unwatches the bus name.
      */
     ~BusWatcher();

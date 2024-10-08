@@ -32,6 +32,19 @@ BusWatcher::BusWatcher(BusType bus_type, const std::string &bus_name, bool start
 }
 
 
+BusWatcher::BusWatcher(DBus::Connection::Ptr conn, const std::string &bus_name, bool start)
+{
+    watcher_id_ = g_bus_watch_name_on_connection(
+        conn->ConnPtr(),
+        bus_name.c_str(),
+        (start ? G_BUS_NAME_WATCHER_FLAGS_AUTO_START : G_BUS_NAME_WATCHER_FLAGS_NONE),
+        on_name_appeared,
+        on_name_disappeared,
+        this,
+        nullptr);
+}
+
+
 BusWatcher::~BusWatcher()
 {
     g_bus_unwatch_name(watcher_id_);
