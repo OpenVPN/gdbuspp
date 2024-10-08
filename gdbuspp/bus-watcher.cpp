@@ -21,9 +21,8 @@ namespace DBus {
 
 
 BusWatcher::BusWatcher(BusType bus_type, const std::string &bus_name, bool start)
-    : bus_type_(bus_type)
 {
-    watcher_id_ = g_bus_watch_name((bus_type_ == BusType::SESSION ? G_BUS_TYPE_SESSION : G_BUS_TYPE_SYSTEM),
+    watcher_id_ = g_bus_watch_name((bus_type == BusType::SESSION ? G_BUS_TYPE_SESSION : G_BUS_TYPE_SYSTEM),
                                    bus_name.c_str(),
                                    (start ? G_BUS_NAME_WATCHER_FLAGS_AUTO_START : G_BUS_NAME_WATCHER_FLAGS_NONE),
                                    on_name_appeared,

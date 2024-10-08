@@ -106,7 +106,6 @@ class BusWatcher
                                     gpointer user_data);
 
   private:
-    BusType bus_type_{BusType::SESSION};
     guint watcher_id_{0};
     std::function<void(const std::string &)> name_disappeared_callback_;
     std::condition_variable name_appeared_cv_;
