@@ -61,6 +61,12 @@ void MainLoop::Run()
 }
 
 
+bool MainLoop::Running() const
+{
+    return _private::_int_glib2_mainloop != nullptr;
+}
+
+
 void MainLoop::Stop()
 {
     if (!_private::_int_glib2_mainloop)

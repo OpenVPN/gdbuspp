@@ -70,6 +70,12 @@ class MainLoop
      */
     void Run();
 
+    /**
+     *  Check if the mainloop is already running
+     *
+     * @return true if the main loop is running, otherwise false
+     */
+    bool Running() const;
 
     /**
      *  Stops an already running main loop.  This can be called from a
