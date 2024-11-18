@@ -254,7 +254,13 @@ const bool DBusServiceQuery::LookupActivatable(const std::string &service) const
 
 const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const noexcept
 {
-    // Identify if this service can be started via the
+    // Check if the service is already running
+    if (LookupService(service))
+    {
+        return true;
+    }
+
+    // If not, identify if this service can be started via the
     // org.freedesktop.DBus.StartServiceByName() call to the D-Bus daemon
     bool activatable = true;
     try
@@ -282,11 +288,11 @@ const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const
                 (void)StartServiceByName(service);
             }
 
-            // All services registered with the D-Bus daemon will have a
-            // unique bus name it can be reached via.  If the method below
-            // does not throw an exception - the service is available.
-            (void)GetNameOwner(service);
-            return true;
+            if (LookupService(service))
+            {
+                return true;
+            }
+            usleep(300000);
         }
         catch (const DBusServiceQuery::Exception &)
         {
