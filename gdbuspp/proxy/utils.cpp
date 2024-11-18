@@ -69,7 +69,7 @@ const bool Query::CheckObjectExists(const Object::Path &path,
 {
     auto target = Proxy::TargetPreset::Create(path,
                                               "org.freedesktop.DBus.Properties");
-    for (int i = 4; i > 0; --i)
+    for (int i = 15; i > 0; --i)
     {
         try
         {
@@ -268,7 +268,7 @@ const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const
         // that will be caught in by the StartServiveByName() call below.
     }
 
-    for (int i = 5; i > 0; --i)
+    for (int i = 30; i > 0; --i)
     {
         try
         {
@@ -302,7 +302,7 @@ const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const
             // call failed - which can mean the service did respond to
             // the auto-start request but hasn't settled yet - just wait
             // a little bit before retrying.
-            usleep(400000);
+            usleep(300000);
         }
     }
     return false;
