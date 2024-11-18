@@ -497,18 +497,11 @@ Client::Client(Connection::Ptr conn, const std::string &dest)
         // result in a recursion, since DBusServiceQuery uses this Client
         // implementation
         auto srvqry = Proxy::Utils::DBusServiceQuery::Create(connection);
-        if (!srvqry->LookupService(destination))
+        if (!srvqry->CheckServiceAvail(destination))
         {
-            if (srvqry->LookupActivatable(destination))
-            {
-                (void)srvqry->StartServiceByName(destination);
-            }
-            else
-            {
-                throw DBus::Proxy::Exception("Service '"
-                                             + destination
-                                             + "' cannot be reached");
-            }
+            throw DBus::Proxy::Exception("Service '"
+                                         + destination
+                                         + "' cannot be reached");
         }
     }
 }
