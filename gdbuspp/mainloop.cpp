@@ -61,6 +61,15 @@ void MainLoop::Run()
 }
 
 
+void MainLoop::Wait()
+{
+    if (_private::_int_glib2_mainloop)
+    {
+        g_main_loop_run(_private::_int_glib2_mainloop);
+    }
+}
+
+
 bool MainLoop::Running() const
 {
     return _private::_int_glib2_mainloop != nullptr;

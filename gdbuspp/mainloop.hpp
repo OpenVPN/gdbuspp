@@ -70,6 +70,13 @@ class MainLoop
      */
     void Run();
 
+
+    /**
+     *  This will wait until the main loop stops running.  If no main loop
+     *  us running, it will return instantly.
+     */
+    void Wait();
+
     /**
      *  Check if the mainloop is already running
      *
