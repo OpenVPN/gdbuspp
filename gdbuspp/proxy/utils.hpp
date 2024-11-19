@@ -128,7 +128,6 @@ class DBusServiceQuery
      */
     [[nodiscard]] static DBusServiceQuery::Ptr Create(DBus::Connection::Ptr connection);
 
-
     /**
      *  Calls the org.freedesktop.DBus.StartServiceByName method
      *
@@ -137,7 +136,7 @@ class DBusServiceQuery
      * @param service          std::string to the service to start
      *
      * @return const uint32_t  Returns 1 if the service was started, 2 if the
-     *         service was alreadu running.
+     *         service was already running.
      *
      * @throws DBusServiceQuery::Exception on errors
      */
@@ -185,9 +184,12 @@ class DBusServiceQuery
      *  while in between each attempt.
 
      * @param service   D-Bus service well-known bus name to check for
+     * @param timeout   How many seconds to wait for the service to respond.
+     *                  Defaults to approx. 10 seconds.
      * @return true if the service is available, otherwise false
      */
-    const bool CheckServiceAvail(const std::string &service) const noexcept;
+    const bool CheckServiceAvail(const std::string &service,
+                                 uint8_t timeout = 10) const noexcept;
 
 
   private:

@@ -487,7 +487,7 @@ TargetPreset::TargetPreset(const Object::Path &object_path_,
 
 
 
-Client::Client(Connection::Ptr conn, const std::string &dest)
+Client::Client(Connection::Ptr conn, const std::string &dest, uint8_t timeout)
     : connection(conn), destination(dest)
 {
     if ("org.freedesktop.DBus" != dest)
@@ -497,7 +497,7 @@ Client::Client(Connection::Ptr conn, const std::string &dest)
         // result in a recursion, since DBusServiceQuery uses this Client
         // implementation
         auto srvqry = Proxy::Utils::DBusServiceQuery::Create(connection);
-        if (!srvqry->CheckServiceAvail(destination))
+        if (!srvqry->CheckServiceAvail(destination, timeout))
         {
             throw DBus::Proxy::Exception("Service '"
                                          + destination

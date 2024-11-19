@@ -107,13 +107,16 @@ class Client
      * @param connection   DBus::Connection
      * @param destination  std::string containing the D-Bus service to
      *                     connect to
+     * @param timeout      How long to wait for the proxy creation to complete.
+     *                     Defaults to approx. 10 seconds.
      *
      * @return Client::Ptr Returns a shared_ptr with the prepared Proxy client
      */
     [[nodiscard]] static Client::Ptr Create(Connection::Ptr connection,
-                                            const std::string &destination)
+                                            const std::string &destination,
+                                            uint8_t timeout = 10)
     {
-        return Client::Ptr(new Client(connection, destination));
+        return Client::Ptr(new Client(connection, destination, timeout));
     }
     ~Client() noexcept = default;
 
@@ -475,7 +478,7 @@ class Client
     Connection::Ptr connection = nullptr; ///< D-Bus connection object
     const std::string destination;        ///< D-Bus service bus name to use
 
-    Client(Connection::Ptr conn, const std::string &dest);
+    Client(Connection::Ptr conn, const std::string &dest, uint8_t timeout);
 };
 
 } // namespace Proxy

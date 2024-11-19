@@ -252,7 +252,8 @@ const bool DBusServiceQuery::LookupActivatable(const std::string &service) const
 }
 
 
-const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const noexcept
+const bool DBusServiceQuery::CheckServiceAvail(const std::string &service,
+                                               uint8_t timeout) const noexcept
 {
     // Check if the service is already running
     if (LookupService(service))
@@ -274,7 +275,8 @@ const bool DBusServiceQuery::CheckServiceAvail(const std::string &service) const
         // that will be caught in by the StartServiveByName() call below.
     }
 
-    for (int i = 30; i > 0; --i)
+    int iterations = timeout * 3; // 3 iterations takes about 1 second
+    for (int i = iterations; i > 0; --i)
     {
         try
         {
