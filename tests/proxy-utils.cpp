@@ -16,6 +16,7 @@
  */
 
 #include <any>
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -96,15 +97,21 @@ class ProxyOpts : protected TestUtils::OptionParser
 uint32_t success = 0;
 uint32_t failed = 0;
 
-void test_log(std::ostringstream &log,
+bool test_log(std::ostringstream &log,
               const std::string &descr,
               DBus::Proxy::Client::Ptr proxy,
-              bool result,
+              std::function<bool()> &&test_func,
               bool expect)
 {
+    time_t start, end;
+    time(&start);
+    bool result = test_func();
+    time(&end);
+
     log << "[" << (result == expect ? "PASS" : "FAIL") << "] "
         << "{result=" << (result ? "pass" : "fail")
         << ", expected=" << (expect ? "pass" : "fail")
+        << ", execution_time=" << double(end - start) << "s"
         << "} " << descr;
     if (proxy)
     {
@@ -120,6 +127,7 @@ void test_log(std::ostringstream &log,
     {
         ++failed;
     }
+    return result;
 }
 
 template <typename FUNC>
@@ -129,29 +137,35 @@ void test_exception(std::ostringstream &log,
                     FUNC &&testfunc,
                     const std::vector<std::string> &exception_list)
 {
-    bool result = false;
-    std::string error_msg{};
-    try
-    {
-        testfunc();
-        result = false;
-    }
-    catch (const DBus::Exception &excp)
-    {
-        for (const auto &exception : exception_list)
-        {
-            error_msg = std::string(excp.GetRawError());
-            result = (error_msg == exception);
-            if (result)
-            {
-                break;
-            }
-        }
-    }
     std::ostringstream msg;
     msg << "Expecting exception string["
         << std::quoted(exception_list[0]) << "] " + descr;
-    test_log(log, msg.str(), proxy, result, true);
+
+    std::string error_msg{};
+    auto test_code = [&testfunc, &exception_list, &error_msg]() -> bool
+    {
+        bool res = false;
+        try
+        {
+            testfunc();
+            res = false;
+        }
+        catch (const DBus::Exception &excp)
+        {
+            for (const auto &exception : exception_list)
+            {
+                error_msg = std::string(excp.GetRawError());
+                res = (error_msg == exception);
+                if (res)
+                {
+                    break;
+                }
+            }
+        }
+        return res;
+    };
+
+    bool result = test_log(log, msg.str(), proxy, test_code, true);
     if (!result)
     {
         if (!error_msg.empty())
@@ -213,7 +227,7 @@ int main(int argc, char **argv)
                        bad_proxy,
                        [&]()
                        {
-                           bad_proxy = DBus::Proxy::Client::Create(conn, "non.existing.service");
+                           bad_proxy = DBus::Proxy::Client::Create(conn, "non.existing.service", 3);
                        },
                        {"Service 'non.existing.service' cannot be reached"});
 
@@ -230,32 +244,55 @@ int main(int argc, char **argv)
         std::string incorrect_interface = "no.such.interface";
 
         // Run Utils::Query::CheckObjectExists() tests
+        auto test1 = [&query, &path, &interface]() -> bool
+        {
+            return query->CheckObjectExists(path, interface);
+        };
         test_log(log,
                  "query->CheckObjectExists('" + path + "', '" + interface + "')",
                  proxy,
-                 query->CheckObjectExists(path, interface),
+                 test1,
                  true);
+
+        auto test2 = [&query, &incorrect_path, &interface]() -> bool
+        {
+            return query->CheckObjectExists(incorrect_path, interface);
+        };
         test_log(log,
                  "query->CheckObjectExists('" + incorrect_path + "', '" + interface + "')",
                  proxy,
-                 query->CheckObjectExists(incorrect_path, interface),
+                 test2,
                  false);
+
+        auto test3 = [&query, &path, &incorrect_interface]() -> bool
+        {
+            return query->CheckObjectExists(path, incorrect_interface);
+        };
         test_log(log,
                  "query->CheckObjectExists('" + path + "', '" + incorrect_interface + "')",
                  proxy,
-                 query->CheckObjectExists(path, incorrect_interface),
+                 test3,
                  false);
+
+        auto test4 = [&query, &incorrect_path, &incorrect_interface]() -> bool
+        {
+            return query->CheckObjectExists(incorrect_path, incorrect_interface);
+        };
         test_log(log,
                  "query->CheckObjectExists('" + incorrect_path + "', '" + incorrect_interface + "')",
                  proxy,
-                 query->CheckObjectExists(incorrect_path, incorrect_interface),
+                 test4,
                  false);
 
         // Run Utils::Query::ServiceVersion() tests
+        auto test5 = [&query, &path, &interface]() -> bool
+        {
+            return query->ServiceVersion(path, interface) == "0.1.2.3";
+        };
         test_log(log,
                  "query->ServiceVersion('" + path + "', '" + interface + "')",
                  proxy,
-                 query->ServiceVersion(path, interface) == "0.1.2.3",
+                 test5,
                  true);
 
         test_exception(
@@ -278,15 +315,24 @@ int main(int argc, char **argv)
             auto chk_value = glib2::Value::Extract<std::string>(res, 0);
             g_variant_unref(res);
 
+            auto test_introsp = [&query, &path, &chk_value]() -> bool
+            {
+                return query->Introspect(path) == chk_value;
+            };
             test_log(log,
                      "query->Introspect('" + path + "')",
                      proxy,
-                     query->Introspect(path) == chk_value,
+                     test_introsp,
                      true);
+
+            auto test_incorr_introsp = [&query, &incorrect_path, &chk_value]() -> bool
+            {
+                return query->Introspect(incorrect_path) == chk_value;
+            };
             test_log(log,
                      "query->Introspect('" + incorrect_path + "')",
                      proxy,
-                     query->Introspect(incorrect_path) == chk_value,
+                     test_incorr_introsp,
                      false);
         }
 
@@ -295,10 +341,14 @@ int main(int argc, char **argv)
         {
             auto service_qry = Proxy::Utils::DBusServiceQuery::Create(conn);
 
+            auto test_start_srv_by_name = [&service_qry]() -> bool
+            {
+                return service_qry->StartServiceByName("org.freedesktop.systemd1") == 2;
+            };
             test_log(log,
                      "service_qry->StartServiceByName(org.freedesktop.systemd1) == 2",
                      nullptr,
-                     service_qry->StartServiceByName("org.freedesktop.systemd1") == 2,
+                     test_start_srv_by_name,
                      true);
 
             test_exception(
@@ -318,29 +368,45 @@ int main(int argc, char **argv)
                  "Failed querying service 'non.existing.service': "
                  "The name is not activatable"});
 
+            auto test_check_srv_avail = [&service_qry]() -> bool
+            {
+                return service_qry->CheckServiceAvail("org.freedesktop.systemd1", 5) == true;
+            };
             test_log(log,
                      "service_qry->CheckServiceAvail(org.freedesktop.systemd1) == true",
                      nullptr,
-                     service_qry->CheckServiceAvail("org.freedesktop.systemd1") == true,
+                     test_check_srv_avail,
                      true);
+
+            auto test_check_srv_avail_non = [&service_qry]() -> bool
+            {
+                return service_qry->CheckServiceAvail("non.existing.service", 3) == true;
+            };
+
             test_log(log,
                      "service_qry->CheckServiceAvail(non.existing.service) == true",
                      nullptr,
-                     service_qry->CheckServiceAvail("non.existing.service") == true,
+                     test_check_srv_avail_non,
                      false);
 
             auto creds = DBus::Credentials::Query::Create(conn);
             std::string chk_busname = creds->GetUniqueBusName(options.destination);
+
+            auto test_getname_own_opt = [&service_qry, &options, &chk_busname]() -> bool
+            {
+                return service_qry->GetNameOwner(options.destination) == chk_busname;
+            };
             test_log(log,
                      "service_qry->GetNameOwner(" + options.destination + ")",
                      nullptr,
-                     service_qry->GetNameOwner(options.destination) == chk_busname,
+                     test_getname_own_opt,
                      true);
+
             test_exception(
                 log,
                 "service_qry->GetNameOwner(non.existing.service)",
                 nullptr,
-                [service_qry]()
+                [&service_qry]()
                 {
                     service_qry->GetNameOwner("non.existing.service");
                 },
@@ -353,26 +419,44 @@ int main(int argc, char **argv)
                  "Failed querying service 'non.existing.service': "
                  "The name does not have an owner"});
 
+            auto test_lookup_srv_exist = [&service_qry]() -> bool
+            {
+                return service_qry->LookupService("org.freedesktop.DBus");
+            };
             test_log(log,
                      "service_qry->LookupService(org.freedesktop.DBus)",
                      nullptr,
-                     service_qry->LookupService("org.freedesktop.DBus"),
+                     test_lookup_srv_exist,
                      true);
+
+            auto test_lookup_srv_non = [&service_qry]() -> bool
+            {
+                return service_qry->LookupService("non.existing.service");
+            };
             test_log(log,
                      "service_qry->LookupService(non.existing.service)",
                      nullptr,
-                     service_qry->LookupService("non.existing.service"),
+                     test_lookup_srv_non,
                      false);
 
+            auto test_lookupact_avail = [&service_qry]() -> bool
+            {
+                return service_qry->LookupActivatable("org.freedesktop.DBus");
+            };
             test_log(log,
                      "service_qry->LookupActivatable(org.freedesktop.DBus)",
                      nullptr,
-                     service_qry->LookupActivatable("org.freedesktop.DBus"),
+                     test_lookupact_avail,
                      true);
+
+            auto test_lookupact_non = [&service_qry]() -> bool
+            {
+                return service_qry->LookupActivatable("non.existing.service");
+            };
             test_log(log,
                      "service_qry->LookupActivatable(non.existing.service)",
                      nullptr,
-                     service_qry->LookupActivatable("non.existing.service"),
+                     test_lookupact_non,
                      false);
         }
 
