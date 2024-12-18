@@ -20,6 +20,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
+#include <random>
 #include <string>
 #include <getopt.h>
 #include <glib.h>
@@ -178,6 +179,47 @@ void test_exception(std::ostringstream &log,
         }
     }
 }
+
+
+
+/**
+ *  Extract a list of well-known bus names which can be activated by
+ *  the D-Bus.
+ *
+ *  This will exclude the 'org.freedesktop.DBus' service from the list,
+ *  as that not return the expected return code when starting a service.
+ *
+ *  The resulting list will also be shuffled, to get some variation in
+ *  the testing
+ *
+ * @param conn   DBus::Connection object to use for the lookup
+ * @return std::vector<std::string> containing an unsorted list of all
+ *         the D-Bus service names which can be activated
+ */
+std::vector<std::string> raw_ListActivatableNames(DBus::Connection::Ptr &conn)
+{
+    auto prx = DBus::Proxy::Client::Create(conn, "org.freedesktop.DBus");
+    auto tgt = DBus::Proxy::TargetPreset::Create("/org/freedesktop/DBus",
+                                                 "org.freedesktop.DBus");
+    GVariant *r = prx->Call(tgt, "ListActivatableNames");
+    if (r)
+    {
+        auto ret = glib2::Value::ExtractVector<std::string>(r);
+        ret.erase(std::remove_if(ret.begin(),
+                                 ret.end(),
+                                 [](const std::string &v)
+                                 {
+                                     return v == "org.freedesktop.DBus";
+                                 }));
+
+        auto rd = std::random_device{};
+        auto rng = std::default_random_engine{rd()};
+        std::shuffle(ret.begin(), ret.end(), rng);
+        return ret;
+    }
+    return {};
+}
+
 
 int main(int argc, char **argv)
 {
@@ -339,14 +381,28 @@ int main(int argc, char **argv)
 
         // Run Proxy::Utils::DBusServiceQuery tests
         {
+            auto srv_activatable = raw_ListActivatableNames(conn);
             auto service_qry = Proxy::Utils::DBusServiceQuery::Create(conn);
-
-            auto test_start_srv_by_name = [&service_qry]() -> bool
+            std::string started_srv;
+            auto test_start_srv_by_name = [&service_qry, &srv_activatable, &started_srv, &log]() -> bool
             {
-                return service_qry->StartServiceByName("org.freedesktop.systemd1") == 2;
+                // Loop through activatable services until one starts
+                for (const auto &srv : srv_activatable)
+                {
+                    bool r = service_qry->StartServiceByName(srv) == 2;
+                    if (r)
+                    {
+                        log << "            [lambda]      >>   Started service:"
+                            << srv << std::endl;
+                        started_srv = srv;
+                        return true;
+                    }
+                }
+                return false;
             };
+
             test_log(log,
-                     "service_qry->StartServiceByName(org.freedesktop.systemd1) == 2",
+                     "service_qry->StartServiceByName(...) == 2",
                      nullptr,
                      test_start_srv_by_name,
                      true);
@@ -368,12 +424,12 @@ int main(int argc, char **argv)
                  "Failed querying service 'non.existing.service': "
                  "The name is not activatable"});
 
-            auto test_check_srv_avail = [&service_qry]() -> bool
+            auto test_check_srv_avail = [&service_qry, &started_srv]() -> bool
             {
-                return service_qry->CheckServiceAvail("org.freedesktop.systemd1", 5) == true;
+                return service_qry->CheckServiceAvail(started_srv, 5) == true;
             };
             test_log(log,
-                     "service_qry->CheckServiceAvail(org.freedesktop.systemd1) == true",
+                     "service_qry->CheckServiceAvail(" + started_srv + ") == true",
                      nullptr,
                      test_check_srv_avail,
                      true);
