@@ -15,6 +15,7 @@
  *         running
  */
 
+#include <algorithm>
 #include <any>
 #include <functional>
 #include <iostream>
