@@ -429,6 +429,7 @@ test_data_types = executable(
         [
                 'tests/test-data-types.cpp',
         ],
+        cpp_args: '-Wno-free-nonheap-object', # This trips off on GCC-15
         link_with: [
                 gdbuspp_lib.get_static_lib(),
                 tests_lib,
