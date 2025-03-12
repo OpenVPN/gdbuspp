@@ -51,7 +51,7 @@ glib2_deps = [
 build_config_data = configuration_data({
         'GDBUSPP_INTERNAL_DEBUG': get_option('internal_debug'),
 })
-build_config_h = configure_file(
+configure_file(
         output: 'build-config.h',
         configuration: build_config_data,
 )
@@ -96,7 +96,7 @@ gdbuspp_lib = both_libraries(
         soversion: '3',
         install: true
 )
-gdbuspp_inc = include_directories('gdbuspp')
+
 install_headers(
         'gdbuspp/async-process.hpp',
         'gdbuspp/authz-request.hpp',
@@ -272,7 +272,7 @@ test_proxy = executable(
         install_dir: get_option('libexecdir') + '/gdbuspp/tests'
 )
 
-test_bus_watcher = executable(
+executable(
         'test_bus_watcher',
         [
                 'tests/bus-watcher.cpp'
@@ -356,7 +356,7 @@ signal_group = executable(
 )
 
 #  Tests the DBus::Signals::Signal API
-signal_signal = executable(
+executable(
         'test_signal-signal',
         [
                 'tests/signal-signal.cpp',
