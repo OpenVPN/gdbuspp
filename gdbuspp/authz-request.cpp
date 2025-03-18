@@ -38,7 +38,7 @@ const std::string Exception::compose_error(const Request::Ptr req,
     }
 
     std::ostringstream r;
-    r << "Autorization failed for " << req->caller;
+    r << "Authorization failed for " << req->caller;
     switch (req->operation)
     {
     case Object::Operation::METHOD_CALL:
