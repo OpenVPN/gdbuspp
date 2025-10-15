@@ -401,19 +401,10 @@ inline void Add(GVariantBuilder *builder,
  * @return Returns a GVariantBuilder object containing the complete array
  */
 template <typename T>
-inline GVariantBuilder *FromVector(const std::vector<T> input,
+inline GVariantBuilder *FromVector(const std::vector<T> &input,
                                    const char *override_type = nullptr)
 {
-    std::string type = {};
-    if (override_type)
-    {
-        type = std::string("a") + std::string(override_type);
-    }
-    else
-    {
-        type = std::string("a") + std::string(DataType::DBus<T>());
-    }
-
+    std::string type = "a" + std::string(override_type ? override_type : DataType::DBus<T>());
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE(type.c_str()));
     for (const auto &e : input)
     {
