@@ -93,10 +93,7 @@ class Update
     void AddValue(const std::vector<T> &vals)
     {
         GVariantBuilder *val_array = glib2::Builder::Create("a*");
-        for (const auto &v : vals)
-        {
-            glib2::Builder::Add(val_array, v);
-        }
+        glib2::Builder::Add(val_array, vals);
         updated_vals.push_back(glib2::Builder::Finish(val_array));
     }
 

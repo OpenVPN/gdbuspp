@@ -373,6 +373,23 @@ inline void Add(GVariantBuilder *builder,
 }
 
 
+template <typename T>
+inline void Add(GVariantBuilder *builder,
+                const std::vector<T> &vector_value,
+                const char *override_type = nullptr) noexcept
+{
+    std::string dbus_type = "a" + std::string(override_type ? override_type : DataType::DBus<T>());
+    GVariantBuilder *bld = glib2::Builder::Create(dbus_type.c_str());
+    for (const auto &value : vector_value)
+    {
+        {
+            glib2::Builder::Add(bld, value);
+        }
+    }
+    g_variant_builder_add_value(builder, glib2::Builder::Finish(bld));
+}
+
+
 /**
  *  Converts a std::vector<T> to a D-Bus compliant
  *  array  builder of the D-Bus corresponding data type

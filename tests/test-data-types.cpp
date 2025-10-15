@@ -596,6 +596,21 @@ int test_base_data_types()
                                  "(soibnuty)");
                          });
 
+    failures += run_test([]()
+                         {
+                             auto str_v = std::vector<std::string>{"string 1", "string B", "string III"};
+                             auto int_v = std::vector<int32_t>{-103949501, 304958104, 10, 50, 0, -24, -88};
+                             auto uint_v = std::vector<uint32_t>{0, 10293, 5029, 19586, 1};
+                             GVariantBuilder *b = glib2::Builder::Create("(asaiau)");
+                             glib2::Builder::Add(b, str_v);
+                             glib2::Builder::Add(b, int_v);
+                             glib2::Builder::Add(b, uint_v);
+                             return check_data_type_gvariant(
+                                 "glib2::Builder::Create(\"(asaiau)\")  ",
+                                 glib2::Builder::Finish(b),
+                                 "(asaiau)");
+                         });
+
     std::cout << ":: Base data type test failures: " << failures
               << std::endl
               << std::endl;
