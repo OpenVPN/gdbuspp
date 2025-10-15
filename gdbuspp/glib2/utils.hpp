@@ -260,6 +260,30 @@ void CloseChild(GVariantBuilder *builder);
  */
 GVariant *CreateEmpty(const char *type);
 
+
+/**
+ *  Just a wrapper around @g_variant_builder_end() with a memory cleanup.
+ *  This function is primarily here to provide a consistent C++ API.
+ *
+ * @param builder   GVariantBuilder object to complete
+ * @return GVariant* The finialized GVariantBuilder object as a GVariant object
+ */
+GVariant *Finish(GVariantBuilder *builder) noexcept;
+
+
+/**
+ *  Wraps the content in a GVariantBuilder object into a tuple
+ *  and returns the complete tuple as GVariant object.
+ *
+ *  This function will call @g_variant_builder_end() on the provided
+ *  GVariantBuilder object and unrefs it.
+ *
+ *  @param bld the builder to wrap
+ * @return the result of the builder wrapped into a tuple
+ */
+GVariant *FinishWrapped(GVariantBuilder *bld) noexcept;
+
+
 /**
  *   Template variant of GLib2's @g_variant_builder_add() which extract
  *   the D-Bus data type automatically via the data type passed.
@@ -381,29 +405,6 @@ inline GVariantBuilder *FromVector(const std::vector<T> input,
 
     return bld;
 }
-
-
-/**
- *  Just a wrapper around @g_variant_builder_end() with a memory cleanup.
- *  This function is primarily here to provide a consistent C++ API.
- *
- * @param builder   GVariantBuilder object to complete
- * @return GVariant* The finialized GVariantBuilder object as a GVariant object
- */
-GVariant *Finish(GVariantBuilder *builder) noexcept;
-
-
-/**
- *  Wraps the content in a GVariantBuilder object into a tuple
- *  and returns the complete tuple as GVariant object.
- *
- *  This function will call @g_variant_builder_end() on the provided
- *  GVariantBuilder object and unrefs it.
- *
- *  @param bld the builder to wrap
- * @return the result of the builder wrapped into a tuple
- */
-GVariant *FinishWrapped(GVariantBuilder *bld) noexcept;
 
 
 } // namespace Builder
