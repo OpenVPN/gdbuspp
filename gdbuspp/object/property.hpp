@@ -113,7 +113,7 @@ class Update
 
 
   private:
-    Update(const Property::Interface &prop)
+    explicit Update(const Property::Interface &prop)
         : property(prop)
     {
     }

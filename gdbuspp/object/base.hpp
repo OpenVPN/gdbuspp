@@ -169,8 +169,8 @@ class Base : public std::enable_shared_from_this<Base>
      *                    property value is being changed via the D-Bus
      *                    org.freedesktop.DBus.Properties.Set() method.
      */
-    void AddPropertyBySpec(const std::string name,
-                           const std::string dbustype,
+    void AddPropertyBySpec(const std::string &name,
+                           const std::string &dbustype,
                            Property::BySpec::GetPropertyCallback get_cb,
                            Property::BySpec::SetPropertyCallback set_cb);
 
@@ -189,8 +189,8 @@ class Base : public std::enable_shared_from_this<Base>
      *                    this property is queried for its value via the
      *                    D-Bus org.freedesktop.DBus.Properties.Get() method.
      */
-    void AddPropertyBySpec(const std::string name,
-                           const std::string dbustype,
+    void AddPropertyBySpec(const std::string &name,
+                           const std::string &dbustype,
                            Property::BySpec::GetPropertyCallback get_cb);
 
 

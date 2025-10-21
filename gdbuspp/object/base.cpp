@@ -63,8 +63,8 @@ const std::string &Object::Base::GetInterface() const noexcept
 }
 
 
-void Object::Base::AddPropertyBySpec(const std::string name,
-                                     const std::string dbustype,
+void Object::Base::AddPropertyBySpec(const std::string &name,
+                                     const std::string &dbustype,
                                      Property::BySpec::GetPropertyCallback get_cb,
                                      Property::BySpec::SetPropertyCallback set_cb)
 {
@@ -79,8 +79,8 @@ void Object::Base::AddPropertyBySpec(const std::string name,
 }
 
 
-void Object::Base::AddPropertyBySpec(const std::string name,
-                                     const std::string dbustype,
+void Object::Base::AddPropertyBySpec(const std::string &name,
+                                     const std::string &dbustype,
                                      Property::BySpec::GetPropertyCallback get_cb)
 {
     auto set_readonly_cb{
