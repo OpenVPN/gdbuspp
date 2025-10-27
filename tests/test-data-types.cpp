@@ -166,6 +166,7 @@ TestResult check_data_type_gvariant(const std::string &msg,
     }
     message << " } >>> Test";
 
+    g_variant_unref(value);
     return TestResult(message.str(), pass);
 }
 
