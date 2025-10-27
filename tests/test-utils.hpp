@@ -44,7 +44,7 @@ class OptionParser
     virtual ~OptionParser() noexcept = default;
 
   protected:
-    void help(const std::string argv0, struct option options[]);
+    void help(const std::string &argv0, struct option options[]);
 };
 
 
@@ -67,7 +67,7 @@ void dump_gvariant(std::ostringstream &log, const std::string &prefix, GVariant 
  * @param  data        GVariant * to object to check
  * @returns Returns true when the expected type string is found, otherwise false
  */
-bool check_data_type(const std::string expect_type, GVariant *data);
+bool check_data_type(const std::string &expect_type, GVariant *data);
 
 /**
  *  Checks the data contents of a GVariant object against an expected
@@ -79,7 +79,7 @@ bool check_data_type(const std::string expect_type, GVariant *data);
  * @param  data        GVariant * to object to check
  * @returns Returns true when the expected value is found, otherwise false
  */
-bool check_data_value(const std::string expect_value, GVariant *data);
+bool check_data_value(const std::string &expect_value, GVariant *data);
 
 /**
  *  Test and log the data type and value of a GVariant object.

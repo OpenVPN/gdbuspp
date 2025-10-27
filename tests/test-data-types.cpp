@@ -123,7 +123,7 @@ TestResult check_data_type_cpp(const std::string &type_str,
 }
 
 
-TestResult check_data_type_gvariant(const std::string msg,
+TestResult check_data_type_gvariant(const std::string &msg,
                                     GVariant *value,
                                     const std::string &expect)
 {

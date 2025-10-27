@@ -38,7 +38,7 @@ const char *Exception::what() const noexcept
 
 
 
-void OptionParser::help(const std::string argv0, struct option options[])
+void OptionParser::help(const std::string &argv0, struct option options[])
 {
     std::cout << "Usage: " << argv0 << " <options>" << std::endl
               << std::endl
@@ -48,7 +48,7 @@ void OptionParser::help(const std::string argv0, struct option options[])
     bool done = false;
     while (!done)
     {
-        struct option *opt = &options[idx];
+        const struct option *opt = &options[idx];
         if (opt->name)
         {
             if (opt->val > 0)
@@ -92,14 +92,14 @@ void dump_gvariant(std::ostringstream &log, const std::string &prefix, GVariant 
 }
 
 
-bool check_data_type(const std::string expect_type, GVariant *data)
+bool check_data_type(const std::string &expect_type, GVariant *data)
 {
     std::string gv_type(g_variant_get_type_string(data));
     return gv_type == expect_type;
 }
 
 
-bool check_data_value(const std::string expect_value, GVariant *data)
+bool check_data_value(const std::string &expect_value, GVariant *data)
 {
     std::string gv_value(g_variant_print(data, false));
     return gv_value == expect_value;
