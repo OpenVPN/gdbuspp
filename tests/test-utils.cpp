@@ -101,7 +101,9 @@ bool check_data_type(const std::string &expect_type, GVariant *data)
 
 bool check_data_value(const std::string &expect_value, GVariant *data)
 {
-    std::string gv_value(g_variant_print(data, false));
+    char *tmpstr = g_variant_print(data, false);
+    std::string gv_value(tmpstr);
+    free(tmpstr);
     return gv_value == expect_value;
 }
 
