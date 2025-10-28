@@ -13,6 +13,7 @@
  *         requires the simple-service.cpp program to run in advance
  */
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include "../gdbuspp/connection.hpp"
@@ -171,6 +172,16 @@ TestResult check_data_type_gvariant(const std::string &msg,
 }
 
 
+template <typename T>
+auto stream_iterator_value(T t)
+{
+    if constexpr (std::is_same_v<std::byte, std::decay_t<T>>)
+        return std::to_integer<int>(t);
+    else
+        return t;
+}
+
+
 template <typename T1, typename T2>
 TestResult compare_vector(const std::string &msg,
                           T1 &vect1,
@@ -188,15 +199,16 @@ TestResult compare_vector(const std::string &msg,
     message << "Pass, ";
 
     message << "Content: ";
-    for (size_t i = 0; i < vect1.size(); i++)
+    if (!std::equal(vect1.begin(), vect1.end(), vect2.begin(), vect2.end()))
     {
-        if (vect1[i] != vect2[i])
-        {
-            message << "Differs ('" << vect1[i] << "', '" << vect2[i] << "'): FAILED";
-            return TestResult(message.str(), false);
-        }
+        auto [vect1_it, vect2_it] = std::mismatch(vect1.begin(),
+                                                  vect1.end(),
+                                                  vect2.begin(),
+                                                  vect2.end());
+        message << "Differs ('" << stream_iterator_value(*vect1_it) << "', '" << stream_iterator_value(*vect2_it) << "'): FAILED";
+        return TestResult(message.str(), false);
     }
-    message << "Pass";
+    message << "Pass -> Test case";
     return TestResult(message.str(), true);
 }
 
@@ -622,10 +634,9 @@ int test_base_data_types()
 
 int test_base_vector()
 {
-    std::cout << ":: Testing base data types ..." << std::endl;
+    std::cout << ":: Testing vectorized base data types ..." << std::endl;
     int failures = 0;
 
-#if 0 // FIXME: Need better data type logic in compare_vector
     // std::byte
     failures += run_test([]()
                          {
@@ -633,14 +644,15 @@ int test_base_vector()
                                  std::byte{1},
                                  std::byte{8},
                                  std::byte{0},
+                                 std::byte{128},
                                  std::byte{15},
                                  std::byte{16},
+                                 std::byte{127},
                                  std::byte{255}};
                              GVariant *vector = glib2::Value::CreateTupleWrapped(d);
                              auto res = glib2::Value::ExtractVector<std::byte>(vector);
                              return compare_vector("std::byte", d, res);
                          });
-#endif
 
     // uint16_t
     failures += run_test([]()
