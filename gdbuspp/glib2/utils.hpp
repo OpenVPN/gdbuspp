@@ -643,15 +643,14 @@ inline std::string Extract<std::string>(GVariant *v, int elm) noexcept
  * @param override_type   (optional) Override the data type. Normally extracted
                           via the C++ data type (T), but some types may need
                           a different D-Bus data type
- * @param wrapped         Is the result wrapped as a tuple
  * @return std::vector<T>
  */
 template <typename T>
 inline std::vector<T> ExtractVector(GVariant *params,
-                                    const char *override_type = nullptr,
-                                    bool wrapped = true) noexcept
+                                    const char *override_type = nullptr) noexcept
 {
     std::stringstream type;
+    const bool wrapped = g_variant_type_is_tuple(g_variant_get_type(params));
     type << (wrapped ? "(" : "")
          << "a"
          << (override_type ? std::string(override_type) : std::string(DataType::DBus<T>()))

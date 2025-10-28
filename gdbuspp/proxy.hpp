@@ -336,7 +336,7 @@ class Client
                                     const std::string &property_name) const
     {
         GVariant *res = GetPropertyGVariant(object_path, interface, property_name);
-        std::vector<T> ret = glib2::Value::ExtractVector<T>(res, nullptr, false);
+        std::vector<T> ret = glib2::Value::ExtractVector<T>(res, nullptr);
         return ret;
     }
 

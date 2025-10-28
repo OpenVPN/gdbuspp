@@ -669,7 +669,7 @@ class Base : public std::enable_shared_from_this<Base>
             // an extra reference count to not completely free it in our
             // own internal processing.
             g_variant_ref_sink(value);
-            std::vector<T> newvalue = glib2::Value::ExtractVector<T>(value, glib2::DataType::DBus<T>(), false);
+            std::vector<T> newvalue = glib2::Value::ExtractVector<T>(value, glib2::DataType::DBus<T>());
             this->variable_ref = newvalue;
 
             auto upd = Property::Interface::PrepareUpdate();
