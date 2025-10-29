@@ -52,7 +52,7 @@ bool expect_throw(std::function<void()> &&testfunc, const std::string &error_mat
 bool checkParams_no_fail_no_container()
 {
     std::vector<std::uint16_t> test_data_array = {{1, 2, 3, 4, 5}};
-    GVariant *data_array = glib2::Value::CreateVector(test_data_array);
+    GVariant *data_array = glib2::Value::Create(test_data_array);
     std::cout << "data_array=" << g_variant_print(data_array, true)
               << std::endl;
     glib2::Utils::checkParams(__func__, data_array, "aq");

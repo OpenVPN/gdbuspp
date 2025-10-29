@@ -474,9 +474,8 @@ a `GVariant` based array to a C++ `std::vector<>`.  This can only be used
 if all the values in the `GVariant` array is of the same data type.  The
 
 The `Create<>()` set of functions will convert a C++ variable into a
-`GVariant` object with the appropriate D-Bus data type.  Similarly, the
-`CreateVector()` takes a `std::vector<>` C++ object and converts that
-to a `GVariant` based object.
+`GVariant` object with the appropriate D-Bus data type.
+
 
 ##### `glib2::Builder`
 In this namespace there are functions to work with the `GVariantBuilder`

@@ -766,25 +766,24 @@ inline GVariant *Create(std::string value) noexcept
 
 
 /**
- *  Converts a std::vector<T> to a D-Bus compliant
- *  array of the corresponding D-Bus data type
+ *  Variant of the @Create function which works on std::vector
  *
- * @param input          std::vector<T> to convert
- * @param override_type  (optional) char * string with the D-Bus type string
- *                       to use for the GVariant container instead of the
- *                       template derived type.
- *
- * @return Returns a GVariant object containing the complete array
+ * @tparam T           C++ data type of value
+ * @param value        The C++ value
+ * @return GVariant*
  */
 template <typename T>
-inline GVariant *CreateVector(const std::vector<T> &input,
-                              const char *override_type = nullptr) noexcept
+inline GVariant *Create(const std::vector<T> &value) noexcept
 {
-    GVariantBuilder *bld = Builder::FromVector(input, override_type);
-    GVariant *ret = g_variant_builder_end(bld);
-    g_variant_builder_unref(bld);
-
-    return ret;
+    std::string type = "a" + std::string(DataType::DBus<T>());
+    GVariantBuilder *bld = Builder::Create(type.c_str());
+    for (const auto &elem : value)
+    {
+        {
+            Builder::Add(bld, elem);
+        }
+    }
+    return Builder::Finish(bld);
 }
 
 
@@ -827,7 +826,7 @@ inline GVariant *CreateTupleWrapped(const std::vector<T> &input,
                                     const char *override_type = nullptr) noexcept
 {
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value(bld, CreateVector(input, override_type));
+    g_variant_builder_add_value(bld, Create(input));
     GVariant *ret = g_variant_builder_end(bld);
     g_variant_builder_unref(bld);
     return ret;

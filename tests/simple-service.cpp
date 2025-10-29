@@ -385,7 +385,7 @@ class MethodTests : public DBus::Object::Base
             "GetRemovedObjects",
             [this](DBus::Object::Method::Arguments::Ptr args)
             {
-                GVariant *r = glib2::Value::CreateVector(removed_objects);
+                GVariant *r = glib2::Value::Create(removed_objects);
                 args->SetMethodReturn(r);
                 removed_objects.clear();
             });

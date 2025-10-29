@@ -646,7 +646,7 @@ class Base : public std::enable_shared_from_this<Base>
          */
         GVariant *GetValue() const override
         {
-            return glib2::Value::CreateVector(this->variable_ref);
+            return glib2::Value::Create(this->variable_ref);
         }
 
 
