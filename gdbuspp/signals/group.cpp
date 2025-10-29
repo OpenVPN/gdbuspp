@@ -15,6 +15,7 @@
 #include <string>
 #include <glib.h>
 
+#include "../glib2/utils.hpp"
 #include "../object/path.hpp"
 #include "exceptions.hpp"
 #include "group.hpp"
@@ -153,7 +154,7 @@ void Group::SendGVariant(const std::string &signal_name,
 
 void Group::GroupSendGVariant(const std::string &groupname,
                               const std::string &signal_name,
-                              GVariant *param)
+                              GVariant *signal_data)
 {
     // If the type cache is empty, run the introspection generation
     // to build the cache
@@ -172,6 +173,8 @@ void Group::GroupSendGVariant(const std::string &groupname,
     {
         throw Signals::Exception("Not a registered signal: " + signal_name);
     }
+
+    GVariant *param = glib2::Value::TupleWrap(signal_data);
 
     // ... and validate it with what we have recevied
     std::string param_type(g_variant_get_type_string(param));

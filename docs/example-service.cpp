@@ -42,9 +42,10 @@ class MySignalGroup : public DBus::Signals::Group
 
     void MySignal(const std::string &message_content)
     {
-        // NOTE: D-Bus signals are picky on the data type.  Signals
-        // must always be sent as a tuple, even if it's just a single value
-        GVariant *message = glib2::Value::CreateTupleWrapped(message_content);
+        // NOTE: Signals must always be sent as a tuple in
+        // glib2, even if it's just a single value.  The
+        // SendGVariant() method will wrap the data when needed.
+        GVariant *message = glib2::Value::Create(message_content);
         SendGVariant("MySignal", message);
     }
 };

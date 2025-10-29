@@ -259,7 +259,7 @@ class MySignalGroup : public DBus::Signals::Group
 
     void MySignal(const std::string &message_content)
     {
-        GVariant *message = glib2::Value::CreateTupleWrapped(message_content);
+        GVariant *message = glib2::Value::Create(message_content);
         SendGVariant("MySignal", message);
     }
 };

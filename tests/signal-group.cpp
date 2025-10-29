@@ -137,11 +137,13 @@ class DebugSignal : public Signals::Signal
               const std::string &msg,
               const std::string &details)
     {
-        Signal::EmitSignal(g_variant_new("(tsss)",
-                                         code,
-                                         msg.c_str(),
-                                         details.c_str(),
-                                         program_name.c_str()));
+        GVariantBuilder *sigdata = glib2::Builder::Create("(tsss)");
+        glib2::Builder::Add<uint64_t>(sigdata, code);
+        glib2::Builder::Add(sigdata, msg);
+        glib2::Builder::Add(sigdata, details);
+        glib2::Builder::Add(sigdata, program_name);
+
+        Signal::EmitSignal(glib2::Builder::Finish(sigdata));
     }
 
   private:
@@ -172,21 +174,29 @@ class LogExample : public Signals::Group
 
     void Info(const int id, const std::string &msg)
     {
-        GVariant *p = g_variant_new("(is)", id, msg.c_str());
-        SendGVariant("Info", p);
+        GVariantBuilder *b = glib2::Builder::Create("(is)");
+        glib2::Builder::Add(b, id);
+        glib2::Builder::Add(b, msg);
+        SendGVariant("Info", glib2::Builder::Finish(b));
     }
 
     void Error(const unsigned int code, const std::string &msg)
     {
-        GVariant *p = g_variant_new("(uss)", code, msg.c_str(), program_name.c_str());
-        SendGVariant("Error", p);
+        GVariantBuilder *b = glib2::Builder::Create("(uss)");
+        glib2::Builder::Add(b, code);
+        glib2::Builder::Add(b, msg);
+        glib2::Builder::Add(b, program_name);
+        SendGVariant("Error", glib2::Builder::Finish(b));
     }
 
     void Invalid()
     {
-        GVariant *p = g_variant_new("(s)", program_name.c_str());
+        GVariant *p = glib2::Value::Create(program_name);
         try
         {
+            // This is deliberately wrong - used for testing only
+            // This shold fail via an exception which will be
+            // processed in the main() function
             SendGVariant("Debug", p);
         }
         catch (...)
