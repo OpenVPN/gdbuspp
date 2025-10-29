@@ -649,7 +649,7 @@ int test_base_vector()
                                  std::byte{16},
                                  std::byte{127},
                                  std::byte{255}};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<std::byte>(vector);
                              return compare_vector("std::byte", d, res);
                          });
@@ -658,7 +658,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<uint16_t> d = {430, 10439, 5039, 102, 0, 994};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<uint16_t>(vector);
                              return compare_vector("uint16_t", d, res);
                          });
@@ -667,7 +667,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<int16_t> d = {304, -103, 4, -32405, 304, 506};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<int16_t>(vector);
                              return compare_vector("int16_t", d, res);
                          });
@@ -676,7 +676,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<uint32_t> d = {95817395, 103945850, 40913, 0, 59, 958274958};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<uint32_t>(vector);
                              return compare_vector("uint32_t", d, res);
                          });
@@ -685,7 +685,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<int32_t> d = {3049, 0, -1049581045, -309185019, 6610495, 86371, 9483, 6610495};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<int32_t>(vector);
                              return compare_vector("int32_t", d, res);
                          });
@@ -694,7 +694,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<uint64_t> d = {8476164390, 1034985710104950195, 0, 10495871};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<uint64_t>(vector);
                              return compare_vector("uint64_t", d, res);
                          });
@@ -703,7 +703,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<int64_t> d = {-1043958104856, 309858106037, -5098282759120942699, 999999999999999999, 19485601895, 0, 2984585, 104959185, -999999999999999999};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<int64_t>(vector);
                              return compare_vector("int64_t", d, res);
                          });
@@ -712,7 +712,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<double> d = {1.0, -0.4, 3.14159267, 0, 4958194920958193.9471683, -9482748750.22593};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<double>(vector);
                              return compare_vector("double", d, res);
                          });
@@ -721,7 +721,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<bool> d = {false, true, 0, 1, false, false, true};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<bool>(vector);
                              return compare_vector("bool", d, res);
                          });
@@ -730,7 +730,7 @@ int test_base_vector()
     failures += run_test([]()
                          {
                              std::vector<std::string> d = {"line 1", "line 2", "line 3"};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<std::string>(vector);
                              return compare_vector("std::string", d, res);
                          });
@@ -744,7 +744,7 @@ int test_base_vector()
                                  "/net/openvpn/gdbus/object_path/test3",
                                  "/net/openvpn/gdbus/object_path/test4",
                                  "/net/openvpn/gdbus/object_path/test5"};
-                             GVariant *vector = glib2::Value::CreateTupleWrapped(d);
+                             GVariant *vector = glib2::Value::Create(d);
                              auto res = glib2::Value::ExtractVector<DBus::Object::Path>(vector);
                              return compare_vector("DBus::Object::Path", d, res);
                          });

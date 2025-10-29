@@ -788,52 +788,6 @@ inline GVariant *Create(const std::vector<T> &value) noexcept
 
 
 /**
- *  Wraps a single C++ value into a D-Bus tuple in a GVariant object
- *
- *  If T is std::string, the D-Bus data type in the GVariant object
- *  will then be '(s,)'.
- *
- * @tparam T           C++ data type
- * @param value        C++ variable content to wrap in
- * @param override_type  (optional) char * string with the D-Bus type string
- *                       to use for the GVariant container instead of the
- *                       template derived type.
- * @return GVariant*
- */
-template <typename T>
-inline GVariant *CreateTupleWrapped(const T &value,
-                                    const char *override_type = nullptr) noexcept
-{
-    GVariant *v = nullptr;
-    if (!override_type)
-    {
-        v = Create(value);
-    }
-    else
-    {
-        v = CreateType(override_type, value);
-    }
-    GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value(bld, v);
-    GVariant *ret = g_variant_builder_end(bld);
-    g_variant_builder_unref(bld);
-    return ret;
-}
-
-
-template <typename T>
-inline GVariant *CreateTupleWrapped(const std::vector<T> &input,
-                                    const char *override_type = nullptr) noexcept
-{
-    GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value(bld, Create(input));
-    GVariant *ret = g_variant_builder_end(bld);
-    g_variant_builder_unref(bld);
-    return ret;
-}
-
-
-/**
  *  Wraps the data in a GVariant object inside a D-Bus tuple
  *  unless it is already wrapped.
  *
