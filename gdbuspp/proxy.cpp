@@ -262,7 +262,7 @@ class Proxy
         GError *err = nullptr;
         GVariant *ret = g_dbus_proxy_call_sync(proxy,
                                                method.c_str(),
-                                               params,
+                                               glib2::Value::TupleWrap(params),
                                                G_DBUS_CALL_FLAGS_NONE,
                                                DBUS_PROXY_CALL_TIMEOUT,
                                                nullptr,
@@ -296,7 +296,7 @@ class Proxy
 
         g_dbus_proxy_call(proxy,
                           method.c_str(),
-                          params,
+                          glib2::Value::TupleWrap(params),
                           G_DBUS_CALL_FLAGS_NONE,
                           DBUS_PROXY_CALL_TIMEOUT,
                           nullptr, // GCancellable
@@ -355,7 +355,7 @@ class Proxy
         GError *error = nullptr;
         GVariant *ret = g_dbus_proxy_call_with_unix_fd_list_sync(proxy,
                                                                  method.c_str(),
-                                                                 params, // parameters to method
+                                                                 glib2::Value::TupleWrap(params), // parameters to method
                                                                  G_DBUS_CALL_FLAGS_NONE,
                                                                  DBUS_PROXY_CALL_TIMEOUT,
                                                                  caller_fdlist, // fd_list (to send)

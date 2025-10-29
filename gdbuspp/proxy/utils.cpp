@@ -76,7 +76,7 @@ const bool Query::CheckObjectExists(const Object::Path &path,
         {
             GVariant *ignore = proxy->Call(target,
                                            "GetAll",
-                                           glib2::Value::CreateTupleWrapped(interface));
+                                           glib2::Value::Create(interface));
             if (ignore)
             {
                 g_variant_unref(ignore);
@@ -196,7 +196,7 @@ const std::string DBusServiceQuery::GetNameOwner(const std::string &service) con
         GVariant *res = proxy->Call("/",
                                     "org.freedesktop.DBus",
                                     "GetNameOwner",
-                                    glib2::Value::CreateTupleWrapped(service));
+                                    glib2::Value::Create(service));
         auto ret = glib2::Value::Extract<std::string>(res, 0);
         g_variant_unref(res);
         return ret;

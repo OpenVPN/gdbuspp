@@ -36,7 +36,7 @@ const uid_t Credentials::Query::GetUID(const std::string &busname) const
     {
         GVariant *result = dbus_proxy->Call(dbus_target,
                                             "GetConnectionUnixUser",
-                                            glib2::Value::CreateTupleWrapped(busname));
+                                            glib2::Value::Create(busname));
         uid_t ret = glib2::Value::Extract<uint32_t>(result, 0);
         g_variant_unref(result);
         return ret;
@@ -56,7 +56,7 @@ const pid_t Credentials::Query::GetPID(const std::string &busname) const
     {
         GVariant *result = dbus_proxy->Call(dbus_target,
                                             "GetConnectionUnixProcessID",
-                                            glib2::Value::CreateTupleWrapped(busname));
+                                            glib2::Value::Create(busname));
         pid_t pid = glib2::Value::Extract<uint32_t>(result, 0);
         g_variant_unref(result);
         return pid;
@@ -76,7 +76,7 @@ const std::string Credentials::Query::GetUniqueBusName(const std::string &busnam
     {
         GVariant *result = dbus_proxy->Call(dbus_target,
                                             "GetNameOwner",
-                                            glib2::Value::CreateTupleWrapped(busname));
+                                            glib2::Value::Create(busname));
         std::string ret = glib2::Value::Extract<std::string>(result, 0);
         g_variant_unref(result);
         return ret;
