@@ -834,6 +834,16 @@ inline GVariant *CreateTupleWrapped(const std::vector<T> &input,
 }
 
 
+/**
+ *  Wraps the data in a GVariant object inside a D-Bus tuple
+ *  unless it is already wrapped.
+ *
+ * @param data        GVariant* data to wrap
+ * @return GVariant*
+ */
+GVariant *TupleWrap(GVariant *data);
+
+
 namespace Dict {
 
 /**

@@ -29,14 +29,14 @@ Exception::Exception(const std::string &err,
                      GError *gliberr)
     : DBus::Exception(std::string("glib2::Utils::" + std::string(__func__)),
                       err,
-                      gliberr){};
+                      gliberr) {};
 Exception::Exception::Exception(const std::string &callfunc,
                                 const std::string &err,
                                 GError *gliberr)
     : DBus::Exception(std::string("glib2::Utils::" + std::string(__func__)
                                   + " [" + callfunc + "]"),
                       err,
-                      gliberr){};
+                      gliberr) {};
 
 
 void CheckCapabilityFD(GDBusConnection *dbuscon)
@@ -115,6 +115,33 @@ const std::string Extract(GVariant *value) noexcept
 
 } // namespace DataType
 
+
+namespace Value {
+
+GVariant *TupleWrap(GVariant *data)
+{
+    if (!data)
+    {
+        return nullptr;
+    }
+
+    if (g_variant_type_is_tuple(g_variant_get_type(data)))
+    {
+        return data;
+    }
+
+    GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
+    if (!bld)
+    {
+        throw glib2::Utils::Exception("Builder::TupleWrap()",
+                                      "Failed allocating new GVariantBuilder");
+    }
+    g_variant_builder_add_value(bld, data);
+
+    return glib2::Builder::Finish(bld);
+}
+
+} // namespace Value
 
 
 namespace Builder {
