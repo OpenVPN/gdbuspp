@@ -39,7 +39,7 @@ Exception::Exception::Exception(const std::string &callfunc,
                       gliberr){};
 
 
-void CheckCapabilityFD(const GDBusConnection *dbuscon)
+void CheckCapabilityFD(GDBusConnection *dbuscon)
 {
     if (!(g_dbus_connection_get_capabilities((GDBusConnection *)dbuscon) & G_DBUS_CAPABILITY_FLAGS_UNIX_FD_PASSING))
     {

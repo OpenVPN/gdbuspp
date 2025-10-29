@@ -51,7 +51,7 @@ class Exception : public DBus::Exception
 };
 
 
-void CheckCapabilityFD(const GDBusConnection *dbuscon);
+void CheckCapabilityFD(GDBusConnection *dbuscon);
 
 
 /**

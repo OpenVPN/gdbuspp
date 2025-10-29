@@ -73,7 +73,7 @@ struct Request
     using UPtr = std::unique_ptr<Request>;
 
     /// glib2 D-Bus connection object where the request came from
-    const GDBusConnection *dbusconn;
+    GDBusConnection *dbusconn;
 
     /// aka: Object::Base::Ptr; the DBus::Object::Base object being processed
     std::shared_ptr<Object::Base> object;
