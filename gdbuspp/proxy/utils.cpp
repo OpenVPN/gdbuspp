@@ -32,6 +32,7 @@ Query::Ptr Query::Create(Proxy::Client::Ptr proxy)
     return Query::Ptr(new Query(proxy));
 }
 
+
 const bool Query::Ping() const noexcept
 {
     auto target = Proxy::TargetPreset::Create("/", "org.freedesktop.DBus.Peer");
@@ -256,9 +257,18 @@ const bool DBusServiceQuery::CheckServiceAvail(const std::string &service,
                                                uint8_t timeout) const noexcept
 {
     // Check if the service is already running
-    if (LookupService(service))
+    try
     {
-        return true;
+        if (LookupService(service))
+        {
+            return true;
+        }
+    }
+    catch (const DBus::Exception &)
+    {
+        // If LookupService() throws an error, it is needed
+        // to continue to try activating the service.  The
+        // requested service is most likely not running.
     }
 
     // If not, identify if this service can be started via the
