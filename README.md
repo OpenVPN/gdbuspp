@@ -333,7 +333,7 @@ To return a value back to the caller:
 {
   // ....
   std::string result = string1 + " <=> " + string2;
-  GVariant *ret = glib2::Value::CreateTupleWrapped(result);
+  GVariant *ret = glib2::Value::Create(result);
   args->SetMethodReturn(ret);
 }
 ```

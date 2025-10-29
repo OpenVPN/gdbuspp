@@ -96,9 +96,7 @@ class SimpleObject : public DBus::Object::Base
         auto getmyname_args = AddMethod("GetMyName",
                                         [this](DBus::Object::Method::Arguments::Ptr args)
                                         {
-                                            GVariant *ret = g_variant_new("(s)",
-                                                                          this->my_name.c_str());
-                                            args->SetMethodReturn(ret);
+                                            args->SetMethodReturn(glib2::Value::Create(this->my_name));
                                         });
         getmyname_args->AddOutput("name", "s");
 
@@ -350,7 +348,7 @@ class MethodTests : public DBus::Object::Base
         auto get_caller_args = AddMethod("GetCallerBusName",
                                          [](DBus::Object::Method::Arguments::Ptr args)
                                          {
-                                             args->SetMethodReturn(glib2::Value::CreateTupleWrapped(args->GetCallerBusName()));
+                                             args->SetMethodReturn(glib2::Value::Create(args->GetCallerBusName()));
                                          });
         get_caller_args->AddOutput("caller_busname", glib2::DataType::DBus<std::string>());
 
@@ -387,7 +385,7 @@ class MethodTests : public DBus::Object::Base
             "GetRemovedObjects",
             [this](DBus::Object::Method::Arguments::Ptr args)
             {
-                GVariant *r = glib2::Value::CreateTupleWrapped(removed_objects);
+                GVariant *r = glib2::Value::CreateVector(removed_objects);
                 args->SetMethodReturn(r);
                 removed_objects.clear();
             });
@@ -461,7 +459,7 @@ class MethodTests : public DBus::Object::Base
         std::cout << "Input: '" << in << "'  "
                   << "length: " << std::to_string(l) << std::endl;
 
-        args->SetMethodReturn(g_variant_new("(i)", l));
+        args->SetMethodReturn(glib2::Value::Create<int32_t>(l));
     }
 
 
@@ -491,7 +489,7 @@ class MethodTests : public DBus::Object::Base
         std::cout << ">>>> NEW OBJECT: " << obj->GetPath() << std::endl;
         Log(__func__, "New child object created: " + obj->GetPath());
 
-        args->SetMethodReturn(g_variant_new("(o)", obj->GetPath().c_str()));
+        args->SetMethodReturn(glib2::Value::Create(obj->GetPath()));
     }
 
 
@@ -536,7 +534,7 @@ class MethodTests : public DBus::Object::Base
             std::cerr << "** ERROR **  " << excp.what() << std::endl;
         }
 
-        args->SetMethodReturn(g_variant_new("(b)", (fd > 0)));
+        args->SetMethodReturn(glib2::Value::Create(fd > 0));
     }
 
 
@@ -554,7 +552,11 @@ class MethodTests : public DBus::Object::Base
                       << "gid=" << std::to_string(fileinfo.st_gid) << ", "
                       << "size=" << std::to_string(fileinfo.st_size)
                       << std::endl;
-            ret = g_variant_new("(uut)", fileinfo.st_uid, fileinfo.st_gid, fileinfo.st_size);
+            auto *bld = glib2::Builder::Create("(uut)");
+            glib2::Builder::Add<uint32_t>(bld, fileinfo.st_uid);
+            glib2::Builder::Add<uint32_t>(bld, fileinfo.st_gid);
+            glib2::Builder::Add<uint64_t>(bld, fileinfo.st_size);
+            ret = glib2::Builder::Finish(bld);
             Log(__func__, "fstat(" + std::to_string(fd) + "') successful");
         }
         else
@@ -590,7 +592,7 @@ class FailingMethodTests : public DBus::Object::Base
         auto wrong_args1 = AddMethod("NoReceive123",
                                      [](DBus::Object::Method::Arguments::Ptr args)
                                      {
-                                         args->SetMethodReturn(g_variant_new("(i)", 123));
+                                         args->SetMethodReturn(glib2::Value::Create<int32_t>(123));
                                      });
         wrong_args1->AddOutput("length", "s");
 
@@ -600,7 +602,7 @@ class FailingMethodTests : public DBus::Object::Base
                                          GVariant *p = args->GetMethodParameters();
                                          glib2::Utils::checkParams(__func__, p, "(i)", 1);
                                          (void)glib2::Value::Extract<int>(p, 0);
-                                         args->SetMethodReturn(g_variant_new("(b)", false));
+                                         args->SetMethodReturn(glib2::Value::Create(false));
                                      });
         wrong_args2->AddInput("not_an_int", "s");
         wrong_args2->AddOutput("failed", "b");
@@ -608,7 +610,7 @@ class FailingMethodTests : public DBus::Object::Base
         auto wrong_args3 = AddMethod("OutputMismatch",
                                      [](DBus::Object::Method::Arguments::Ptr args)
                                      {
-                                         args->SetMethodReturn(g_variant_new("(i)", 123));
+                                         args->SetMethodReturn(glib2::Value::Create<int32_t>(123));
                                      });
         wrong_args3->AddOutput("failed", "b");
 

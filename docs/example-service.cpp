@@ -80,7 +80,7 @@ class MyObject : public DBus::Object::Base
 
                                   // Prepare the response to the caller
                                   std::string result = string1 + " <=> " + string2;
-                                  GVariant *ret = glib2::Value::CreateTupleWrapped(result);
+                                  GVariant *ret = glib2::Value::Create(result);
                                   args->SetMethodReturn(ret);
                               });
         args->AddInput("string_1", glib2::DataType::DBus<std::string>());

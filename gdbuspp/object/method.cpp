@@ -215,7 +215,7 @@ int Arguments::ReceiveFD() const
 
 void Arguments::SetMethodReturn(GVariant *result) noexcept
 {
-    return_params = result;
+    return_params = glib2::Value::TupleWrap(result);
 }
 
 
