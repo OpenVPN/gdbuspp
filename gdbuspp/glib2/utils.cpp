@@ -41,7 +41,8 @@ Exception::Exception::Exception(const std::string &callfunc,
 
 void CheckCapabilityFD(GDBusConnection *dbuscon)
 {
-    if (!(g_dbus_connection_get_capabilities((GDBusConnection *)dbuscon) & G_DBUS_CAPABILITY_FLAGS_UNIX_FD_PASSING))
+    auto capabilities = g_dbus_connection_get_capabilities(static_cast<GDBusConnection *>(dbuscon));
+    if (!(capabilities & G_DBUS_CAPABILITY_FLAGS_UNIX_FD_PASSING))
     {
         throw Utils::Exception("D-Bus connection does not support file descriptor passing");
     }
@@ -50,7 +51,7 @@ void CheckCapabilityFD(GDBusConnection *dbuscon)
 
 void unref_fdlist(GUnixFDList *fdlist)
 {
-    g_object_unref((GVariant *)fdlist);
+    g_object_unref(reinterpret_cast<GVariant *>(fdlist));
 }
 
 
@@ -84,7 +85,7 @@ void checkParams(const char *func,
         err << "Incorrect parameter format: "
             << (params ? typestr : "<null>")
             << ", expected " << format;
-        if (nchildren >= 0 && num > 0)
+        if (nchildren > 0 && num > 0)
         {
             err << " (elements expected: " << std::to_string(num);
             if (params)
