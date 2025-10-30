@@ -360,28 +360,11 @@ inline void Add(GVariantBuilder *builder,
 }
 
 
-template <typename T>
-inline void Add(GVariantBuilder *builder,
-                const std::vector<T> &vector_value,
-                const char *override_type = nullptr) noexcept
-{
-    std::string dbus_type = "a" + std::string(override_type ? override_type : DataType::DBus<T>());
-    GVariantBuilder *bld = glib2::Builder::Create(dbus_type.c_str());
-    for (const auto &value : vector_value)
-    {
-        {
-            glib2::Builder::Add(bld, value);
-        }
-    }
-    g_variant_builder_add_value(builder, glib2::Builder::Finish(bld));
-}
-
-
 /**
- *  Converts a std::vector<T> to a D-Bus compliant
- *  array  builder of the D-Bus corresponding data type
+ *  Creates and populates a new GVariantBuilder object based
+ *  on the content of a std::vector<T>.
  *
- * @param input  std::vector<T> to convert
+ * @param input         std::vector<T> to convert
  * @param override_type (optional) If set, it will use the given type instead
  *                      of deducting the D-Bus type for T
  *
@@ -395,10 +378,30 @@ inline GVariantBuilder *FromVector(const std::vector<T> &input,
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE(type.c_str()));
     for (const auto &e : input)
     {
-        Add(bld, e, override_type);
+        glib2::Builder::Add(bld, e, override_type);
     }
 
     return bld;
+}
+
+
+/**
+ *  Adds the content of a std::vector<T> into an existing
+ *  GVariantBuilder object
+ *
+ * @tparam T             C++ data type of the std::vector
+ * @param builder        GVariantBuilder object to add the data to
+ * @param vector_value   std::vector<T> containing the data to add
+ * @param override_type  (optional) If set, it will use the given type instead
+ *                       of deducting the D-Bus type for T
+ */
+template <typename T>
+inline void Add(GVariantBuilder *builder,
+                const std::vector<T> &vector_value,
+                const char *override_type = nullptr) noexcept
+{
+    GVariantBuilder *bld = glib2::Builder::FromVector(vector_value, override_type);
+    glib2::Builder::Add(builder, glib2::Builder::Finish(bld));
 }
 
 
