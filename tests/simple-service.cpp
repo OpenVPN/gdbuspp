@@ -59,8 +59,10 @@ class SimpleLog : public DBus::Signals::Group
     {
         try
         {
-            GVariant *p = g_variant_new("(ss)", info.c_str(), details.c_str());
-            SendGVariant("Log", p);
+            GVariantBuilder *b = glib2::Builder::Create("(ss)");
+            glib2::Builder::Add(b, info);
+            glib2::Builder::Add(b, details);
+            SendGVariant("Log", glib2::Builder::Finish(b));
         }
         catch (const DBus::Signals::Exception &excp)
         {
@@ -245,13 +247,14 @@ class PropertyTests : public DBus::Object::Base
     {
         std::cout << "[Get Complex Property]"
                   << "name=" << property.GetName() << std::endl;
-        GVariant *r = g_variant_new("(bis)",
-                                    complex.boolval,
-                                    complex.intval,
-                                    complex.stringval.c_str());
+
+        GVariantBuilder *bld = glib2::Builder::Create("(bis)");
+        glib2::Builder::Add(bld, complex.boolval);
+        glib2::Builder::Add(bld, complex.intval);
+        glib2::Builder::Add(bld, complex.stringval);
 
         Log(__func__, "Complex Property retrieved");
-        return r;
+        return glib2::Builder::Finish(bld);
     }
 
 

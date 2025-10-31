@@ -113,10 +113,11 @@ class TestSignal : public Signals::Signal
 
     bool Send(const std::string &val1, const bool val2, const uint32_t val3)
     {
-        return EmitSignal(g_variant_new(GetDBusType(),
-                                        val1.c_str(),
-                                        val2,
-                                        val3));
+        GVariantBuilder *signal_data = glib2::Builder::Create(GetDBusType());
+        glib2::Builder::Add(signal_data, val1);
+        glib2::Builder::Add(signal_data, val2);
+        glib2::Builder::Add(signal_data, val3);
+        return EmitSignal(glib2::Builder::Finish(signal_data));
     }
 };
 

@@ -174,10 +174,13 @@ const uint32_t DBusServiceQuery::StartServiceByName(const std::string &service) 
 {
     try
     {
+        GVariantBuilder *bld = glib2::Builder::Create("(su)");
+        glib2::Builder::Add(bld, service);
+        glib2::Builder::Add<uint32_t>(bld, 0);
         GVariant *res = proxy->Call("/",
                                     "org.freedesktop.DBus",
                                     "StartServiceByName",
-                                    g_variant_new("(su)", service.c_str(), 0));
+                                    glib2::Builder::Finish(bld));
         auto ret = glib2::Value::Extract<uint32_t>(res, 0);
         g_variant_unref(res);
         return ret;

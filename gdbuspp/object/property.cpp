@@ -44,39 +44,55 @@ GVariant *Object::Property::Update::Finalize()
     }
     else if (updated_vals.size() == 0)
     {
-        vals = g_variant_new_variant(nullptr);
+        vals = glib2::Value::NullVariant();
     }
     else
     {
         GVariantBuilder *arvals = glib2::Builder::Create(property.GetDBusType());
-        for (auto &val : updated_vals)
+        for (const auto &value : updated_vals)
         {
-            glib2::Builder::Add(arvals, val);
+            glib2::Builder::Add(arvals, value);
         }
         vals = glib2::Builder::Finish(arvals);
     }
 
     // Build a single element array containing all updates
-    // for this single property
-    GVariantBuilder *msg = glib2::Builder::Create("a*");
-    glib2::Builder::Add(msg,
-                        g_variant_new("{sv}",
-                                      property.GetName().c_str(),
-                                      vals));
+    // for this single property.
+    //
+    // This information will be used to send the
+    // org.freedesktop.Properties.PropertiesChanged D-Bus
+    // signal. This should be emitted each time an object
+    // property is updated.
+    //
+    // The complete signal D-Bus type is: (sa{sv}as)
+    // This is a structured object with the following fields:
+    //
+    //     s - interface name where the properties belongs to
+    // a{sv} - key/value dictionary of all changed properties
+    //         where the key holds the property name.
+    //    as - array of properties which has been invalidated.
+    //         This implementation always sends an empty array
+    //         in this case. (This may change in the future)
 
-    // Wrap this up into the needed format needed when sending the
+    // Create the property/value dictionary
+    GVariantDict *property_values = glib2::Dict::Create();
+    glib2::Dict::Add(property_values,
+                     property.GetName(),
+                     vals);
+
+    // Wrap it up as the final update message to be emitted as the
     // org.freedesktop.DBus.Properties.PropertiesChanged signal
-    GVariant *update_msg = g_variant_new("(sa{sv}as)",
-                                         property.GetInterface().c_str(),
-                                         msg,
-                                         nullptr);
-    // This is "finished" by g_variant_new() above; we only need to clean up
-    g_variant_builder_unref(msg);
+    GVariantBuilder *update_msg = glib2::Builder::Create("(sa{sv}as)");
+    glib2::Builder::Add(update_msg, property.GetInterface());
+    glib2::Builder::Add(update_msg, glib2::Dict::Finish(property_values));
+    glib2::Builder::Add(update_msg, glib2::Builder::CreateEmpty("as"));
+
+    // Reset the list of of updated values
     updated_vals = {};
 
     // Return this to the glib2 set-property callback method
     // which will emit the signal and do the needed error handling
-    return update_msg;
+    return glib2::Builder::Finish(update_msg);
 }
 
 

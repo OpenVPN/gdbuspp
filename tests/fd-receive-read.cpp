@@ -121,8 +121,12 @@ int main(int argc, char **argv)
         auto prx = DBus::Proxy::Client::Create(conn, opts.destination);
 
         int fd = -1;
-        GVariant *p = g_variant_new("(s)", opts.file.c_str());
-        GVariant *r = prx->GetFD(fd, opts.preset, opts.method, p);
+        GVariantBuilder *param = glib2::Builder::Create("(s)");
+        glib2::Builder::Add(param, opts.file);
+        GVariant *r = prx->GetFD(fd,
+                                 opts.preset,
+                                 opts.method,
+                                 glib2::Builder::Finish(param));
 
         bool res = glib2::Value::Extract<bool>(r, 0) && (fd > 0);
         g_variant_unref(r);

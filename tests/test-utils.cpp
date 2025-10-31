@@ -283,19 +283,18 @@ GVariant *generate_gvariant(std::ostringstream &log,
         }
         else
         {
-            GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
+            GVariantBuilder *bld = glib2::Builder::EmptyTuple();
             uint32_t pos = 0;
             for (const auto &v : data_values)
             {
                 std::string type = data_type.substr(pos, 1);
-                g_variant_builder_add_value(bld, convert_to_gvariant(type, v));
+                glib2::Builder::Add(bld, convert_to_gvariant(type, v));
                 log << "   " << type
                     << " [" << v << "]" << std::endl;
                 ++pos;
             }
             log << std::endl;
-            data = g_variant_builder_end(bld);
-            g_variant_builder_unref(bld);
+            data = glib2::Builder::Finish(bld);
         }
 
         dump_gvariant(log, "GVariant data", data);

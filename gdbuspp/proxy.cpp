@@ -582,17 +582,15 @@ GVariant *Client::GetPropertyGVariant(const Object::Path &object_path,
 
     // The Get method needs the property interface scope of the property
     // and the property name
-    GVariant *params = g_variant_new("(ss)",
-                                     interface.c_str(),
-                                     property_name.c_str());
+    GVariantBuilder *params = glib2::Builder::Create("(ss)");
+    glib2::Builder::Add(params, interface);
+    glib2::Builder::Add(params, property_name);
 
-    GVariant *resp = prx.Call("Get", params, false);
+    GVariant *resp = prx.Call("Get", glib2::Builder::Finish(params), false);
 
     // Property results are wrapped into a "variant" type, which
     // needs to be unpacked to retrieve the property value.
-    GVariant *child = g_variant_get_child_value(resp, 0);
-    GVariant *ret = g_variant_get_variant(child);
-    g_variant_unref(child);
+    auto *ret = glib2::Value::Extract<GVariant *>(resp, 0);
     g_variant_unref(resp);
 
     return ret;
@@ -619,17 +617,17 @@ void Client::SetPropertyGVariant(const Object::Path &object_path,
 
     // The Set method needs the property interface scope of the property
     // and the property name
-    GVariant *params = g_variant_new("(ssv)",
-                                     interface.c_str(),
-                                     property_name.c_str(),
-                                     value);
+    GVariantBuilder *params = glib2::Builder::Create("(ssv)");
+    glib2::Builder::Add(params, interface);
+    glib2::Builder::Add(params, property_name);
+    glib2::Builder::Add(params, value, glib2::DataType::DBUS_TYPE_VARIANT);
 
     // Even though there is no response expected, this need to be
     // a synchronous call.  Programs only setting a property and then
     // exiting will experience the property often not be modified at all.
     // Doing this synchronously ensures we wait until the request has been
     // processed by the service.
-    GVariant *r = prx.Call("Set", params, false);
+    GVariant *r = prx.Call("Set", glib2::Builder::Finish(params), false);
     g_variant_unref(r);
 }
 
