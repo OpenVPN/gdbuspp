@@ -116,6 +116,7 @@ constexpr const char *DBUS_TYPE_TUPLE      = "r";
 constexpr const char *DBUS_TYPE_UINT16     = "q";
 constexpr const char *DBUS_TYPE_UINT32     = "u";
 constexpr const char *DBUS_TYPE_UINT64     = "t";
+constexpr const char *DBUS_TYPE_VARIANT    = "v";
 // clang-format on
 
 
@@ -216,6 +217,12 @@ template <>
 inline const char *DBus<std::string>() noexcept
 {
     return DBUS_TYPE_STRING;
+}
+
+template <>
+inline const char *DBus<GVariant *>() noexcept
+{
+    return DBUS_TYPE_VARIANT;
 }
 
 } // namespace DataType
@@ -650,6 +657,13 @@ inline std::string Get<std::string>(GVariant *v) noexcept
 }
 
 
+template <>
+inline GVariant *Get<GVariant *>(GVariant *v) noexcept
+{
+    return g_variant_get_variant(v);
+}
+
+
 /*
  * These methods extracts values from a GVariant object containing
  * values in a tuple.  This is used as an alternative to g_variant_get()
@@ -748,6 +762,15 @@ inline std::string Extract<std::string>(GVariant *v, int elm) noexcept
 {
     GVariant *bv = g_variant_get_child_value(v, elm);
     std::string ret = Get<std::string>(bv);
+    g_variant_unref(bv);
+    return ret;
+}
+
+template <>
+inline GVariant *Extract<GVariant *>(GVariant *v, int elm) noexcept
+{
+    GVariant *bv = g_variant_get_child_value(v, elm);
+    auto ret = Get<GVariant *>(bv);
     g_variant_unref(bv);
     return ret;
 }
@@ -932,6 +955,19 @@ namespace Dict {
 inline GVariantDict *Create() noexcept
 {
     return g_variant_dict_new(nullptr);
+}
+
+
+/**
+ *  Add a new GVariant object to the GVariant based dictionary.
+ *
+ * @param dict   GVariantDict object holding the dictionary
+ * @param key    std::string with the dictionary key
+ * @param value  GVariant object to store in the dictionary
+ */
+inline void Add(GVariantDict *dict, const std::string &key, GVariant *value) noexcept
+{
+    g_variant_dict_insert_value(dict, key.c_str(), value);
 }
 
 
