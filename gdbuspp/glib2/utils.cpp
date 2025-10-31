@@ -191,18 +191,6 @@ GVariant *Finish(GVariantBuilder *builder) noexcept
     return ret;
 }
 
-
-GVariant *FinishWrapped(GVariantBuilder *bld) noexcept
-{
-    GVariantBuilder *wrapper = g_variant_builder_new(G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value(wrapper, g_variant_builder_end(bld));
-    GVariant *ret = g_variant_builder_end(wrapper);
-    g_variant_builder_unref(wrapper);
-    g_variant_builder_unref(bld);
-    return ret;
-}
-
-
 } // namespace Builder
 
 } // namespace glib2
