@@ -634,6 +634,29 @@ if __name__ == "__main__":
     simple1_props.AddTest(TestProperty('complex', '(bis)', complex_init, complex_new))
     simple1_props.AddTest(TestProperty('complex_readonly', '(bis)', complex_init, None))
 
+
+    key_val_array = dbus.Array()
+    for i in range(0, 10):
+        s = dbus.Struct((
+                dbus.Int32(i+1),
+                dbus.String(f'Element #{i}'),
+                dbus.Boolean((i % 2) == 0)
+        ))
+        key_val_array.append(s)
+
+    more_complex = dbus.Struct((
+        dbus.Boolean(True),
+        dbus.Array((dbus.String('line 1'), dbus.String('line 2'), dbus.String('line 3'))),
+        dbus.Struct((
+            dbus.Int32(255),
+            dbus.String('A single stand-alone structured element'),
+            dbus.Boolean(False)
+        )),
+        key_val_array
+    ))
+    simple1_props.AddTest(TestProperty('more_complex_readonly', '(bas(isb)a(isb))', more_complex, None))
+
+
     ##
     ##  Run all the tests
     ##

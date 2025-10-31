@@ -163,7 +163,7 @@ class PropertyTests : public DBus::Object::Base
 
 
         //  These two lambda functions wraps the call to methods in this
-        //  object to read and update a more complex property data type.
+        //  object to read and update a more complex property data types.
         //
         //  In this implementation this is done through a classic struct
         //  approach, but it is up to the Get/Set methods to build up and
@@ -179,6 +179,14 @@ class PropertyTests : public DBus::Object::Base
         };
         AddPropertyBySpec("complex", "(bis)", complex_get, complex_set);
         AddPropertyBySpec("complex_readonly", "(bis)", complex_get);
+
+
+        auto more_complex_get = [this](const DBus::Object::Property::BySpec &prop)
+        {
+            return this->GetMoreComplexProperty(prop);
+        };
+        AddPropertyBySpec("more_complex_readonly", "(bas(isb)a(isb))", more_complex_get);
+
 
         AddPropertyBySpec("dictionary",
                           "a{sv}",
@@ -285,6 +293,147 @@ class PropertyTests : public DBus::Object::Base
 
         return upd;
     }
+
+
+    /**
+     *   Simple key/value storage container used by
+     *   the PropertyTests - morecomplex_readonly
+     */
+    struct key_value
+    {
+        int key;
+        std::string value;
+        bool even;
+    };
+
+    /**
+     *  This will build a fairly complex structured GVariant object.  The
+     *  C struct equivalent would look like this:
+     *
+     *  @code
+     *      struct key_value {
+     *          int32_t key;
+     *          char *value
+     *          bool even_key;
+     *      };
+     *
+     *      struct root_object {
+     *           bool bool_value1;
+     *           char *array_of_string[];
+     *           struct key_value *single_keyval;
+     *           struct key_value *array_of_keyval[];
+     *      };
+     *  @endcode
+     *
+     *  It is the `struct root_object` which is the returned data from this
+     *  method, returned as a GVariant object.
+     *
+     *  The first _bool_value1_ has the D-Bus data type: `b`
+     *
+     *  The _array_of_strings_ has the `as`  D-Bus data type - `a` indicates
+     *  an array, `s` is the D-Bus type for strings.
+     *
+     *  Data structures (the `struct key_value` in this example) are always
+     *  encapsulated in parantheses, with the data types of the elements included.
+     *
+     *  The `struct key_value` consists of 3 members, an `int32_t` (_key_), a string
+     *  (`char *`, _value_) and finally a `bool` value (_even_key_).  The D-Bus types
+     *  for each of these members are: `isb`.  And since it is a structure, the final
+     *  D-Bus type for the `single_keyval` element will be: `(isb)`
+     *
+     *  Finally, there is an array of `struct key_value`.  This has the same
+     *  D-Bus data type as the _single_keyval_, but is denoted with a leading `"a"`
+     *  to indicate it is an array.  The D-Bus type for the _array_of_keyval_ will
+     *  then be: `a(isb)`.
+     *
+     *  When all of these elements are combined, the final D-Bus data type for the
+     *  `struct root_object` will be: `"bas(isb)a(isb)"`
+     *
+     * @param property
+     * @return GVariant*
+     */
+    GVariant *GetMoreComplexProperty(const DBus::Object::Property::BySpec &property)
+    {
+        std::cout << "[Get More Complex Property]"
+                  << "name=" << property.GetName() << std::endl;
+
+        //  Helper lambda function which extracts data from
+        //  a single struct key_value into a new GVariant object
+        //  representing the `struct key_value`.
+        //
+        //  This function will be called via Builder::AddStructData()
+        //
+        //  D-Bus data type of the output: (isb)
+        //
+        auto data_extractor = [](void const *data_ptr) -> GVariant *
+        {
+            const auto *data = static_cast<const key_value *>(data_ptr);
+
+            GVariantBuilder *bld = glib2::Builder::Create("(isb)");
+            glib2::Builder::Add(bld, data->key);
+            glib2::Builder::Add(bld, data->value);
+            glib2::Builder::Add(bld, data->even);
+            return glib2::Builder::Finish(bld);
+        };
+
+
+        // Create the container for the main result - picking the data type
+        // as indicated in the introspection data.  This should be the
+        // root object's data type: bas(isb)a(isb)
+        GVariantBuilder *builder = glib2::Builder::Create(property.GetDBusType());
+
+        // Add the first boolean value to the container
+        //  - D-Bus type: b
+        glib2::Builder::Add(builder, true);
+
+        // Add the data with an array of strings to the container
+        //  - D-Bus type: as
+        glib2::Builder::Add(builder, string_array);
+
+        // Add a single key_value data set into the container.
+        // This makes use of the lambda function declared earlier
+        // in this method.
+        //
+        //  - D-Bus type: (isb)
+        //
+        key_value stand_alone = {
+            .key = 255,
+            .value = "A single stand-alone structured element",
+            .even = false};
+        glib2::Builder::AddStructData(builder, stand_alone, data_extractor);
+
+
+        // Add the array of key_value elements to the container,
+        // using the same lambda function as above.
+        //
+        //  - D-Bus type: a(isb)
+        //
+
+        // First, generate some test data
+        std::vector<key_value> dataset;
+        for (int i = 0; i < 10; i++)
+        {
+            std::ostringstream str;
+            str << "Element #" << i;
+            dataset.push_back({(i + 1),        // .key
+                               str.str(),      // .value
+                               (i % 2 == 0)}); // .even
+        }
+
+        // Add the complete array/vector of key_value elements.  The
+        // data_extractor lambda fuction will be called for each element
+        // in the vector
+        glib2::Builder::AddStructData(builder, dataset, data_extractor);
+
+
+        Log(__func__, "More Complex Property retrieved");
+
+        // This wraps all of these elements into the final
+        // main result - as a GVariant object - with the
+        // ending D-Bus data type: (bas(isb)a(isb))
+        return glib2::Builder::Finish(builder);
+    };
+
 
     void Log(const std::string &func, const std::string &msg) const
     {

@@ -19,6 +19,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -361,6 +362,108 @@ inline void Add(GVariantBuilder *builder,
 
 
 /**
+ *  Add structured data to a GVariantBuilder object.
+ *
+ *  This is used to process a C/C++ struct based object into
+ *  a GVariant object which can be added to a GVariantBuilder
+ *  object.  This is achieved by using a callback (lambda) function
+ *  which receives the C/C++ struct as an argument and prepares
+ *  the GVariant object which it need to return.
+ *
+ *  A simple example for a single element struct:
+ *
+ *  @code
+ *     struct value_container
+ *     {
+ *           uint32_t my_int;
+ *     };
+ *
+ *     auto process_callback = [](void const *data_ptr) -> GVariant *
+ *     {
+ *         const auto *data = static_cast<const value_container *>(data_ptr);
+ *         return glib2::Value::Create(data->my_int);
+ *     }
+ *
+ *     value_container my_data;
+ *     my_data.my_int = 12345;
+ *
+ *     auto *builder = glib2::Builder::Create("(u)");
+ *     glib2::Builder::AddStructData(builder, my_data, process_callback);
+ *     GVariant *result = glib2::Builder::Finish(builder);
+ *  @endcode
+ *
+ * @tparam T            C/C++ struct data type
+ * @param builder       GVariantBuilder object to add the data to
+ * @param struct_data   Const reference to the data to process
+ * @param extractor     Callback function used to process `struct_data`
+ */
+template <typename T>
+inline void AddStructData(GVariantBuilder *builder,
+                          const T &struct_data,
+                          std::function<GVariant *(void const *data_ptr)> extractor)
+{
+    GVariant *data = extractor(static_cast<void const *>(&struct_data));
+    Builder::Add(builder, data);
+}
+
+
+/**
+ *  Add a vector/array of structured data elements into a GVariantBuilder object
+ *
+ *  This is the std::vector<> version of @AddStructData(), which will iterate
+ *  through all the elements and add them to the GVariantBuilder object.
+ *
+ *  The D-Bus data type of the GVariantBuilder object must be typed as an
+ *  array of a struct.
+ *
+ *  Extending the example code from @AddStructData(), an array version
+ *  will be like this:
+ *
+ *  @code
+ *     std::vector<value_container> my_value_array;
+ *     // data need to be inserted; not demonstrated here
+ *
+ *     auto *builder = glib2::Builder::Create("a(u)");
+ *     glib2::Builder::AddStructData(builder, my_value_array, process_callback);
+ *     GVariant *array_result = glib2::Builder::Finish(builder);
+ *  @endcode
+ *
+ *  See the Test::Program::PropertyTests::GetMoreComplexProperty() method in tests/simple-service.cpp
+ *  for a complete example.
+ *
+ * @tparam T            C/C++ struct data type used in the std::vector
+ * @param builder       GVariantBuilder object to add the data to
+ * @param struct_data   Const reference to the data to process
+ * @param extractor     Callback function used to process `struct_data`
+ */
+template <typename T>
+inline void AddStructData(GVariantBuilder *main_builder,
+                          const std::vector<T> &data_set,
+                          std::function<GVariant *(void const *data_ptr)> extractor)
+{
+    if (data_set.empty())
+    {
+        return;
+    }
+
+    std::vector<GVariant *> elements;
+    for (auto rec : data_set)
+    {
+        elements.push_back(extractor(static_cast<void const *>(&rec)));
+    }
+
+    std::string dbus_type = "a" + std::string(g_variant_get_type_string(elements[0]));
+    GVariantBuilder *array_builder = glib2::Builder::Create(dbus_type.c_str());
+    for (const auto &data : elements)
+    {
+        glib2::Builder::Add(array_builder, data);
+    }
+    GVariant *array_entries = glib2::Builder::Finish(array_builder);
+    glib2::Builder::Add(main_builder, array_entries);
+}
+
+
+/**
  *  Creates and populates a new GVariantBuilder object based
  *  on the content of a std::vector<T>.
  *
@@ -403,7 +506,6 @@ inline void Add(GVariantBuilder *builder,
     GVariantBuilder *bld = glib2::Builder::FromVector(vector_value, override_type);
     glib2::Builder::Add(builder, glib2::Builder::Finish(bld));
 }
-
 
 } // namespace Builder
 
