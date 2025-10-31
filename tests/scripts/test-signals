@@ -177,8 +177,14 @@ err = run_signal_group(['-l','debug'], False)
 if not (parse_result(s, False) and err):
     errors += 1
 
+# Test case 4 - SingleString signal, with only a single string
+s = run_signal_subscribe(['-s','SingleString','-X','s','-x','A simple single string', '-C','1'])
+err = run_signal_group(['-l','singlestring'], False)
+if not (parse_result(s, False) and err):
+    errors += 1
 
-# Test case 4 - Try sending a signal with the wrong data type - stopped before being sent
+# Test case 5 - Try sending a signal with the wrong data type
+# - this is stopped before being sent, so it "passes" in the test program
 if not run_signal_group(['-l','invalid'], False):
     errors += 1
 

@@ -96,7 +96,7 @@ class Options : public TestUtils::OptionParser
         // default to test sending all signal types
         if (log_types.size() == 0)
         {
-            log_types = {"info", "error", "debug", "invalid"};
+            log_types = {"info", "error", "debug", "singlestring", "invalid"};
         }
     }
 
@@ -170,6 +170,8 @@ class LogExample : public Signals::Group
                        {{"code", "u"},
                         {"message", "s"},
                         {"object_name", "s"}});
+        RegisterSignal("SingleString",
+                       {{"string", "s"}});
     }
 
     void Info(const int id, const std::string &msg)
@@ -187,6 +189,11 @@ class LogExample : public Signals::Group
         glib2::Builder::Add(b, msg);
         glib2::Builder::Add(b, program_name);
         SendGVariant("Error", glib2::Builder::Finish(b));
+    }
+
+    void SingleString(const std::string &msg)
+    {
+        SendGVariant("SingleString", glib2::Value::Create(msg));
     }
 
     void Invalid()
@@ -221,32 +228,36 @@ int main(int argc, char **argv)
         Options opts(argc, argv);
 
         auto dbuscon = DBus::Connection::Create(opts.bustype);
-        auto log = Signals::Group::Create<LogExample>(dbuscon,
-                                                      opts.object_path,
-                                                      opts.object_interface,
-                                                      "signal-group");
-        auto debug = log->CreateSignal<DebugSignal>("signal-group");
+        auto sig_log = Signals::Group::Create<LogExample>(dbuscon,
+                                                          opts.object_path,
+                                                          opts.object_interface,
+                                                          "signal-group");
+        auto debug = sig_log->CreateSignal<DebugSignal>("signal-group");
 
         if (opts.show_introspection)
         {
-            std::cout << log->GenerateIntrospection();
+            std::cout << sig_log->GenerateIntrospection();
             return 0;
         }
 
         for (const auto &tgt : opts.target)
         {
-            log->AddTarget(tgt);
+            sig_log->AddTarget(tgt);
         }
 
         for (const auto &log_type : opts.log_types)
         {
             if ("info" == log_type)
             {
-                log->Info(1, "Testing Info signal");
+                sig_log->Info(1, "Testing Info signal");
             }
             else if ("error" == log_type)
             {
-                log->Error(2, "Error signal test");
+                sig_log->Error(2, "Error signal test");
+            }
+            else if ("singlestring" == log_type)
+            {
+                sig_log->SingleString("A simple single string");
             }
             else if ("debug" == log_type)
             {
@@ -256,7 +267,7 @@ int main(int argc, char **argv)
             {
                 try
                 {
-                    log->Invalid();
+                    sig_log->Invalid();
                     throw DBus::Exception("signal-group-test",
                                           "log->Invalid() should fail; it didn't");
                 }
