@@ -112,6 +112,7 @@ constexpr const char *DBUS_TYPE_INT32      = "i";
 constexpr const char *DBUS_TYPE_INT64      = "x";
 constexpr const char *DBUS_TYPE_OBJECTPATH = "o";
 constexpr const char *DBUS_TYPE_STRING     = "s";
+constexpr const char *DBUS_TYPE_TUPLE      = "r";
 constexpr const char *DBUS_TYPE_UINT16     = "q";
 constexpr const char *DBUS_TYPE_UINT32     = "u";
 constexpr const char *DBUS_TYPE_UINT64     = "t";
@@ -239,6 +240,17 @@ namespace Builder {
  * @return GVariantBuilder*
  */
 GVariantBuilder *Create(const char *type);
+
+
+/**
+ *  Creates a new empty tuple GVariantBuilder object
+ *
+ *  Use Builder::Add() to add elements to this tuple
+ *  object and close it using Builder::Finish()
+ *
+ * @return GVariantBuilder*
+ */
+GVariantBuilder *EmptyTuple();
 
 
 /**

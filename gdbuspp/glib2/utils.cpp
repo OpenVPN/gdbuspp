@@ -158,6 +158,12 @@ GVariantBuilder *Create(const char *type)
 }
 
 
+GVariantBuilder *EmptyTuple()
+{
+    return g_variant_builder_new(G_VARIANT_TYPE(DataType::DBUS_TYPE_TUPLE));
+}
+
+
 void OpenChild(GVariantBuilder *builder, const char *type)
 {
     g_variant_builder_open(builder, G_VARIANT_TYPE(type));
