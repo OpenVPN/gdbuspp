@@ -246,28 +246,19 @@ class PropertyTests : public DBus::Object::Base
         return r;
     }
 
+
     GVariant *GetDictionary(const DBus::Object::Property::BySpec &property)
     {
         std::cout << "[Get Dictionary Property] name=" << property.GetName()
                   << std::endl;
-        GVariantBuilder *dict = glib2::Builder::Create("a{sv}");
-        g_variant_builder_add(dict,
-                              "{sv}",
-                              "name",
-                              glib2::Value::Create(std::string("dictionary test")));
-        g_variant_builder_add(dict,
-                              "{sv}",
-                              "key",
-                              glib2::Value::Create(std::string("value")));
-        g_variant_builder_add(dict,
-                              "{sv}",
-                              "numbers",
-                              glib2::Value::Create(123));
-        g_variant_builder_add(dict,
-                              "{sv}",
-                              "bool",
-                              glib2::Value::Create(true));
-        return glib2::Builder::Finish(dict);
+        GVariantDict *dict = glib2::Dict::Create();
+        glib2::Dict::Add(dict, "name", std::string("dictionary test"));
+        glib2::Dict::Add<std::string>(dict, "key", "value");
+        glib2::Dict::Add(dict, "numbers", 123);
+        std::vector<uint32_t> num_array = {0, 1, 2, 4, 8, 16, 32, 64, 128};
+        glib2::Dict::Add(dict, "nummeric_array", num_array);
+        glib2::Dict::Add(dict, "bool", true);
+        return glib2::Dict::Finish(dict);
     }
 
     DBus::Object::Property::Update::Ptr SetComplexProperty(const DBus::Object::Property::BySpec &property,

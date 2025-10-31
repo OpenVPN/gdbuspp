@@ -786,8 +786,82 @@ inline GVariant *Create(const std::vector<T> &value) noexcept
  */
 GVariant *TupleWrap(GVariant *data);
 
+} // namespace Value
+
 
 namespace Dict {
+
+/**
+ *  Create a new GVariant based dictionary.
+ *
+ *  This method is a convenience wrapper around g_variant_dict_new(),
+ *  to provide a more unified glib2::Dict API.
+ *
+ * @return GVariantDict*
+ */
+inline GVariantDict *Create() noexcept
+{
+    return g_variant_dict_new(nullptr);
+}
+
+
+/**
+ *  Adds a new value to the GVariant based dictionary.
+ *
+ *  This method is a convenience wrapper around g_variant_dict_insert_value(),
+ *  to provide a more unified glib2::Dict API.  But it will also take care of
+ *  converting the C++ data type and create the appropriate GVariant object
+ *  holding the data, with the correct D-Bus data type.
+ *
+ * @tparam T     C++ data type of the value
+ * @param dict   GVariantDict object holding the dictionary
+ * @param key    std:::string with the dictionary key
+ * @param value  The C++ value to store in the dictionary
+ */
+template <typename T>
+inline void Add(GVariantDict *dict, const std::string &key, const T &value) noexcept
+{
+    g_variant_dict_insert_value(dict, key.c_str(), glib2::Value::Create<T>(value));
+}
+
+
+/**
+ *  Adds a new vector/array value to the GVariant based dictionary.
+ *
+ *  This method is a convenience wrapper around g_variant_dict_insert_value(),
+ *  to provide a more unified glib2::Dict API.  But it will also take care of
+ *  converting the C++ data type and create the appropriate GVariant object
+ *  holding the vector data, with the correct D-Bus data type.
+ *
+ * @tparam T     C++ data type of the vector values
+ * @param dict   GVariantDict object holding the dictionary
+ * @param key    std:::string with the dictionary key
+ * @param value  The C++ std::vector<T> holding the vector to store in the dictionary
+ */
+template <typename T>
+inline void Add(GVariantDict *dict, const std::string &key, const std::vector<T> &value) noexcept
+{
+    g_variant_dict_insert_value(dict, key.c_str(), glib2::Value::Create<T>(value));
+}
+
+
+/**
+ *  This wraps up the GVariantDict object into a GVariant object which
+ *  is used when passing the dictionary through various D-Bus APIs.
+ *
+ *  This method is a convenience wrapper around g_variant_dict_end(),
+ *  to provide a more unified glib2::Dict API.
+ *
+ * @param dict        GVariantDict object holding the dictionary
+ * @return GVariant*  object containing the finalised dictionary object.
+ */
+inline GVariant *Finish(GVariantDict *dict) noexcept
+{
+    GVariant *ret = g_variant_dict_end(dict);
+    g_variant_dict_unref(dict);
+    return ret;
+}
+
 
 /**
  *  Extract a value from a GVariant based dictionary container object.
@@ -822,7 +896,5 @@ T Lookup(GVariant *dict, const std::string &key)
 }
 
 } // namespace Dict
-
-} // namespace Value
 
 } // namespace glib2

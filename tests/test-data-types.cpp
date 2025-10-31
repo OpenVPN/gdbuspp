@@ -40,14 +40,14 @@ bool test_dictionary(DBus::Proxy::Client::Ptr prx)
     GVariant *dict = prx->GetPropertyGVariant(Test::Constants::GenPath("simple1/properties"),
                                               Test::Constants::GenInterface("simple1"),
                                               "dictionary");
-    std::string name = glib2::Value::Dict::Lookup<std::string>(dict, "name");
-    std::string key = glib2::Value::Dict::Lookup<std::string>(dict, "key");
-    int numbers = glib2::Value::Dict::Lookup<int>(dict, "numbers");
-    bool true_val = glib2::Value::Dict::Lookup<bool>(dict, "bool");
+    auto name = glib2::Dict::Lookup<std::string>(dict, "name");
+    auto key = glib2::Dict::Lookup<std::string>(dict, "key");
+    auto numbers = glib2::Dict::Lookup<int>(dict, "numbers");
+    auto true_val = glib2::Dict::Lookup<bool>(dict, "bool");
 
     try
     {
-        auto wrong_type = glib2::Value::Dict::Lookup<int>(dict, "key");
+        auto wrong_type = glib2::Dict::Lookup<int>(dict, "key");
         std::cout << "glib2::Value::Dict::Lookup() test with "
                   << "incorrect data type FAILED" << std::endl
                   << "  Retrieved value: '" << wrong_type << "'" << std::endl;
@@ -65,7 +65,7 @@ bool test_dictionary(DBus::Proxy::Client::Ptr prx)
 
     try
     {
-        auto non_exist = glib2::Value::Dict::Lookup<std::string>(dict, "no-such-key");
+        auto non_exist = glib2::Dict::Lookup<std::string>(dict, "no-such-key");
         std::cout << "glib2::Value::Dict::Lookup() test with "
                   << "non-existing key FAILED" << std::endl
                   << "  Retrieved value: '" << non_exist << "'" << std::endl;
