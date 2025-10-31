@@ -895,6 +895,42 @@ T Lookup(GVariant *dict, const std::string &key)
     return ret;
 }
 
+
+/**
+ *  This is the vector variant of Dict::Lookup(), it the return value
+ *  will be std::vector<T> instead of just T.
+ *
+ *  Extract a value from a GVariant based dictionary container object.
+ *  Such objects typically have D-Bus data type like 'a{sv}', where the 'v'
+ *  value is a GVarint based array, list or tuple.
+ *
+ *  This takes a key to look up from a GVariant object and returns the
+ *  value as the data type it's declared as.  There must be a strict match
+ *  between the D-Bus and C++ data type.
+ *
+ * @tparam T
+ * @param dict      GVariant object holding the dictionary
+ * @param key       std::string with the dictionary key to look up
+ * @return std::vector<T>
+ * @throw glib2::Utils::Exception if the value could not be retrieved
+ */
+template <typename T>
+std::vector<T> LookupVector(GVariant *dict, const std::string &key)
+{
+    std::string dbus_type = "a" + std::string(DataType::DBus<T>());
+    GVariant *v = g_variant_lookup_value(dict,
+                                         key.c_str(),
+                                         G_VARIANT_TYPE(dbus_type.c_str()));
+    if (!v)
+    {
+        throw glib2::Utils::Exception("Dict::Lookup",
+                                      std::string("Could not retrieve the ")
+                                          + "value for key '" + key + "'");
+    }
+
+    return Value::ExtractVector<T>(v, DataType::DBus<T>());
+}
+
 } // namespace Dict
 
 } // namespace glib2

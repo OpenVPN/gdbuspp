@@ -43,6 +43,7 @@ bool test_dictionary(DBus::Proxy::Client::Ptr prx)
     auto name = glib2::Dict::Lookup<std::string>(dict, "name");
     auto key = glib2::Dict::Lookup<std::string>(dict, "key");
     auto numbers = glib2::Dict::Lookup<int>(dict, "numbers");
+    auto nummeric_array = glib2::Dict::LookupVector<uint32_t>(dict, "nummeric_array");
     auto true_val = glib2::Dict::Lookup<bool>(dict, "bool");
 
     try
