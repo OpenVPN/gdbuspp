@@ -118,6 +118,12 @@ std::string Extract(GVariant *value) noexcept
 
 namespace Value {
 
+GVariant *NullVariant()
+{
+    return g_variant_new_variant(nullptr);
+}
+
+
 GVariant *TupleWrap(GVariant *data)
 {
     if (!data)

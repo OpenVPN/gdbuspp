@@ -818,6 +818,15 @@ inline std::vector<T> ExtractVector(GVariant *params,
 
 
 /**
+ *  Creates a new, empty GVariant object of
+ *  the "variant" D-Bus type
+ *
+ * @return GVariant*
+ */
+GVariant *NullVariant();
+
+
+/**
  *  Templatized wrapper for g_variant_new() which returns a
  *  GVariant object with the provided D-Bus data type and value
  *
