@@ -168,6 +168,17 @@ unsigned stou(std::string const &str, size_t *idx = 0, int base = 10)
 }
 
 
+/**
+ *  Helper function to generate GVariant object of specific types where the
+ *  value is passed to this function as a std::string.
+ *
+ *  This function will "cast" the std::string value content into the
+ *  appropriate D-Bus type and the related data format for the value.
+ *
+ * @param type        D-Bus data type to generate
+ * @param value       std::string value to "cast" to the D-Bus type
+ * @return GVariant*
+ */
 GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
 {
     try
