@@ -102,6 +102,21 @@ void checkParams(const char *func,
  */
 namespace DataType {
 
+// clang-format off
+constexpr const char *DBUS_TYPE_ARRAY      = "a";
+constexpr const char *DBUS_TYPE_BOOL       = "b";
+constexpr const char *DBUS_TYPE_BYTE       = "y";
+constexpr const char *DBUS_TYPE_DOUBLE     = "d";
+constexpr const char *DBUS_TYPE_INT16      = "n";
+constexpr const char *DBUS_TYPE_INT32      = "i";
+constexpr const char *DBUS_TYPE_INT64      = "x";
+constexpr const char *DBUS_TYPE_OBJECTPATH = "o";
+constexpr const char *DBUS_TYPE_STRING     = "s";
+constexpr const char *DBUS_TYPE_UINT16     = "q";
+constexpr const char *DBUS_TYPE_UINT32     = "u";
+constexpr const char *DBUS_TYPE_UINT64     = "t";
+// clang-format on
+
 
 /**
  *  Retrieve the D-Bus notation of the data type stored
@@ -123,13 +138,13 @@ inline const char *DBus() noexcept;
 template <>
 inline const char *DBus<uint32_t>() noexcept
 {
-    return "u";
+    return DBUS_TYPE_UINT32;
 }
 
 template <>
 inline const char *DBus<int32_t>() noexcept
 {
-    return "i";
+    return DBUS_TYPE_INT32;
 }
 
 /*
@@ -141,32 +156,32 @@ inline const char *DBus<int32_t>() noexcept
 template <typename T>
 inline typename std::enable_if<sizeof(T) == 4 && std::is_signed<T>::value, const char *>::type DBus()
 {
-    return "i";
+    return DBUS_TYPE_INT32;
 }
 #endif
 
 template <>
 inline const char *DBus<uint16_t>() noexcept
 {
-    return "q";
+    return DBUS_TYPE_UINT16;
 }
 
 template <>
 inline const char *DBus<int16_t>() noexcept
 {
-    return "n";
+    return DBUS_TYPE_INT16;
 }
 
 template <>
 inline const char *DBus<uint64_t>() noexcept
 {
-    return "t";
+    return DBUS_TYPE_UINT64;
 }
 
 template <>
 inline const char *DBus<int64_t>() noexcept
 {
-    return "x";
+    return DBUS_TYPE_INT64;
 }
 
 template <>
@@ -175,31 +190,31 @@ inline const char *DBus<std::byte>() noexcept
     // The D-Bus spec declares 'y' (BYTE) as "unsigned 8-bit integer",
     // but in C/C++ uint8_t has an ambiguity and is typedefed to
     // unsigned char
-    return "y";
+    return DBUS_TYPE_BYTE;
 }
 
 template <>
 inline const char *DBus<double>() noexcept
 {
-    return "d";
+    return DBUS_TYPE_DOUBLE;
 }
 
 template <>
 inline const char *DBus<bool>() noexcept
 {
-    return "b";
+    return DBUS_TYPE_BOOL;
 }
 
 template <>
 inline const char *DBus<DBus::Object::Path>() noexcept
 {
-    return "o";
+    return DBUS_TYPE_OBJECTPATH;
 }
 
 template <>
 inline const char *DBus<std::string>() noexcept
 {
-    return "s";
+    return DBUS_TYPE_STRING;
 }
 
 } // namespace DataType
@@ -452,7 +467,8 @@ inline void AddStructData(GVariantBuilder *main_builder,
         elements.push_back(extractor(static_cast<void const *>(&rec)));
     }
 
-    std::string dbus_type = "a" + std::string(g_variant_get_type_string(elements[0]));
+    std::string dbus_type = DataType::DBUS_TYPE_ARRAY
+                            + std::string(g_variant_get_type_string(elements[0]));
     GVariantBuilder *array_builder = glib2::Builder::Create(dbus_type.c_str());
     for (const auto &data : elements)
     {
@@ -477,7 +493,7 @@ template <typename T>
 inline GVariantBuilder *FromVector(const std::vector<T> &input,
                                    const char *override_type = nullptr)
 {
-    std::string type = "a" + std::string(override_type ? override_type : DataType::DBus<T>());
+    std::string type = DataType::DBUS_TYPE_ARRAY + std::string(override_type ? override_type : DataType::DBus<T>());
     GVariantBuilder *bld = g_variant_builder_new(G_VARIANT_TYPE(type.c_str()));
     for (const auto &e : input)
     {
@@ -744,7 +760,7 @@ inline std::vector<T> ExtractVector(GVariant *params,
     std::stringstream type;
     const bool wrapped = g_variant_type_is_tuple(g_variant_get_type(params));
     type << (wrapped ? "(" : "")
-         << "a"
+         << DataType::DBUS_TYPE_ARRAY
          << (override_type ? std::string(override_type) : std::string(DataType::DBus<T>()))
          << (wrapped ? ")" : "");
 
@@ -867,7 +883,7 @@ inline GVariant *Create(const std::string &value) noexcept
 template <typename T>
 inline GVariant *Create(const std::vector<T> &value) noexcept
 {
-    std::string type = "a" + std::string(DataType::DBus<T>());
+    std::string type = DataType::DBUS_TYPE_ARRAY + std::string(DataType::DBus<T>());
     GVariantBuilder *bld = Builder::Create(type.c_str());
     for (const auto &elem : value)
     {
@@ -1019,7 +1035,8 @@ T Lookup(GVariant *dict, const std::string &key)
 template <typename T>
 std::vector<T> LookupVector(GVariant *dict, const std::string &key)
 {
-    std::string dbus_type = "a" + std::string(DataType::DBus<T>());
+    std::string dbus_type = DataType::DBUS_TYPE_ARRAY
+                            + std::string(DataType::DBus<T>());
     GVariant *v = g_variant_lookup_value(dict,
                                          key.c_str(),
                                          G_VARIANT_TYPE(dbus_type.c_str()));

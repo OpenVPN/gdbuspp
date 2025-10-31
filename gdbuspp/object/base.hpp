@@ -621,7 +621,7 @@ class Base : public std::enable_shared_from_this<Base>
                      const bool readwrite,
                      std::vector<T> &vector_var)
             : PropertyTypeBase<std::vector<T>>(interface_arg, name_arg, readwrite, vector_var),
-              dbus_array_type("a" + std::string(glib2::DataType::DBus<T>()))
+              dbus_array_type(glib2::DataType::DBUS_TYPE_ARRAY + std::string(glib2::DataType::DBus<T>()))
         {
         }
 
