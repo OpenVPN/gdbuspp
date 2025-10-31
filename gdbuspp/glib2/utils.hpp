@@ -112,7 +112,7 @@ namespace DataType {
  * @param v   GVariant object to inspect
  * @return std::string of the D-Bus data type representation of the value
  */
-const std::string Extract(GVariant *value) noexcept;
+std::string Extract(GVariant *value) noexcept;
 
 
 // Declare template as prototype only so it cannot be used directly
@@ -723,7 +723,7 @@ inline GVariant *CreateType(const char *dbustype, const std::string &value) noex
  * @return GVariant*
  */
 template <typename T>
-inline GVariant *Create(const T value) noexcept
+inline GVariant *Create(const T &value) noexcept
 {
     return g_variant_new(DataType::DBus<T>(), value);
 }
@@ -736,7 +736,7 @@ inline GVariant *Create(const T value) noexcept
  * @return GVariant*
  */
 template <>
-inline GVariant *Create(DBus::Object::Path value) noexcept
+inline GVariant *Create(const DBus::Object::Path &value) noexcept
 {
     return g_variant_new("o", value.c_str());
 }
@@ -749,7 +749,7 @@ inline GVariant *Create(DBus::Object::Path value) noexcept
  * @return GVariant*
  */
 template <>
-inline GVariant *Create(std::string value) noexcept
+inline GVariant *Create(const std::string &value) noexcept
 {
     return g_variant_new("s", value.c_str());
 }

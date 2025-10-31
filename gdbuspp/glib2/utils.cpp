@@ -108,7 +108,7 @@ void checkParams(const char *func,
 
 namespace DataType {
 
-const std::string Extract(GVariant *value) noexcept
+std::string Extract(GVariant *value) noexcept
 {
     return std::string(g_variant_get_type_string(value));
 }
