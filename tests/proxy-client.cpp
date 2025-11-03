@@ -26,9 +26,12 @@
 #include "../gdbuspp/proxy.hpp"
 #include "test-utils.hpp"
 
+
+namespace Tests::Program {
+
 using namespace DBus;
 
-class ProxyOpts : protected TestUtils::OptionParser
+class ProxyOpts : protected Tests::Utils::OptionParser
 {
   public:
     enum class PropertyMode
@@ -177,7 +180,7 @@ class ProxyOpts : protected TestUtils::OptionParser
 
 
 
-int main(int argc, char **argv)
+int test_proxy_client(int argc, char **argv)
 {
     std::ostringstream log;
     try
@@ -219,12 +222,12 @@ int main(int argc, char **argv)
         GVariant *data = nullptr;
         try
         {
-            data = TestUtils::generate_gvariant(log,
-                                                options.data_type,
-                                                options.data_values,
-                                                ProxyOpts::PropertyMode::SET != options.property_mode);
+            data = Tests::Utils::generate_gvariant(log,
+                                                   options.data_type,
+                                                   options.data_values,
+                                                   ProxyOpts::PropertyMode::SET != options.property_mode);
         }
-        catch (const TestUtils::Exception &excp)
+        catch (const Tests::Utils::Exception &excp)
         {
             std::cerr << "** ERROR ** " << excp.what() << std::endl;
             return 2;
@@ -253,13 +256,13 @@ int main(int argc, char **argv)
             log << "Method call: " << options.preset
                 << ", method=" << options.method << std::endl;
             GVariant *res = prx->Call(options.preset, options.method, data);
-            TestUtils::dump_gvariant(log, "GVariant response", res);
+            Tests::Utils::dump_gvariant(log, "GVariant response", res);
 
             std::ostringstream check_log;
-            if (!TestUtils::log_data_type_value_check(check_log,
-                                                      options.check_type,
-                                                      options.check_response,
-                                                      res))
+            if (!Tests::Utils::log_data_type_value_check(check_log,
+                                                         options.check_type,
+                                                         options.check_response,
+                                                         res))
             {
                 if (options.quiet)
                 {
@@ -294,7 +297,7 @@ int main(int argc, char **argv)
                 << ", property=" << options.property << std::endl;
 
             GVariant *res = prx->GetPropertyGVariant(options.preset, options.property);
-            TestUtils::dump_gvariant(log, "GVariant response", res);
+            Tests::Utils::dump_gvariant(log, "GVariant response", res);
 
 
             std::string res_type = std::string(g_variant_get_type_string(res));
@@ -382,10 +385,10 @@ int main(int argc, char **argv)
 
 
             std::ostringstream check_log;
-            if (!TestUtils::log_data_type_value_check(check_log,
-                                                      options.check_type,
-                                                      options.check_response,
-                                                      res))
+            if (!Tests::Utils::log_data_type_value_check(check_log,
+                                                         options.check_type,
+                                                         options.check_response,
+                                                         res))
             {
                 if (options.quiet)
                 {
@@ -471,4 +474,12 @@ int main(int argc, char **argv)
         return 2;
     }
     return 0;
+}
+
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_proxy_client(argc, argv);
 }

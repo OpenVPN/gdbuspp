@@ -24,6 +24,8 @@
 #include "test-constants.hpp"
 #include "tests/test-utils.hpp"
 
+namespace Tests::Program {
+
 /**
  *  Checks the values hardcoded dictionary in net.openvpn.gdbuspp.test.simple
  *
@@ -38,8 +40,8 @@
  */
 bool test_dictionary(DBus::Proxy::Client::Ptr prx)
 {
-    GVariant *dict = prx->GetPropertyGVariant(Test::Constants::GenPath("simple1/properties"),
-                                              Test::Constants::GenInterface("simple1"),
+    GVariant *dict = prx->GetPropertyGVariant(Tests::Constants::GenPath("simple1/properties"),
+                                              Tests::Constants::GenInterface("simple1"),
                                               "dictionary");
     auto name = glib2::Dict::Lookup<std::string>(dict, "name");
     auto key = glib2::Dict::Lookup<std::string>(dict, "key");
@@ -635,11 +637,12 @@ int test_base_data_types()
                              glib2::Builder::AddKeyValue<uint16_t, bool>(keyval, 4, true);
 
                              GVariant *data = glib2::Builder::Finish(keyval);
-                             return TestResult("glib2::Builder::AddKeyValue - a{qb})",
-                                               TestUtils::check_data_type("a{qb}", data)
-                                                   && TestUtils::check_data_value(
-                                                       "{1: true, 2: false, 3: false, 4: true}",
-                                                       data));
+                             bool result = Tests::Utils::check_data_type("a{qb}", data)
+                                           && Tests::Utils::check_data_value(
+                                               "{1: true, 2: false, 3: false, 4: true}",
+                                               data);
+                             g_variant_unref(data);
+                             return TestResult("glib2::Builder::AddKeyValue - a{qb})", result);
                          });
 
     failures += run_test([]()
@@ -651,11 +654,12 @@ int test_base_data_types()
                              glib2::Builder::AddKeyValue<std::string, uint16_t>(keyval, "key_four", -1039); // This will wrap
 
                              GVariant *data = glib2::Builder::Finish(keyval);
-                             return TestResult("glib2::Builder::AddKeyValue - a{sq})",
-                                               TestUtils::check_data_type("a{sq}", data)
-                                                   && TestUtils::check_data_value(
-                                                       "{'key_one': 123, 'key_two': 6789, 'key_three': 65535, 'key_four': 64497}",
-                                                       data));
+                             bool result = Tests::Utils::check_data_type("a{sq}", data)
+                                           && Tests::Utils::check_data_value(
+                                               "{'key_one': 123, 'key_two': 6789, 'key_three': 65535, 'key_four': 64497}",
+                                               data);
+                             g_variant_unref(data);
+                             return TestResult("glib2::Builder::AddKeyValue - a{sq})", result);
                          });
 
     failures += run_test([]()
@@ -666,11 +670,12 @@ int test_base_data_types()
                              glib2::Builder::AddKeyValue<uint32_t, std::string>(keyval, 30, "Key 30");
 
                              GVariant *data = glib2::Builder::Finish(keyval);
-                             return TestResult("glib2::Builder::AddKeyValue - a{us})",
-                                               TestUtils::check_data_type("a{us}", data)
-                                                   && TestUtils::check_data_value(
-                                                       "{10: 'Key 10', 20: 'Key 20', 30: 'Key 30'}",
-                                                       data));
+                             bool result = Tests::Utils::check_data_type("a{us}", data)
+                                           && Tests::Utils::check_data_value(
+                                               "{10: 'Key 10', 20: 'Key 20', 30: 'Key 30'}",
+                                               data);
+                             g_variant_unref(data);
+                             return TestResult("glib2::Builder::AddKeyValue - a{us})", result);
                          });
 
     failures += run_test([]()
@@ -681,11 +686,12 @@ int test_base_data_types()
                              glib2::Builder::AddKeyValue<std::string, std::string>(keyval, "key_3", "Value C");
 
                              GVariant *data = glib2::Builder::Finish(keyval);
-                             return TestResult("glib2::Builder::AddKeyValue - a{ss})",
-                                               TestUtils::check_data_type("a{ss}", data)
-                                                   && TestUtils::check_data_value(
-                                                       "{'key_1': 'Value A', 'key_2': 'Value B', 'key_3': 'Value C'}",
-                                                       data));
+                             bool result = Tests::Utils::check_data_type("a{ss}", data)
+                                           && Tests::Utils::check_data_value(
+                                               "{'key_1': 'Value A', 'key_2': 'Value B', 'key_3': 'Value C'}",
+                                               data);
+                             g_variant_unref(data);
+                             return TestResult("glib2::Builder::AddKeyValue - a{ss})", result);
                          });
 
     failures += run_test([]()
@@ -696,11 +702,12 @@ int test_base_data_types()
                              glib2::Builder::AddKeyValue<std::string, DBus::Object::Path>(keyval, "pathC", "/example/gdbuspp/path3");
 
                              GVariant *data = glib2::Builder::Finish(keyval);
-                             return TestResult("glib2::Builder::AddKeyValue - a{so})",
-                                               TestUtils::check_data_type("a{so}", data)
-                                                   && TestUtils::check_data_value(
-                                                       "{'pathA': '/example/gdbuspp/path1', 'pathB': '/example/gdbuspp/path2', 'pathC': '/example/gdbuspp/path3'}",
-                                                       data));
+                             bool result = Tests::Utils::check_data_type("a{so}", data)
+                                           && Tests::Utils::check_data_value(
+                                               "{'pathA': '/example/gdbuspp/path1', 'pathB': '/example/gdbuspp/path2', 'pathC': '/example/gdbuspp/path3'}",
+                                               data);
+                             g_variant_unref(data);
+                             return TestResult("glib2::Builder::AddKeyValue - a{so})", result);
                          });
 
 
@@ -747,13 +754,14 @@ int test_base_data_types()
                              std::vector<uint16_t> vector_ui16{1, 2, 4, 8, 16, 32, 65};
                              glib2::Dict::Add(dict, "vector_ui16", vector_ui16);
                              GVariant *data = glib2::Dict::Finish(dict);
-                             return TestResult("glib2::Dict - Generic tests (a{sv})",
-                                               TestUtils::check_data_type("a{sv}", data)
-                                                   && TestUtils::check_data_value(
-                                                       "{'type_bool_false': <false>, 'type_string': <'A dictionary string element'>, 'type_bool_true': <true>, "
-                                                       "'type_int32': <uint64 9402038495>, 'type_object_path': <objectpath '/org/example/gdbuspp/object/path'>, "
-                                                       "'vector_ui16': <[uint16 1, 2, 4, 8, 16, 32, 65]>}",
-                                                       data));
+                             bool result = Tests::Utils::check_data_type("a{sv}", data)
+                                           && Tests::Utils::check_data_value(
+                                               "{'type_bool_false': <false>, 'type_string': <'A dictionary string element'>, 'type_bool_true': <true>, "
+                                               "'type_int32': <uint64 9402038495>, 'type_object_path': <objectpath '/org/example/gdbuspp/object/path'>, "
+                                               "'vector_ui16': <[uint16 1, 2, 4, 8, 16, 32, 65]>}",
+                                               data);
+                             g_variant_unref(data);
+                             return TestResult("glib2::Dict - Generic tests (a{sv})", result);
                          });
 
 
@@ -956,14 +964,14 @@ int test_base_vector()
     return failures;
 };
 
-int main(int argc, char **argv)
+int test_data_types_main(int argc, char **argv)
 {
     DBus::Proxy::Client::Ptr prx = nullptr;
     if ((argc > 1 && (std::string(argv[1]) == "--service-simple")))
     {
         auto conn = DBus::Connection::Create(DBus::BusType::SESSION);
         prx = DBus::Proxy::Client::Create(conn,
-                                          Test::Constants::GenServiceName("simple"));
+                                          Tests::Constants::GenServiceName("simple"));
     }
 
     int failures = 0;
@@ -985,4 +993,12 @@ int main(int argc, char **argv)
         return 2;
     }
     return 0;
+}
+
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_data_types_main(argc, argv);
 }

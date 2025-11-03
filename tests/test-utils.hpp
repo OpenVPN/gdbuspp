@@ -19,7 +19,7 @@
 #include <vector>
 #include <glib.h>
 
-namespace TestUtils {
+namespace Tests::Utils {
 
 class Exception : public std::exception
 {
@@ -141,4 +141,4 @@ GVariant *generate_gvariant(std::ostringstream &log,
                             const std::vector<std::string> &data_values,
                             bool wrap_single_value);
 
-}; // namespace TestUtils
+}; // namespace Tests::Utils

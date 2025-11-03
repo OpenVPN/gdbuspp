@@ -23,10 +23,12 @@
 #include "test-constants.hpp"
 
 
-using namespace DBus;
-using namespace Test;
+namespace Tests::Program {
 
-class Options : public TestUtils::OptionParser
+using namespace DBus;
+using namespace Tests;
+
+class Options : public Tests::Utils::OptionParser
 {
   public:
     DBus::BusType bustype = DBus::BusType::SESSION;
@@ -125,7 +127,7 @@ void check_expectations(const std::string &expect, const std::string &result)
 }
 
 
-int main(int argc, char **argv)
+int test_credential_query(int argc, char **argv)
 {
     try
     {
@@ -163,4 +165,11 @@ int main(int argc, char **argv)
 
 
     return 0;
+}
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_credential_query(argc, argv);
 }

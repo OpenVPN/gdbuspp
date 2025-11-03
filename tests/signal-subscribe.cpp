@@ -27,10 +27,12 @@
 #include "test-utils.hpp"
 
 
+namespace Tests::Program {
+
 using namespace DBus;
 
 
-class Options : protected TestUtils::OptionParser
+class Options : protected Tests::Utils::OptionParser
 {
   public:
     Options(const int argc, char **argv)
@@ -153,7 +155,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
         if (opts.verbose)
         {
             std::ostringstream evdata;
-            TestUtils::dump_gvariant(evdata, "        Signal Event", event->params);
+            Tests::Utils::dump_gvariant(evdata, "        Signal Event", event->params);
             std::cout << evdata.str();
         }
     }
@@ -172,7 +174,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 
 
         uint32_t idx = 0;
-        std::vector<std::string> values = TestUtils::convert_from_gvariant(event->params);
+        std::vector<std::string> values = Tests::Utils::convert_from_gvariant(event->params);
         for (const auto &v : values)
         {
             if (opts.verbose)
@@ -219,7 +221,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 }
 
 
-int main(int argc, char **argv)
+int test_signal_subscribe(int argc, char **argv)
 {
     Options opts(argc, argv);
     std::ostringstream log;
@@ -256,4 +258,12 @@ int main(int argc, char **argv)
         std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
         return 2;
     }
+}
+
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_signal_subscribe(argc, argv);
 }

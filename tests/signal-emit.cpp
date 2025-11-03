@@ -26,10 +26,12 @@
 #include "test-constants.hpp"
 
 
-using namespace DBus;
-using namespace Test;
+namespace Tests::Program {
 
-class EmitOpts : protected TestUtils::OptionParser
+using namespace DBus;
+using namespace Tests;
+
+class EmitOpts : protected Tests::Utils::OptionParser
 {
   public:
     EmitOpts(const int argc, char **argv)
@@ -115,7 +117,7 @@ class EmitOpts : protected TestUtils::OptionParser
 
 
 
-int main(int argc, char **argv)
+int test_signal_emit(int argc, char **argv)
 {
     EmitOpts options(argc, argv);
     std::ostringstream log;
@@ -126,12 +128,12 @@ int main(int argc, char **argv)
         GVariant *data = nullptr;
         try
         {
-            data = TestUtils::generate_gvariant(log,
-                                                options.data_type,
-                                                options.data_values,
-                                                true);
+            data = Tests::Utils::generate_gvariant(log,
+                                                   options.data_type,
+                                                   options.data_values,
+                                                   true);
         }
-        catch (const TestUtils::Exception &excp)
+        catch (const Tests::Utils::Exception &excp)
         {
             std::cerr << "** ERROR ** " << excp.what() << std::endl;
             return 2;
@@ -165,4 +167,11 @@ int main(int argc, char **argv)
         std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
         return 2;
     }
+}
+
+} // namespace Tests::Program
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_signal_emit(argc, argv);
 }

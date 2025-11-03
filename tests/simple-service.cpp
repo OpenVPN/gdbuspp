@@ -30,8 +30,12 @@
 #include "test-constants.hpp"
 
 
-using namespace Test;
+namespace Tests::Program {
 
+using namespace Tests;
+
+
+namespace SimpleService {
 
 /**
  *  Very simple implementation of a simple logging mechanism.
@@ -42,12 +46,12 @@ using namespace Test;
  *  This class and the DBus::Signals::Group class is designed to be
  *  shared across more users, through the ::Ptr (shared_ptr) to it.
  */
-class SimpleLog : public DBus::Signals::Group
+class Logger : public DBus::Signals::Group
 {
   public:
-    using Ptr = std::shared_ptr<SimpleLog>;
+    using Ptr = std::shared_ptr<Logger>;
 
-    SimpleLog(DBus::Connection::Ptr conn)
+    explicit Logger(DBus::Connection::Ptr conn)
         : DBus::Signals::Group(conn,
                                Constants::GenPath("simple1"),
                                Constants::GenInterface("simple1"))
@@ -84,12 +88,12 @@ class SimpleLog : public DBus::Signals::Group
  *  Path:      (set via constructor argument)
  *  Interface: gdbuspp.test.simple1.child
  */
-class SimpleObject : public DBus::Object::Base
+class Object : public DBus::Object::Base
 {
   public:
-    SimpleObject(DBus::Object::Manager::Ptr obj_mgr,
-                 const DBus::Object::Path &path,
-                 const std::string &name)
+    Object(DBus::Object::Manager::Ptr obj_mgr,
+           const DBus::Object::Path &path,
+           const std::string &name)
         : DBus::Object::Base(path, Constants::GenInterface("simple1.child")),
           object_manager(obj_mgr), my_path(path), my_name(name)
     {
@@ -112,7 +116,7 @@ class SimpleObject : public DBus::Object::Base
                   });
     }
 
-    virtual ~SimpleObject() noexcept
+    virtual ~Object() override
     {
         std::cout << "---- ~SimpleObject() ... path: " << my_path << std::endl;
     };
@@ -142,7 +146,7 @@ class SimpleObject : public DBus::Object::Base
 class PropertyTests : public DBus::Object::Base
 {
   public:
-    PropertyTests(SimpleLog::Ptr log_)
+    explicit PropertyTests(Logger::Ptr log_)
         : DBus::Object::Base(Constants::GenPath("simple1/properties"),
                              Constants::GenInterface("simple1")),
           log(log_)
@@ -200,7 +204,7 @@ class PropertyTests : public DBus::Object::Base
         Log(__func__, "Initialized");
     }
 
-    ~PropertyTests() noexcept
+    ~PropertyTests() noexcept override
     {
         Log(__func__, "Removed PropertyTests");
         std::cout << __func__ << " -- ~PropertyTests() called" << std::endl;
@@ -216,7 +220,7 @@ class PropertyTests : public DBus::Object::Base
     }
 
   private:
-    SimpleLog::Ptr log = nullptr;
+    Logger::Ptr log = nullptr;
 
     // Property variables -- Property::SingleType
     std::string string_val = "Initial string";
@@ -455,7 +459,7 @@ class PropertyTests : public DBus::Object::Base
 class MethodTests : public DBus::Object::Base
 {
   public:
-    MethodTests(DBus::Object::Manager::Ptr obj_mgr_, SimpleLog::Ptr log_)
+    MethodTests(DBus::Object::Manager::Ptr obj_mgr_, Logger::Ptr log_)
         : DBus::Object::Base(Constants::GenPath("simple1/methods"),
                              Constants::GenInterface("simple1")),
           object_manager(obj_mgr_), log(log_)
@@ -594,7 +598,7 @@ class MethodTests : public DBus::Object::Base
 
   private:
     DBus::Object::Manager::Ptr object_manager = nullptr;
-    SimpleLog::Ptr log = nullptr;
+    Logger::Ptr log = nullptr;
     std::vector<DBus::Object::Path> removed_objects = {};
 
 
@@ -627,16 +631,16 @@ class MethodTests : public DBus::Object::Base
         std::string name = glib2::Value::Extract<std::string>(params, 0);
 
         const std::string child_path = Constants::GenPath("simple1/childs/") + name;
-        auto obj = object_manager->CreateObject<SimpleObject>(object_manager,
-                                                              child_path,
-                                                              name);
+        auto obj = object_manager->CreateObject<Object>(object_manager,
+                                                        child_path,
+                                                        name);
         object_manager->AttachRemoveCallback(
             child_path,
             [&](const DBus::Object::Path &path)
             {
                 // A bit complicated way - but showcasing the idea
                 // how to use this callback
-                auto obj = object_manager->GetObject<SimpleObject>(path);
+                auto obj = object_manager->GetObject<Object>(path);
                 removed_objects.push_back(obj->GetPath());
                 std::cout << "AttachRemoveCallback: Removed object "
                           << path << std::endl;
@@ -796,18 +800,18 @@ class FailingMethodTests : public DBus::Object::Base
 };
 
 
-class SimpleHandler : public DBus::Object::Base
+class MainHandler : public DBus::Object::Base
 {
   public:
-    using Ptr = std::shared_ptr<SimpleHandler>;
+    using Ptr = std::shared_ptr<MainHandler>;
 
-    SimpleHandler(DBus::Connection::Ptr conn,
-                  DBus::Object::Manager::Ptr object_mgr)
+    MainHandler(DBus::Connection::Ptr conn,
+                DBus::Object::Manager::Ptr object_mgr)
         : DBus::Object::Base(Constants::GenPath("simple1"),
                              Constants::GenInterface("simple1"))
     {
         DisableIdleDetector(true);
-        log = DBus::Signals::Group::Create<SimpleLog>(conn);
+        log = DBus::Signals::Group::Create<Logger>(conn);
         RegisterSignals(log);
         log->AddTarget("");
 
@@ -821,7 +825,7 @@ class SimpleHandler : public DBus::Object::Base
     }
 
 
-    ~SimpleHandler()
+    ~MainHandler()
     {
         try
         {
@@ -866,7 +870,7 @@ class SimpleHandler : public DBus::Object::Base
 
 
   private:
-    SimpleLog::Ptr log = nullptr;
+    Logger::Ptr log = nullptr;
     PropertyTests::Ptr property_tests = nullptr;
     MethodTests::Ptr method_tests = nullptr;
     FailingMethodTests::Ptr failing_meths = nullptr;
@@ -888,15 +892,15 @@ const bool compare_shared_ptr_obj(const std::shared_ptr<CLASS1> &lhs,
  *
  *  Well-known bus name: net.openvpn.gdbuspp.test.simple
  */
-class SimpleService : public DBus::Service
+class Service1 : public DBus::Service
 {
   public:
-    SimpleService(DBus::Connection::Ptr con)
+    Service1(DBus::Connection::Ptr con)
         : DBus::Service(con, Constants::GenServiceName("simple"))
     {
     }
 
-    virtual ~SimpleService() = default;
+    virtual ~Service1() = default;
 
     //  This is a callback method which is called when this D-Bus service
     //  is registered on the D-Bus connection
@@ -915,14 +919,14 @@ class SimpleService : public DBus::Service
     }
 
 
-    void InternalTests(DBus::Object::Manager::Ptr object_mgr, SimpleHandler::Ptr handler)
+    void InternalTests(DBus::Object::Manager::Ptr object_mgr, MainHandler::Ptr handler)
     {
         std::cout << "** Internal tests - "
                   << "DBus::Object::Manager::GetObject() / DBus::Object::Manager::GetAllObjects()"
                   << std::endl;
         std::map<std::string, DBus::Object::Base::Ptr> check;
         check[handler->GetPath()] = handler;
-        auto retr_handler = object_mgr->GetObject<SimpleHandler>(Constants::GenPath("simple1"));
+        auto retr_handler = object_mgr->GetObject<MainHandler>(Constants::GenPath("simple1"));
         if (!compare_shared_ptr_obj(handler, retr_handler))
         {
             throw DBus::Exception("InternalTests",
@@ -963,7 +967,7 @@ class SimpleService : public DBus::Service
             std::cout << "       - " << p << std::endl;
         }
 
-        auto non_existing = object_mgr->GetObject<SimpleHandler>("/nonexisting/path");
+        auto non_existing = object_mgr->GetObject<MainHandler>("/nonexisting/path");
         if (nullptr != non_existing)
         {
             throw DBus::Exception("InternalTests",
@@ -1007,8 +1011,10 @@ class SimpleService : public DBus::Service
     }
 };
 
+} // namespace SimpleService
 
-int main(int argc, char **argv)
+
+int test_simple_service(int argc, char **argv)
 {
     try
     {
@@ -1016,13 +1022,13 @@ int main(int argc, char **argv)
         auto dbuscon = DBus::Connection::Create(DBus::BusType::SESSION);
 
         // Create a new service object - SimpleService
-        auto simple_service = DBus::Service::Create<SimpleService>(dbuscon);
+        auto simple_service = DBus::Service::Create<SimpleService::Service1>(dbuscon);
 
         // Create a new "root object", handling all the initial requests
         // This root object is the ServiceHandler; which can create child
         // objects with different functionality
-        auto handler = simple_service->CreateServiceHandler<SimpleHandler>(dbuscon,
-                                                                           simple_service->GetObjectManager());
+        auto handler = simple_service->CreateServiceHandler<SimpleService::MainHandler>(dbuscon,
+                                                                                        simple_service->GetObjectManager());
 
         simple_service->PrepareIdleDetector(std::chrono::seconds(60));
 
@@ -1044,4 +1050,12 @@ int main(int argc, char **argv)
         return 8;
     }
     return 0;
+}
+
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_simple_service(argc, argv);
 }

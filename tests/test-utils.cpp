@@ -24,7 +24,7 @@
 #include "gdbuspp/glib2/utils.hpp"
 #include "test-utils.hpp"
 
-namespace TestUtils {
+namespace Tests::Utils {
 
 Exception::Exception(const std::string &group, const std::string &err)
     : errormsg("[" + group + "]: " + err)
@@ -211,10 +211,10 @@ GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
     }
     catch (const std::out_of_range &)
     {
-        throw TestUtils::Exception(__func__,
-                                   "Type '" + type + "' "
-                                       + "with value '" + value + "' "
-                                       + "exceeds the range for the data type");
+        throw Tests::Utils::Exception(__func__,
+                                      "Type '" + type + "' "
+                                          + "with value '" + value + "' "
+                                          + "exceeds the range for the data type");
     }
 }
 
@@ -265,8 +265,8 @@ std::vector<std::string> convert_from_gvariant(GVariant *values)
                 std::ostringstream err;
                 err << "D-Bus data type '" << type[pos + 1] << "'"
                     << " has not been implemented.";
-                throw TestUtils::Exception("TestUtils::convert_from_gvariant",
-                                           err.str());
+                throw Tests::Utils::Exception("Tests::Utils::convert_from_gvariant",
+                                              err.str());
             }
         }
 
@@ -291,11 +291,11 @@ GVariant *generate_gvariant(std::ostringstream &log,
     {
         if (data_type.empty())
         {
-            throw TestUtils::Exception(__func__, "data values requires data types");
+            throw Tests::Utils::Exception(__func__, "data values requires data types");
         }
         if (data_type.length() != data_values.size())
         {
-            throw TestUtils::Exception(__func__, "data type string does not contain enough field to describe all data values");
+            throw Tests::Utils::Exception(__func__, "data type string does not contain enough field to describe all data values");
         }
 
         log << "-------------------------" << std::endl;
@@ -328,4 +328,4 @@ GVariant *generate_gvariant(std::ostringstream &log,
 }
 
 
-}; // namespace TestUtils
+}; // namespace Tests::Utils

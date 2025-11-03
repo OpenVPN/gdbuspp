@@ -27,10 +27,12 @@
 #include "test-utils.hpp"
 #include "test-constants.hpp"
 
-using namespace DBus;
-using namespace Test;
+namespace Tests::Program {
 
-class SignalOpts : protected TestUtils::OptionParser
+using namespace DBus;
+using namespace Tests;
+
+class SignalOpts : protected Tests::Utils::OptionParser
 {
   public:
     SignalOpts(const int argc, char **argv)
@@ -122,7 +124,7 @@ class TestSignal : public Signals::Signal
 };
 
 
-int main(int argc, char **argv)
+int test_signal_signal(int argc, char **argv)
 {
     SignalOpts opts(argc, argv);
     auto dbc = DBus::Connection::Create(opts.bustype);
@@ -137,4 +139,13 @@ int main(int argc, char **argv)
         msg << "Test Signal " << std::to_string(i + 1);
         testsig->Send(msg.str(), (i % 2), 101 + i);
     }
+    return 0;
+}
+
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_signal_signal(argc, argv);
 }

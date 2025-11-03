@@ -20,8 +20,7 @@
 #include <string_view>
 #include <cstring>
 
-namespace Test {
-namespace Constants {
+namespace Tests::Constants {
 
 /**
  *  Constant values of prefixes used by the test programs
@@ -35,5 +34,4 @@ constexpr std::string_view INTERFACE{"gdbuspp.test."};
 // Include the constant generator logic
 #include "../gdbuspp/gen-constants.hpp"
 
-} // namespace Constants
-} // namespace Test
+} // namespace Tests::Constants

@@ -21,7 +21,9 @@
 #include "test-constants.hpp"
 
 
-int main(int argc, char **argv)
+namespace Tests::Program {
+
+int buswatch_test(int argc, char **argv)
 {
     using namespace std::literals;
 
@@ -73,4 +75,11 @@ int main(int argc, char **argv)
         return 8;
     }
     return 0;
+}
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::buswatch_test(argc, argv);
 }

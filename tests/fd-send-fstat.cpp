@@ -29,10 +29,12 @@
 #include "test-utils.hpp"
 #include "test-constants.hpp"
 
-using namespace Test;
+namespace Tests::Program {
+
+using namespace Tests;
 
 
-class Options : public TestUtils::OptionParser
+class Options : public Tests::Utils::OptionParser
 {
   public:
     Options(int argc, char **argv)
@@ -102,7 +104,7 @@ class Options : public TestUtils::OptionParser
 };
 
 
-int main(int argc, char **argv)
+int test_fd_send_fstat(int argc, char **argv)
 {
     try
     {
@@ -118,7 +120,7 @@ int main(int argc, char **argv)
         if (!opts.quiet)
         {
             std::ostringstream l;
-            TestUtils::dump_gvariant(l, opts.method + " results", r);
+            Tests::Utils::dump_gvariant(l, opts.method + " results", r);
             std::cout << l.str();
         }
         else
@@ -143,4 +145,11 @@ int main(int argc, char **argv)
         return 2;
     }
     return 0;
+}
+
+} // namespace Tests::Program
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_fd_send_fstat(argc, argv);
 }

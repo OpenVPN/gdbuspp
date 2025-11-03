@@ -28,10 +28,13 @@
 #include "test-utils.hpp"
 #include "test-constants.hpp"
 
-using namespace DBus;
-using namespace Test;
 
-class Options : public TestUtils::OptionParser
+namespace Tests::Program {
+
+using namespace DBus;
+using namespace Tests;
+
+class Options : public Tests::Utils::OptionParser
 {
   public:
     Options(int argc, char **argv)
@@ -219,7 +222,7 @@ class LogExample : public Signals::Group
 
 
 
-int main(int argc, char **argv)
+int test_signal_group(int argc, char **argv)
 {
 
     std::ostringstream log;
@@ -298,4 +301,11 @@ int main(int argc, char **argv)
         std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
         return 2;
     }
+}
+
+} // namespace Tests::Program
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_signal_group(argc, argv);
 }

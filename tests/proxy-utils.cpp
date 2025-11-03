@@ -33,10 +33,13 @@
 #include "test-utils.hpp"
 #include "test-constants.hpp"
 
-using namespace DBus;
-using namespace Test;
 
-class ProxyOpts : protected TestUtils::OptionParser
+namespace Tests::Program {
+
+using namespace DBus;
+using namespace Tests;
+
+class ProxyOpts : protected Tests::Utils::OptionParser
 {
   public:
     ProxyOpts(const int argc, char **argv)
@@ -222,7 +225,7 @@ std::vector<std::string> raw_ListActivatableNames(DBus::Connection::Ptr &conn)
 }
 
 
-int main(int argc, char **argv)
+int test_proxy_utils(int argc, char **argv)
 {
     std::ostringstream log;
     try
@@ -539,4 +542,12 @@ int main(int argc, char **argv)
         return 2;
     }
     return 9;
+}
+
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_proxy_utils(argc, argv);
 }

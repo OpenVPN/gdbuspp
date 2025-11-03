@@ -26,6 +26,8 @@
 #include "../gdbuspp/object/manager.hpp"
 
 
+namespace Tests::Program {
+
 
 class ChildObject : public DBus::Object::Base
 {
@@ -206,7 +208,7 @@ void delayed_join()
 
 
 
-int main(int argc, char **argv)
+int test_idle_detect(int argc, char **argv)
 {
     // First simple test; just have an empty object manager.  It is expected
     // to shutdown automatically after 3 seconds.
@@ -347,4 +349,12 @@ int main(int argc, char **argv)
               << (success > 0 && failed == 0 ? "PASS" : "FAIL")
               << std::endl;
     return (success > 0 && failed == 0) ? 0 : 2;
+}
+
+} // namespace Tests::Program
+
+
+int main(int argc, char **argv)
+{
+    return Tests::Program::test_idle_detect(argc, argv);
 }
