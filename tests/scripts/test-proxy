@@ -45,6 +45,7 @@ run_proxy $MAIN_PATH -Q
 # Test calling D-Bus methods
 run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m MethodNoArgs
 run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m StringLength -t s -v "A small test string" -X "(i)" -x "(19,)"
+run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m GetStringArray -X "(as)" -x "(['String line 1', 'String line B', 'String line III'],)"
 
 # Test creating child objects and introspect it
 run_proxy $METHODS_PATH -i gdbuspp.test.simple1 -m CreateSimpleObject -t s -v proxy_test -X "(o)" -x "('/gdbuspp/tests/simple1/childs/proxy_test',)"

@@ -267,7 +267,8 @@ class TestMethod(object):
 
         result = False
         try:
-            result = self.__expect_res == method(self.__in_data)
+            method_result = method(self.__in_data)
+            result = self.__expect_res == method_result
         except dbus.exceptions.DBusException as err:
             print('           Calling {name} failed'.format(name=self.__name))
             print('           Error: {}'.format(str(err)))
@@ -277,6 +278,10 @@ class TestMethod(object):
         print(text.format(name=self.__name,
                           in_data=str(self.__in_data),
                           result=result and "Pass" or "FAIL"))
+        if not result:
+            print(f'                 Expected: {self.__expect_res}' )
+            print(f'            Actual result: {method_result}\n')
+
         return result
 
 
@@ -327,7 +332,6 @@ class TestFailingMethod(object):
                           in_data=str(self.__in_data),
                           result=result and "Pass" or "FAIL"))
         return result
-
 
 
 
@@ -555,6 +559,18 @@ if __name__ == "__main__":
                                         {'length': 'i'},
                                         dbus.String('A little and short test'),
                                         dbus.Int32(23)))
+
+    simple1_methods.AddTest(TestMethod('GetStringArray',
+                                        {},
+                                        {'string_array': 'as'},
+                                        None,
+                                        dbus.Array(
+                                            [
+                                                dbus.String('String line 1'),
+                                                dbus.String('String line B'),
+                                                dbus.String('String line III')
+                                            ])
+                                        ))
 
     simple1_methods.AddTest(TestMethod('CreateSimpleObject',
                                         {'string': 's'},

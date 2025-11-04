@@ -485,6 +485,19 @@ class MethodTests : public DBus::Object::Base
         stringlen_args->AddOutput("length", "i");
 
 
+        auto ret_string_array = AddMethod(
+            "GetStringArray",
+            [](DBus::Object::Method::Arguments::Ptr args)
+            {
+                std::vector<std::string> data = {
+                    "String line 1",
+                    "String line B",
+                    "String line III"};
+                GVariant *ret = glib2::Value::Create(data);
+                args->SetMethodReturn(ret);
+            });
+        ret_string_array->AddOutput("string_array", "as");
+
         //  Return the bus name of the caller back to the caller.  This is
         //  used so the proxy test program can check if that matches the
         //  assigned bus name of the calling client
