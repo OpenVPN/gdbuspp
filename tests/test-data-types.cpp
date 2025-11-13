@@ -628,6 +628,85 @@ int test_base_data_types()
 
     failures += run_test([]()
                          {
+                             GVariantBuilder *keyval = glib2::Builder::Create("a{qb}");
+                             glib2::Builder::AddKeyValue<uint16_t, bool>(keyval, 1, true);
+                             glib2::Builder::AddKeyValue<uint16_t, bool>(keyval, 2, false);
+                             glib2::Builder::AddKeyValue<uint16_t, bool>(keyval, 3, false);
+                             glib2::Builder::AddKeyValue<uint16_t, bool>(keyval, 4, true);
+
+                             GVariant *data = glib2::Builder::Finish(keyval);
+                             return TestResult("glib2::Builder::AddKeyValue - a{qb})",
+                                               TestUtils::check_data_type("a{qb}", data)
+                                                   && TestUtils::check_data_value(
+                                                       "{1: true, 2: false, 3: false, 4: true}",
+                                                       data));
+                         });
+
+    failures += run_test([]()
+                         {
+                             GVariantBuilder *keyval = glib2::Builder::Create("a{sq}");
+                             glib2::Builder::AddKeyValue<std::string, uint16_t>(keyval, "key_one", 123);
+                             glib2::Builder::AddKeyValue<std::string, uint16_t>(keyval, "key_two", 6789);
+                             glib2::Builder::AddKeyValue<std::string, uint16_t>(keyval, "key_three", 65535);
+                             glib2::Builder::AddKeyValue<std::string, uint16_t>(keyval, "key_four", -1039); // This will wrap
+
+                             GVariant *data = glib2::Builder::Finish(keyval);
+                             return TestResult("glib2::Builder::AddKeyValue - a{sq})",
+                                               TestUtils::check_data_type("a{sq}", data)
+                                                   && TestUtils::check_data_value(
+                                                       "{'key_one': 123, 'key_two': 6789, 'key_three': 65535, 'key_four': 64497}",
+                                                       data));
+                         });
+
+    failures += run_test([]()
+                         {
+                             GVariantBuilder *keyval = glib2::Builder::Create("a{us}");
+                             glib2::Builder::AddKeyValue<uint32_t, std::string>(keyval, 10, "Key 10");
+                             glib2::Builder::AddKeyValue<uint32_t, std::string>(keyval, 20, "Key 20");
+                             glib2::Builder::AddKeyValue<uint32_t, std::string>(keyval, 30, "Key 30");
+
+                             GVariant *data = glib2::Builder::Finish(keyval);
+                             return TestResult("glib2::Builder::AddKeyValue - a{us})",
+                                               TestUtils::check_data_type("a{us}", data)
+                                                   && TestUtils::check_data_value(
+                                                       "{10: 'Key 10', 20: 'Key 20', 30: 'Key 30'}",
+                                                       data));
+                         });
+
+    failures += run_test([]()
+                         {
+                             GVariantBuilder *keyval = glib2::Builder::Create("a{ss}");
+                             glib2::Builder::AddKeyValue<std::string, std::string>(keyval, "key_1", "Value A");
+                             glib2::Builder::AddKeyValue<std::string, std::string>(keyval, "key_2", "Value B");
+                             glib2::Builder::AddKeyValue<std::string, std::string>(keyval, "key_3", "Value C");
+
+                             GVariant *data = glib2::Builder::Finish(keyval);
+                             return TestResult("glib2::Builder::AddKeyValue - a{ss})",
+                                               TestUtils::check_data_type("a{ss}", data)
+                                                   && TestUtils::check_data_value(
+                                                       "{'key_1': 'Value A', 'key_2': 'Value B', 'key_3': 'Value C'}",
+                                                       data));
+                         });
+
+    failures += run_test([]()
+                         {
+                             GVariantBuilder *keyval = glib2::Builder::Create("a{so}");
+                             glib2::Builder::AddKeyValue<std::string, DBus::Object::Path>(keyval, "pathA", "/example/gdbuspp/path1");
+                             glib2::Builder::AddKeyValue<std::string, DBus::Object::Path>(keyval, "pathB", "/example/gdbuspp/path2");
+                             glib2::Builder::AddKeyValue<std::string, DBus::Object::Path>(keyval, "pathC", "/example/gdbuspp/path3");
+
+                             GVariant *data = glib2::Builder::Finish(keyval);
+                             return TestResult("glib2::Builder::AddKeyValue - a{so})",
+                                               TestUtils::check_data_type("a{so}", data)
+                                                   && TestUtils::check_data_value(
+                                                       "{'pathA': '/example/gdbuspp/path1', 'pathB': '/example/gdbuspp/path2', 'pathC': '/example/gdbuspp/path3'}",
+                                                       data));
+                         });
+
+
+
+    failures += run_test([]()
+                         {
                              GVariantDict *dict = glib2::Dict::Create();
                              glib2::Dict::Add<int32_t>(dict, "type_int32", 123);
                              glib2::Dict::Add<uint64_t>(dict, "type_int32", 9402038495);

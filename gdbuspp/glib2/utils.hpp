@@ -396,6 +396,100 @@ inline void Add(GVariantBuilder *builder,
 
 
 /**
+ *  Add a "dictionary type of element" to a GVariantBuilder object
+ *
+ *  Normally glib2::Dict::Add() would be used, but that approach
+ *  enforces the value to be `DBUS_TYPE_VARIANT` and the data type for
+ *  key is always `DBUS_TYPE_STRING`.  For use cases where the data
+ *  types need to be more specific it is needed to use GVariantBuilder
+ *  instead.
+ *
+ *  To use this feature, a GVariantBuilder container needs to be
+ *  created with the correct data types for both the key and value
+ *  parts.
+ *
+ *  Example 1: A simple dictionary with string as the data type for
+ *             both key and value
+ *             @code
+ *                GVariantBuilder *dictionary = glib2::Builder::Create("a{ss}");
+ *                glib2::Builder::AddKeyValue<std::string, std::string>(dictionary, "my-key", "My Value");
+ *             @endcode
+ *
+ *  Example 2: A simple dictionary with string as the data type for
+ *             the key and int64_t for the value
+ *             @code
+ *                GVariantBuilder *dictionary = glib2::Builder::Create("a{sx}");
+ *                glib2::Builder::AddKeyValue<std::string, int64_t>(dictionary, "my-key", 123456789);
+ *             @endcode
+ *
+ *  Example 3: A simple dictionary with uint16_t as the data type for
+ *             the key and bool for the value
+ *             @code
+ *                GVariantBuilder *dictionary = glib2::Builder::Create("a{qb}");
+ *                glib2::Builder::AddKeyValue<uint16_t, bool>(dictionary, 1, true);
+ *             @endcode
+ *
+ * @tparam TKEY    C++ data type for the key element
+ * @tparam TVAL    C++ data type for the value element
+ * @param builder  GVariantBuilder object to insert the key/value pairs into
+ * @param key      Dictionary key element
+ * @param value    Dictionary value element to be assigned to the key
+ */
+template <typename TKEY, typename TVAL>
+inline void AddKeyValue(GVariantBuilder *builder,
+                        const TKEY &key,
+                        const TVAL &value)
+{
+    std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
+    g_variant_builder_add(builder, dbus_type.c_str(), key, value);
+}
+
+
+/**
+ *  Variant of AddKeyValue() where the data type for the dictionary `value` is `std::string`
+ *
+ *  @copydetails glib2::Builder::AddKeyValue()
+ */
+template <typename TKEY, typename TVAL>
+inline void AddKeyValue(GVariantBuilder *builder,
+                        const TKEY &key,
+                        const std::string &value)
+{
+    std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
+    g_variant_builder_add(builder, dbus_type.c_str(), key, value.c_str());
+}
+
+/**
+ *  Variant of AddKeyValue() where the data type for the dictionary `key` is `std::string`
+ *
+ *  @copydetails glib2::Builder::AddKeyValue()
+ */
+template <typename TKEY, typename TVAL>
+inline void AddKeyValue(GVariantBuilder *builder,
+                        const std::string &key,
+                        const TVAL &value)
+{
+    std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
+    g_variant_builder_add(builder, dbus_type.c_str(), key.c_str(), value);
+}
+
+/**
+ *  Variant of AddKeyValue() where the data type for both the dictionary `key` and `value` are `std::string`
+ *
+ *  @copydetails glib2::Builder::AddKeyValue()
+ */
+template <typename TKEY, typename TVAL>
+inline void AddKeyValue(GVariantBuilder *builder,
+                        const std::string &key,
+                        const std::string &value)
+{
+    std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
+    g_variant_builder_add(builder, dbus_type.c_str(), key.c_str(), value.c_str());
+}
+
+
+
+/**
  *  Add structured data to a GVariantBuilder object.
  *
  *  This is used to process a C/C++ struct based object into
@@ -958,6 +1052,11 @@ namespace Dict {
  *
  *  This method is a convenience wrapper around g_variant_dict_new(),
  *  to provide a more unified glib2::Dict API.
+ *
+ *  @note This approach will always result in the D-Bus data type `a{sv}`.
+ *  If a specialized data type is required for the key or value, the
+ *  glib2::Builder::Create() and glib2::Builder::AddKeyValue() functions
+ *  need to be used; only this approach allows specifying the data types.
  *
  * @return GVariantDict*
  */
