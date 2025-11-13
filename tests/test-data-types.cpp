@@ -22,6 +22,7 @@
 #include "../gdbuspp/proxy.hpp"
 
 #include "test-constants.hpp"
+#include "tests/test-utils.hpp"
 
 /**
  *  Checks the values hardcoded dictionary in net.openvpn.gdbuspp.test.simple
@@ -625,6 +626,28 @@ int test_base_data_types()
                                  "(asaiau)");
                          });
 
+    failures += run_test([]()
+                         {
+                             GVariantDict *dict = glib2::Dict::Create();
+                             glib2::Dict::Add<int32_t>(dict, "type_int32", 123);
+                             glib2::Dict::Add<uint64_t>(dict, "type_int32", 9402038495);
+                             glib2::Dict::Add<bool>(dict, "type_bool_false", false);
+                             glib2::Dict::Add<bool>(dict, "type_bool_true", true);
+                             glib2::Dict::Add<std::string>(dict, "type_string", "A dictionary string element");
+                             glib2::Dict::Add<DBus::Object::Path>(dict, "type_object_path", "/org/example/gdbuspp/object/path");
+
+                             std::vector<uint16_t> vector_ui16{1, 2, 4, 8, 16, 32, 65};
+                             glib2::Dict::Add(dict, "vector_ui16", vector_ui16);
+                             GVariant *data = glib2::Dict::Finish(dict);
+                             return TestResult("glib2::Dict - Generic tests (a{sv})",
+                                               TestUtils::check_data_type("a{sv}", data)
+                                                   && TestUtils::check_data_value(
+                                                       "{'type_bool_false': <false>, 'type_string': <'A dictionary string element'>, 'type_bool_true': <true>, "
+                                                       "'type_int32': <uint64 9402038495>, 'type_object_path': <objectpath '/org/example/gdbuspp/object/path'>, "
+                                                       "'vector_ui16': <[uint16 1, 2, 4, 8, 16, 32, 65]>}",
+                                                       data));
+                         });
+
     std::cout << ":: Base data type test failures: " << failures
               << std::endl
               << std::endl;
@@ -751,6 +774,9 @@ int test_base_vector()
                          });
 
 
+    std::cout << ":: Vectorized data type test failures: " << failures
+              << std::endl
+              << std::endl;
     return failures;
 };
 
