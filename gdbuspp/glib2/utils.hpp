@@ -187,6 +187,18 @@ inline const char *DBus<int64_t>() noexcept
 }
 
 template <>
+inline const char *DBus<unsigned long long>() noexcept
+{
+    return DBUS_TYPE_UINT64;
+}
+
+template <>
+inline const char *DBus<long long>() noexcept
+{
+    return DBUS_TYPE_INT64;
+}
+
+template <>
 inline const char *DBus<std::byte>() noexcept
 {
     // The D-Bus spec declares 'y' (BYTE) as "unsigned 8-bit integer",
