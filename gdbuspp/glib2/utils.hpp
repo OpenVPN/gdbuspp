@@ -1218,6 +1218,26 @@ std::vector<T> LookupVector(GVariant *dict, const std::string &key)
     return Value::ExtractVector<T>(v, DataType::DBus<T>());
 }
 
+
+/**
+ *  Helper function which will iterate through all the dictionary elements
+ *  in a GVariant object.  The data type of the GVariant object MUST be
+ *  `a{sv}`, otherwise an exception will be thrown.
+ *
+ *  For each element iteration it will call an arbitrary extractor function
+ *  provided by the user of this function.  This exatractor function takes
+ *  two arguments: `const std::string &key` and `GVariant *value`, which
+ *  represents `{sv}` part of the dictionary container.  This function can
+ *  not return any data.
+ *
+ * @param dict       GVariant object containing the dictionary
+ * @param extractor  Function to be called for each element.  Function declaration
+ *                   MUST be: `void(const std::string &key, GVariant *value)`
+ * @throws glib2::Utils::Exception when `*dict` is not of the `a{sv}` data type.
+ *         The excpetions from the extractor function will be implicitly forwarded.
+ */
+void IterateDictionary(GVariant *dict, std::function<void(const std::string &key, GVariant *value)> extractor);
+
 } // namespace Dict
 
 } // namespace glib2

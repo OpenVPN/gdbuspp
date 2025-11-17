@@ -205,4 +205,24 @@ GVariant *Finish(GVariantBuilder *builder) noexcept
 
 } // namespace Builder
 
+
+namespace Dict {
+
+void IterateDictionary(GVariant *dict, std::function<void(const std::string &key, GVariant *value)> extractor)
+{
+    Utils::checkParams(__func__, dict, "a{sv}");
+
+    GVariantIter element_iter;
+    g_variant_iter_init(&element_iter, dict);
+
+    char *key = nullptr;
+    GVariant *value = nullptr;
+    while (g_variant_iter_loop(&element_iter, "{sv}", &key, &value))
+    {
+        extractor(std::string(key), value);
+    }
+}
+
+} // namespace Dict
+
 } // namespace glib2

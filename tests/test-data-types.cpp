@@ -727,6 +727,74 @@ int test_base_data_types()
                                                        data));
                          });
 
+
+    failures += run_test([]()
+                         {
+                             GVariantDict *dict = glib2::Dict::Create();
+                             glib2::Dict::Add<int32_t>(dict, "type_int32", 123);
+                             glib2::Dict::Add<uint64_t>(dict, "type_uint64", 9402038495);
+                             glib2::Dict::Add<bool>(dict, "type_bool_false", false);
+                             glib2::Dict::Add<bool>(dict, "type_bool_true", true);
+                             glib2::Dict::Add<std::string>(dict, "type_string", "A dictionary string element");
+                             glib2::Dict::Add<DBus::Object::Path>(dict, "type_object_path", "/org/example/gdbuspp/object/path");
+
+                             std::vector<uint16_t> vector_ui16{1, 2, 4, 8, 16, 32, 65};
+                             glib2::Dict::Add(dict, "vector_ui16", vector_ui16);
+                             GVariant *data = glib2::Dict::Finish(dict);
+
+                             bool result = false;
+                             try
+                             {
+                                 glib2::Dict::IterateDictionary(
+                                     data,
+                                     [&vector_ui16](const std::string &key, GVariant *value)
+                                     {
+                                         // std::cout << "IterateDictionary: key='" << key << "' value: " << g_variant_print(value, true) << '\n';
+
+                                         if ("type_int32" == key
+                                             && 123 != glib2::Value::Get<int32_t>(value))
+                                         {
+                                             throw std::runtime_error("Incorrect value for 'type_int32'");
+                                         }
+                                         else if ("type_uint64" == key
+                                                  && static_cast<uint64_t>(9402038495) != glib2::Value::Get<uint64_t>(value))
+                                         {
+                                             throw std::runtime_error("Incorrect value for 'type_uint32'");
+                                         }
+                                         else if ("type_bool_false" == key
+                                                  && false != glib2::Value::Get<bool>(value))
+                                         {
+                                             throw std::runtime_error("Incorrect value for 'type_bool_false'");
+                                         }
+                                         else if ("type_bool_true" == key
+                                                  && true != glib2::Value::Get<bool>(value))
+                                         {
+                                             throw std::runtime_error("Incorrect value for 'type_bool_true'");
+                                         }
+                                         else if ("type_string" == key
+                                                  && "A dictionary string element" != glib2::Value::Get<std::string>(value))
+                                         {
+                                             throw std::runtime_error("Incorrect value for 'type_string'");
+                                         }
+                                         else if ("type_object_path" == key
+                                                  && "/org/example/gdbuspp/object/path" != glib2::Value::Get<std::string>(value))
+                                         {
+                                             throw std::runtime_error("Incorrect value for 'type_string'");
+                                         }
+                                         else if ("vector_ui16" == key
+                                                  && vector_ui16 != glib2::Value::ExtractVector<uint16_t>(value))
+                                         {
+                                             throw std::runtime_error("Incorrect value for 'vector_ui16'");
+                                         }
+                                     });
+                                 result = true;
+                             }
+                             catch (const std::runtime_error &err)
+                             {
+                                 std::cerr << "    ** IterateDictionary exception: " << err.what() << '\n';
+                             }
+                             return TestResult("glib2::Dict::IterateDictionary", result);
+                         });
     std::cout << ":: Base data type test failures: " << failures
               << std::endl
               << std::endl;
