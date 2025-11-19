@@ -924,6 +924,21 @@ inline std::vector<T> ExtractVector(GVariant *params,
 
 
 /**
+ *  Helper function to simplify iterating a GVariant array container.
+ *
+ *  The \p array argument need to be an array or an array inside a tuple.
+ *  For each element in the the array, the function passed as the \p parser
+ *  argument will be called, which provides access to a single array element.
+ *
+ * @param array    GVariant container object carrying the array to iterate
+ * @param parser   Function to be called for each array element
+ * @throws glib2::Utils::Exception if the data type of the array data is
+ *         incorrect, otherwise the exceptions produced by the parser function
+ */
+void IterateArray(GVariant *array, std::function<void(GVariant *data)> parser);
+
+
+/**
  *  Creates a new, empty GVariant object of
  *  the "variant" D-Bus type
  *

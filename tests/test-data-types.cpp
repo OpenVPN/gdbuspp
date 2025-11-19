@@ -704,6 +704,35 @@ int test_base_data_types()
                          });
 
 
+    failures += run_test([]()
+                         {
+                             std::vector<std::string> data = {"Element number 1", "Element B", "Element Three"};
+                             GVariant *array = glib2::Value::Create(data);
+                             bool result = false;
+                             try
+                             {
+                                 int array_counter = 0;
+                                 glib2::Value::IterateArray(array,
+                                                            [&array_counter, &data](GVariant *element)
+                                                            {
+                                                                auto val = glib2::Value::Get<std::string>(element);
+                                                                if (val != data[array_counter])
+                                                                {
+                                                                    throw std::runtime_error("Unxpected data: '" + val + "' != '" + data[array_counter] + "'");
+                                                                }
+                                                                ++array_counter;
+                                                            });
+                                 result = true;
+                             }
+                             catch (const std::runtime_error &err)
+                             {
+                                 std::cerr << "    ** IterateArray exception: " << err.what() << '\n';
+                                 result = false;
+                             }
+                             g_variant_unref(array);
+                             return TestResult("glib2::Value::IterateArray", result);
+                         });
+
 
     failures += run_test([]()
                          {

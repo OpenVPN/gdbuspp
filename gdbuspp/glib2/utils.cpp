@@ -118,6 +118,46 @@ std::string Extract(GVariant *value) noexcept
 
 namespace Value {
 
+void IterateArray(GVariant *array, std::function<void(GVariant *data)> parser)
+{
+    if (!array)
+    {
+        return;
+    }
+
+    if (!g_variant_is_container(array))
+    {
+        throw glib2::Utils::Exception("Input data is not a container [" + DataType::Extract(array) + "]");
+    }
+
+    // If the array is stored inside a tuple, extract the array from
+    // the tuple before starting iterate the elements.
+    bool is_tuple = g_variant_type_is_tuple(g_variant_get_type(array));
+    GVariant *iterate_values = (is_tuple ? g_variant_get_child_value(array, 0) : array);
+    if (!g_variant_type_is_array(g_variant_get_type(iterate_values)))
+    {
+        throw glib2::Utils::Exception("Input data is not an array [" + DataType::Extract(iterate_values) + "]");
+    }
+
+    GVariantIter array_iterator;
+    g_variant_iter_init(&array_iterator, iterate_values);
+
+    GVariant *element = nullptr;
+    while ((element = g_variant_iter_next_value(&array_iterator)))
+    {
+        parser(element);
+        g_variant_unref(element);
+    }
+
+    if (is_tuple)
+    {
+        // If the array was extracted from a tuple,
+        // the extracted values need to be released
+        g_variant_unref(iterate_values);
+    }
+}
+
+
 GVariant *NullVariant()
 {
     return g_variant_new_variant(nullptr);
