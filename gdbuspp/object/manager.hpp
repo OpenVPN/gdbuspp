@@ -282,7 +282,7 @@ class Manager : public std::enable_shared_from_this<Manager>
     //
 
     /**
-     *  The real constructor, only to be accessed via @CreateManager()
+     *  The real constructor, only to be accessed via CreateManager()
      *
      * @param conn  DBus::Connection object with the D-Bus connection
      */

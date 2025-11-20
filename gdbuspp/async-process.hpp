@@ -201,7 +201,7 @@ struct Request
      *  This is the base information required for all kind
      *  of DBus object operations.
      *
-     *  This must be called via the static @Create() method
+     *  This must be called via the static Create() method
      *
      * @param gdbus_conn      GDBusConnection pointer where the request came from
      * @param dbus_object     DBus::Object::Ptr (shared_ptr) to the C++ object side

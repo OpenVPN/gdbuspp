@@ -966,7 +966,7 @@ inline GVariant *CreateType(const char *dbustype, const T &value) noexcept
 }
 
 /**
- *  Variant of the @Create function above, which converts the
+ *  Variant of the Create() function above, which converts the
  *  C++ DBus::Object::Path type to a C type string, via the
  *  std::string::c_str() method
  *
@@ -982,7 +982,7 @@ inline GVariant *CreateType(const char *dbustype, const DBus::Object::Path &valu
 
 
 /**
- *  Variant of the @Create function above, which converts the
+ *  Variant of the Create() function above, which converts the
  *  C++ std::string type to a C type string, via the
  * std::string::c_str() method
 
@@ -999,7 +999,7 @@ inline GVariant *CreateType(const char *dbustype, const std::string &value) noex
 /**
  *  Templatized and simpler g_variant_new() wrapper which automatically
  *  converts the C++ data type of the value into the proper D-Bus
- *  data type.  Otherwise, the same as the @Create() methods above.
+ *  data type.  Otherwise, the same as the Create() methods above.
  *
  * @tparam T          C++ data type of the value
  * @param value       The C++ value
@@ -1012,7 +1012,7 @@ inline GVariant *Create(const T &value) noexcept
 }
 
 /**
- *  Variant of the @Create function above, handling C++ DBus::Object::Path
+ *  Variant of the Create() function above, handling C++ DBus::Object::Path
  *  and converting it into a C type string (std::string::c_str())
  *
  * @param value        DBus::Object::Path with the value to store in GVariant
@@ -1025,7 +1025,7 @@ inline GVariant *Create(const DBus::Object::Path &value) noexcept
 }
 
 /**
- *  Variant of the @Create function above, handling C++ std::string
+ *  Variant of the Create() function above, handling C++ std::string
  *  and converting it into a C type string (std::string::c_str())
  *
  * @param value        std::string of the GVariant object shall carry
@@ -1039,7 +1039,7 @@ inline GVariant *Create(const std::string &value) noexcept
 
 
 /**
- *  Variant of the @Create function which works on std::vector
+ *  Variant of the Create() function which works on std::vector
  *
  * @tparam T           C++ data type of value
  * @param value        The C++ value
