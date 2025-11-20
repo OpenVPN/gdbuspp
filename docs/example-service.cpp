@@ -24,6 +24,7 @@
 #include <gdbuspp/glib2/utils.hpp>
 
 
+namespace Examples {
 
 class MySignalGroup : public DBus::Signals::Group
 {
@@ -143,6 +144,7 @@ class MyService : public DBus::Service
     }
 };
 
+} // namespace Examples
 
 
 int main(int argc, char **argv)
@@ -154,13 +156,13 @@ int main(int argc, char **argv)
 
         // Instantiate and prepare the D-Bus service provided
         // via the MyService class
-        auto my_service = DBus::Service::Create<MyService>(connection);
+        auto my_service = DBus::Service::Create<Examples::MyService>(connection);
 
         // Get access to the DBus::Object::Manager object
         auto object_manager = my_service->GetObjectManager();
 
         // Add the service root object
-        my_service->CreateServiceHandler<MyObject>(connection, object_manager);
+        my_service->CreateServiceHandler<Examples::MyObject>(connection, object_manager);
 
         // Start the service
         my_service->Run();

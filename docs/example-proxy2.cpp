@@ -25,11 +25,14 @@
 #include <gdbuspp/proxy.hpp>
 #include <gdbuspp/glib2/utils.hpp>
 
+namespace Examples {
 
 class MyServiceProxy
 {
   public:
     /**
+     *
+     *
      *  Enforce this object to always be set up with a smart pointer
      *
      * @param c
@@ -131,6 +134,8 @@ class MyServiceProxy
     }
 };
 
+} // namespace Examples
+
 
 int main(int argc, char **argv)
 {
@@ -140,7 +145,7 @@ int main(int argc, char **argv)
         auto connection = DBus::Connection::Create(DBus::BusType::SESSION);
 
         // Setup a client proxy to our example-service
-        auto proxy = MyServiceProxy::Create(connection);
+        auto proxy = Examples::MyServiceProxy::Create(connection);
 
         // Call the net.example.myinterface.MyMethod
         proxy->MyMethod();
