@@ -1,0 +1,5 @@
+version = 1
+SPDX-PackageName = "GDBus++"
+SPDX-PackageSupplier = "David Sommerseth <davids@openvpn.net>"
+SPDX-PackageDownloadLocation = "https://codeberg.org/OpenVPN/gdbuspp/"
+annotations = []
