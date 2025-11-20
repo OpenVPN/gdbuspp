@@ -72,7 +72,7 @@ class Emit
                    const std::string &interface);
 
     /**
-     *  Similar to the @AddTarget() above, but will take a Target::Ptr
+     *  Similar to the AddTarget() above, but will take a Target::Ptr
      *  object as argument instead.
      *
      * @param target   Target::Ptr object with the target details

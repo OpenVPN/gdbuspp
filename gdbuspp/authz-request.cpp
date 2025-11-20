@@ -64,9 +64,15 @@ const std::string Exception::compose_error(const Request::Ptr req,
  *  an AsyncProcess::Request object
  *
  *  This is basically just helping the Authz::Request constructor to
- *  extract information which can be stored as constant variables
-
- * @param t    AsyncProcess::ReqType value to conviert
+ *  extract information which can be stored as constant variables.
+ *
+ *  The result will be a concatenated string of the D-Bus interface
+ *  plus the D-Bus method or property being accessed.
+ *
+ * @param reqtype    Object::Operation request type
+ * @param interface  D-Bus interface being accessed
+ * @param method     D-Bus method being called; related to the request type
+ * @param property   D-Bus property being accessed, related to the request type
  * @return std::string with readable authorization request information
  */
 static inline const std::string extract_authzreq_target(const Object::Operation reqtype,

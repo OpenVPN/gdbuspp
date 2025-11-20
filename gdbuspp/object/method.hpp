@@ -179,7 +179,7 @@ class Arguments
     /**
      *  Provide the method results back to the D-Bus method caller
      *
-     *  This is only available in the callback functor when a
+     *  This is only available in the callback functor when
      *  a D-Bus proxy client has called this method.
      *
      * @param result  GVariant object with all the value arguments

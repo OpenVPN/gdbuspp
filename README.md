@@ -543,4 +543,4 @@ project.  All the test programs are indirectly used when running
 
 License
 -------
-This project is licensed under [AGPLv3](COPYRIGHT.md).
+This project is licensed under [AGPLv3](LICENSES/AGPL-3.0-only.txt).

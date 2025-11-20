@@ -142,6 +142,7 @@ class Manager : public std::enable_shared_from_this<Manager>
      *
      * @param timeout  std::chrono::duration describing the idle timeout
      *                 of the service
+     * @param mainloop DBus::MainLoop::Ptr object which to operate on
      */
     void PrepareIdleDetector(const std::chrono::duration<uint32_t> timeout,
                              std::shared_ptr<DBus::MainLoop> mainloop);
@@ -312,7 +313,7 @@ class Manager : public std::enable_shared_from_this<Manager>
      *  container and path index.
      *
      *  This is only exposed like this for the
-     *  @glib2::Calllbacks::_int_dbusobject_callback_destruct function to
+     *  glib2::Callbacks::_int_dbusobject_callback_destruct() function to
      *  be able to access it.  That callback function is triggered via the
      *  Object::Manager::RemoveObject() method above.  This will call the
      *  g_dbus_connection_unregister_object() (glib2 C library) function.

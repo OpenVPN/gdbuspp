@@ -204,10 +204,10 @@ class Service : public std::enable_shared_from_this<Service>
 
     /**
      *  Called if the bus name could not be acquired or was lost.  Either
-     *  this or @BusNameAcquired will be called.
+     *  this or BusNameAcquired() will be called.
      *
      *  If the program keeps running after this call, it may result in
-     *  gaining the bus name later on; in which the @BusNameAcquired() method
+     *  gaining the bus name later on; in which the BusNameAcquired() method
      *  will be called.
      *
      *  @param busname           std::string of the registered bus name

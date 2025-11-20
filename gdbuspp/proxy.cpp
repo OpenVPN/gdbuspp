@@ -69,6 +69,8 @@ class Proxy
      * @param path_         std::string with the target D-Bus object path
      * @param interface_    std::string with the interface within the object
      *                      we want to interact with
+     * @param error_details_ std::string with details to use in the
+     *                       exception in case of an error
      */
     Proxy(DBus::Connection::Ptr connection,
           const std::string &destination_,
@@ -307,7 +309,7 @@ class Proxy
 
 
     /**
-     *  Similar to the @do_call method, but it also handles sending and
+     *  Similar to the do_call() method, but it also handles sending and
      *  receiving file descriptors to/from the D-Bus method being called
      *
      *  If the method call returns a file descriptor, this is extracted and

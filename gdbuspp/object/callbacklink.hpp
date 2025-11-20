@@ -65,9 +65,9 @@ class CallbackLink
      *  The DBus::Object::Manager this object belongs to and the
      *  AsyncProcess::Pool used to handle D-Bus method calls asynchronously
      *
-     * @param dbus_object   DBus::Object::Base::Ptr (shared_ptr) to the D-Bus object
-     * @param om            DBus::Object::Manager::WPtr (weak_ptr) to the Object Manager
-     * @param async_pool    DBus::AsyncProcess::Pool::Ptr (shared_ptr) to the process pool
+     * @param dbus_object     DBus::Object::Base::Ptr (shared_ptr) to the D-Bus object
+     * @param object_manager  DBus::Object::Manager::WPtr (weak_ptr) to the Object Manager
+     * @param async_pool      DBus::AsyncProcess::Pool::Ptr (shared_ptr) to the process pool
      *
      * @return CallbackLink::Ptr (shared_ptr) to the new CallbackLink object
      */

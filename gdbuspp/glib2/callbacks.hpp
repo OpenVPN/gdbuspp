@@ -7,7 +7,7 @@
 //
 
 /**
- * @file glib2/callbcaks.hpp
+ * @file glib2/callbacks.hpp
  *
  * @brief  Declaration of C based callback functions used
  *         by the glib2 gdbus APIs.
@@ -60,7 +60,7 @@ void _int_callback_name_lost(GDBusConnection *conn, const gchar *name, void *thi
  *  AsyncProcess::Pool::PushCallback() method wrapping the
  *  glib2 g_thread_pool_push() function.
  *
- * @param req_ptr    Raw pointer to the AsyncProcess::Request object which
+ * @param data       Raw pointer to the AsyncProcess::Request object which
  *                   contains the data requested to be processed.  This
  *                   contains information about the D-Bus object which the
  *                   operation will be performed in.

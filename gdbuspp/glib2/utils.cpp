@@ -30,9 +30,10 @@ Exception::Exception(const std::string &err,
     : DBus::Exception(std::string("glib2::Utils::" + std::string(__func__)),
                       err,
                       gliberr) {};
-Exception::Exception::Exception(const std::string &callfunc,
-                                const std::string &err,
-                                GError *gliberr)
+
+Exception::Exception(const std::string &callfunc,
+                     const std::string &err,
+                     GError *gliberr)
     : DBus::Exception(std::string("glib2::Utils::" + std::string(__func__)
                                   + " [" + callfunc + "]"),
                       err,

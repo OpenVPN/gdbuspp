@@ -83,7 +83,7 @@ bool check_data_value(const std::string &expect_value, GVariant *data);
 
 /**
  *  Test and log the data type and value of a GVariant object.
- *  This calls @check_data_type() and @check_data_value() under the hood.
+ *  This calls check_data_type() and check_data_value() under the hood.
  *  See those functions for details on the expected format of the type and
  *  value arguments.
  *
@@ -99,12 +99,15 @@ bool log_data_type_value_check(std::ostringstream &log,
                                GVariant *data);
 
 /**
- *  Convert a single input string to the a GVariant object using the
- *  declared D-Bus data type
+ *  Helper function to generate GVariant object of specific types where the
+ *  value is passed to this function as a std::string.
  *
- * @param type        std::string with the D-Bus data type for the value
- * @param value       std::string with the value to convert
- * @return GVariant* with the converted value
+ *  This function will "cast" the std::string value content into the
+ *  appropriate D-Bus type and the related data format for the value.
+ *
+ * @param type        D-Bus data type to generate
+ * @param value       std::string value to "cast" to the D-Bus type
+ * @return GVariant*
  */
 GVariant *convert_to_gvariant(const std::string &type, const std::string &value);
 

@@ -50,7 +50,7 @@ class Exception : public DBus::Exception
 
 
 /**
- *  Helper class for @Proxy::Client::Call()
+ *  Helper class for Proxy::Client::Call()
  *  This contains a preset for a specific D-Bus object path and interface
  */
 class TargetPreset
@@ -61,7 +61,7 @@ class TargetPreset
 
     /**
      *  Prepare a new Proxy target
-
+     *
      * @param object_path_  DBus::Object::Path with the D-Bus object path to the target
      * @param interface_    std::string with the object interface in the target
      */
@@ -154,7 +154,7 @@ class Client
                    const bool no_response = false) const;
 
     /**
-     *  A variant of the prior @Proxy::Client::Call() method which
+     *  A variant of the prior Proxy::Client::Call() method which
      *  extracts the D-Bus object path and interface from a TargetPreset
      *  object.
      *
@@ -238,7 +238,7 @@ class Client
                                   const std::string &property_name) const;
 
     /**
-     *  A variant of @Proxy::Client::GetPropertyGVariant() which
+     *  A variant of Proxy::Client::GetPropertyGVariant() which
      *  uses a TargetPreset::Ptr to provide the object path and interface
      *  of the property being retrieved
 
@@ -418,9 +418,9 @@ class Client
      *                       D-Bus object
      * @param property_name  std::string with the D-Bus object property name
      *                       which is to be modified
-     * @param params         GVariant object containing the new value of the
-     *                       property.  The data type of T must match the
-     *                       D-Bus data type of property value.
+     * @param value          The new value for the property.  The data type
+     *                       of T must match the D-Bus data type of property
+     *                       value.
      * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>
@@ -449,9 +449,9 @@ class Client
      *                       interface of the property
      * @param property_name  std::string with the D-Bus object property name
      *                       which is to be modified
-     * @param params         GVariant object containing the new value of the
-     *                       property.  The data type of T must match the
-     *                       D-Bus data type of property value.
+     * @param value          The new value for the property.  The data type
+     *                       of T must match the D-Bus data type of property
+     *                       value.
      * @throws DBus::Proxy::Exception if the D-Bus call failed
      */
     template <typename T>

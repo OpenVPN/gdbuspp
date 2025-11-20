@@ -360,7 +360,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
                                               "Property not found");
         }
 
-        // If ret != NULL, we have a valid response which contains
+        // If updated_vals != NULL, we have a valid response which contains
         // information about what has changed.  This is further
         // used to issue a standard D-Bus signal that an object property
         // have been modified; which is the signal being emitted below.

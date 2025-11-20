@@ -61,7 +61,7 @@ void CheckCapabilityFD(GDBusConnection *dbuscon);
  * function to properly unref fdlists. The other examples that I found use
  * g_object_unref on the list
  *
- * @param the fd list
+ * @param fdlist GUnixFDList object to release from memory
  */
 void unref_fdlist(GUnixFDList *fdlist);
 
@@ -127,7 +127,7 @@ constexpr const char *DBUS_TYPE_VARIANT    = "v";
  *  This is just a simple wrapper around g_variant_get_type_string(),
  *  but providing the result as a std::string value instead of char *
  *
- * @param v   GVariant object to inspect
+ * @param value  GVariant object to inspect
  * @return std::string of the D-Bus data type representation of the value
  */
 std::string Extract(GVariant *value) noexcept;
@@ -296,7 +296,7 @@ void CloseChild(GVariantBuilder *builder);
 /**
  *  Creates an empty variant object based on more complex types.
  *  The implementation of this method is very basic and simple, without
- *  any type checking, except of what @g_variant_builder_new() provides.
+ *  any type checking, except of what g_variant_builder_new() provides.
  *
  *  This function is useful in the property get callback method when
  *  an empty dictionary or array needs to be returned.
@@ -309,7 +309,7 @@ GVariant *CreateEmpty(const char *type);
 
 
 /**
- *  Just a wrapper around @g_variant_builder_end() with a memory cleanup.
+ *  Just a wrapper around g_variant_builder_end() with a memory cleanup.
  *  This function is primarily here to provide a consistent C++ API.
  *
  * @param builder   GVariantBuilder object to complete
@@ -319,7 +319,7 @@ GVariant *Finish(GVariantBuilder *builder) noexcept;
 
 
 /**
- *   Template variant of GLib2's @g_variant_builder_add() which extract
+ *   Template variant of GLib2's g_variant_builder_add() which extract
  *   the D-Bus data type automatically via the data type passed.
  *
  *   @param builder  GVariantBuilder object where to add the value
@@ -344,10 +344,10 @@ inline void Add(GVariantBuilder *builder,
 
 
 /**
- *   Variant of @GVariantBuilderAdd() which tackles C++ DBus::Object::Path
+ *   Variant of GVariantBuilderAdd() which tackles C++ DBus::Object::Path
  *
  *   @param builder  GVariantBuilder object where to add the value
- *   @param value    DBus::Object::Path to add the GVariantBuilder object
+ *   @param path     DBus::Object::Path to add the GVariantBuilder object
  *   @param override_type (optional) If set, it will use the given type instead
  *                        of using std::string as the expected type
  */
@@ -369,7 +369,7 @@ inline void Add(GVariantBuilder *builder,
 }
 
 /**
- *   Variant of @GVariantBuilderAdd() which tackles C++ std::string
+ *   Variant of GVariantBuilderAdd() which tackles C++ std::string
  *
  *   @param builder  GVariantBuilder object where to add the value
  *   @param value    std::string value to add to the GVariantBuilder object
@@ -550,13 +550,13 @@ inline void AddStructData(GVariantBuilder *builder,
 /**
  *  Add a vector/array of structured data elements into a GVariantBuilder object
  *
- *  This is the std::vector<> version of @AddStructData(), which will iterate
+ *  This is the std::vector<> version of AddStructData(), which will iterate
  *  through all the elements and add them to the GVariantBuilder object.
  *
  *  The D-Bus data type of the GVariantBuilder object must be typed as an
  *  array of a struct.
  *
- *  Extending the example code from @AddStructData(), an array version
+ *  Extending the example code from AddStructData(), an array version
  *  will be like this:
  *
  *  @code
@@ -572,9 +572,9 @@ inline void AddStructData(GVariantBuilder *builder,
  *  for a complete example.
  *
  * @tparam T            C/C++ struct data type used in the std::vector
- * @param builder       GVariantBuilder object to add the data to
- * @param struct_data   Const reference to the data to process
- * @param extractor     Callback function used to process `struct_data`
+ * @param main_builder  GVariantBuilder object to add the data to
+ * @param data_set      Const reference to the data to process
+ * @param extractor     Callback functor used to process `struct_data`
  */
 template <typename T>
 inline void AddStructData(GVariantBuilder *main_builder,

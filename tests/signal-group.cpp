@@ -7,7 +7,7 @@
 //
 
 /**
- * @file   signal-emitgroup.cpp
+ * @file   signal-group.cpp
  *
  * @brief  Test program using the DBus::Signals::Group interface
  *         sending D-Bus signals

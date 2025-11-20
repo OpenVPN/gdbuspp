@@ -152,7 +152,7 @@ class Base : public std::enable_shared_from_this<Base>
 
 
     /**
-     *  This is similar method to @AddProperty() but instead of linking
+     *  This is similar method to AddProperty() but instead of linking
      *  the D-Bus property to a C++ variable, C++ functors are used as
      *  callback methods for retrieving and setting the property value.
      *
@@ -220,7 +220,7 @@ class Base : public std::enable_shared_from_this<Base>
      *  and changes the property value in the C++ variable bound to the
      *  property.
      *
-     * @param property_name        Property name to update
+     * @param propname             Property name to update
      * @param value                GVariant pointer containing the new value
      * @return PropertyUpdate::Ptr PropertyUpdate object with all the updated properties
      *                             and their new values
@@ -429,14 +429,16 @@ class Base : public std::enable_shared_from_this<Base>
     {
       public:
         /**
-         *  See @PropertyType for details; arguments are passed from
+         *  See PropertyType for details; arguments are passed from
          *  that class to this contructor.
          *
          * @tparam T          C++ variable data type of the value variable
-         * @param name_arg    D-Bus object property name
-         * @param readwr_arg  boolean read/write flag. Read-only if false
-         * @param variable    Reference to the C++ variable holding the
-         *                    property value
+         * @param interface_arg  D-Bus object interface the property
+         *                       belongs to
+         * @param name_arg       D-Bus object property name
+         * @param readwr_arg     boolean read/write flag. Read-only if false
+         * @param variable       Reference to the C++ variable holding the
+         *                       property value
          */
         PropertyTypeBase(const std::string &interface_arg,
                          const std::string &name_arg,
@@ -451,7 +453,7 @@ class Base : public std::enable_shared_from_this<Base>
 
 
         /**
-         *  Generates the <property/> XML node for this particular
+         *  Generates the `<property/>` XML node for this particular
          *  property.
          *
          * @return const std::string containing the XML fragment to be
@@ -515,6 +517,8 @@ class Base : public std::enable_shared_from_this<Base>
          *  object's property and value to a C++ object's variable.
          *
          * @tparam T          C++ variable data type of the value variable
+         * @param interface_arg       D-Bus object interface the property
+         *                            belongs to
          * @param name_arg            D-Bus property name this is available
          * @param readwr_arg          Read/write flag, if true this can be
          *                            updated via the D-Bus
@@ -611,6 +615,7 @@ class Base : public std::enable_shared_from_this<Base>
          *  an array (std::vector<> based).
          *
          * @tparam T  C++ data type of the type stored inside the std::vector<>
+         * @param interface_arg   D-Bus object interface the property belongs to
          * @param name_arg        Name of the property itself
          * @param readwrite       Boolean enabling read/write capabilities
          * @param vector_var      Reference to a std::vector<> container

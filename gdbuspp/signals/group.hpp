@@ -170,7 +170,7 @@ class Group
     /**
      *  Generates the D-Bus introspection data for all the registered
      *  signals.  This is typically not used directly, but called via the
-     *  @DBus::Object::Base::GenerateIntrospection() method.
+     *  DBus::Object::Base::GenerateIntrospection() method.
      *
      * @return const std::string containing the XML introspection data
      */
@@ -204,7 +204,7 @@ class Group
     /**
      *  Sends the D-Bus signals with the provided parameters
      *
-     *  This calls @Emit::SendGVariant() with the same arguments once
+     *  This calls Emit::SendGVariant() with the same arguments once
      *  the signal name and the expected D-Bus data type signature has
      *  been validated.
      *

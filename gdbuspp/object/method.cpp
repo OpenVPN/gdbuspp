@@ -48,7 +48,7 @@ class CallbackArguments : public Arguments
     /**
      *  Creates a new Arguments collection used by one specific method
      *  declaration.  This is normally called by
-     *  @DBus::Object::Method::Collection::AddMethod()
+     *  DBus::Object::Method::Collection::AddMethod()
      *
      * @return Arguments::Ptr - aka std::shared_ptr<Arguments> object
      */

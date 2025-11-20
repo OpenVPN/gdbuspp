@@ -10,16 +10,16 @@
 /**
  * @file gen-constants.hpp
  *
- * @brief This is a fragment header, to be included after a Constants::Base
- *        namespace has been declared with a few std::string_view "constants"
+ * @brief This is a fragment header, to be included after a `Constants::Base`
+ *        namespace has been declared with a few `std::string_view` "constants"
  *        declaring the base prefix for D-Bus service names, object paths and
  *        interface names.
  *
  *        The purpose of this header is to create compile-time constant strings
  *        while being a bit more flexible when needing a slight variation at
- *        the implementation point.  This is an alternative to using #define
+ *        the implementation point.  This is an alternative to using `#define`
  *        macros, where this approach will ensure the end result is always
- *        of a std::string data type.
+ *        of a `std::string` data type.
  *
  *        An example:
  *
@@ -99,7 +99,7 @@ constexpr auto GenPath(const char (&object_path)[sz])
  *  constant from the Constants::Base namespace
  *
  * @tparam sz              Size of the input string, deduced at compile time
- * @param  name            String containing the service name to append
+ * @param  interface       String containing the service interface to append
  * @return constexpr auto  Returns a constant (string) with the INTERFACE
  *                         constant appended with the input interface name.
  */

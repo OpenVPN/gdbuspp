@@ -83,7 +83,7 @@ class Update
 
 
     /**
-     *  This is similar to the @AddValue() method above, but this
+     *  This is similar to the AddValue() method above, but this
      *  is used when processing properties storing array/vector values.
      *
      * @tparam T     C++ data type of the array/vector (std::vector<T>)
@@ -99,7 +99,7 @@ class Update
 
 
     /**
-     *  This is used by the @_int_dbusobject_callback_set_property()
+     *  This is used by the glib2::Callbacks::_int_dbusobject_callback_set_property()
      *  glib2 callback function.  This is a generic internal callback
      *  which can handle all types of properties via the Property::Update
      *  objects.
@@ -155,9 +155,9 @@ class Interface
     /**
      *  Retrive the value of the property, as a GVariant object.
      *  This method is normally accessed via the internal
-     *  @_int_dbusobject_callback_get_property callback function, which
-     *  is called by glib2 interfaces when a D-Bus property is being read
-     *  via the org.freedesktop.Properties.Get() method.
+     *  glib2::Callbacks::_int_dbusobject_callback_get_property() callback
+     *  function, which is called by glib2 interfaces when a D-Bus property
+     *  is being read via the `org.freedesktop.Properties.Get` D-Bus method.
      *
      * @return GVariant* object containing the property value.
      */
@@ -165,9 +165,10 @@ class Interface
 
     /**
      *  Changes the property value.  This is normally called by the
-     *  internal @_int_dbusobject_callback_set_property callback function,
-     *  which is called by the glib2 interfaces when a D-Bus property value
-     *  is being set via the org.freedesktop.DBus.Properties.Set() method.
+     *  internal glib2::Callbacks::_int_dbusobject_callback_set_property
+     *  callback function, which is called by the glib2 interfaces when a
+     *  D-Bus property value is being set via the
+     *  `org.freedesktop.DBus.Properties.Set` D-Bus method.
      *
      * @param value_arg     GVariant object containing the new value
      *                      for the property
@@ -197,7 +198,7 @@ class Interface
 
 
     /**
-     *  Create a new @Properties::Update object for this property object
+     *  Create a new Property::Update object for this property object
      *
      * @return Property::Update::Ptr
      */
@@ -226,6 +227,7 @@ class BySpec : public Interface
      *  Creates a new PropertyBySpec object to be used by a
      *  Object::Base object.
      *
+     * @param interface   D-Bus object interface the property belongs to
      * @param name        std::string with the D-Bus property name
      * @param readwr      boolean read/write flag. Read-only if false
      * @param dbustype    std::string containing the D-Bus data type of this
@@ -275,7 +277,7 @@ class BySpec : public Interface
 
     /**
      *  Retrieve the value of this property.  This essentially
-     *  calls the @GetPropCallback function this object was configured
+     *  calls the GetPropertyCallback function this object was configured
      *  to use
      *
      * @return GVariant*  object containing the prepared value of this
@@ -285,7 +287,7 @@ class BySpec : public Interface
 
     /**
      *  Assign a new value from an incoming D-Bus request.  This
-     *  essentially calls the @SetPropCallback function this object
+     *  essentially calls the SetPropertyCallback function this object
      *  was configured to use
      *
      * @param value_arg     A pointer to the GVariant object contatining
@@ -314,7 +316,7 @@ class BySpec : public Interface
 
   protected:
     /**
-     * @see @PropertyBySpec::Create()
+     * @see Property::BySpec::Create()
      *
      */
     BySpec(const std::string &interface_arg,
@@ -367,11 +369,11 @@ class Collection
     bool Exists(const std::string &name) const noexcept;
 
     /**
-     *  Generates the appropriate <property/> XML introspection
+     *  Generates the appropriate `<property/>` XML introspection
      *  elements based on all the properties being managed by this
      *  collection object
      *
-     * @return const std::string  String containing just the <property/>
+     * @return const std::string  String containing just the `<property/>`
      *         fragments declaring all known properties.
      */
     const std::string GenerateIntrospection() const noexcept;
