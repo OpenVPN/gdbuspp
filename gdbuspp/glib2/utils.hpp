@@ -883,6 +883,22 @@ inline GVariant *Extract<GVariant *>(GVariant *v, int elm) noexcept
 
 
 /**
+ *  Retrive the GVariant object from a container
+ *
+ *  This method is a convenience wrapper around g_variant_get_child_value(),
+ *  to provide a more unified glib2::Value API.
+ *
+ * @param v           GVariant object to extract the child object from
+ * @param elm         index of the child element to extract
+ * @return GVariant*
+ */
+inline GVariant *ExtractChild(GVariant *v, int elm) noexcept
+{
+    return g_variant_get_child_value(v, elm);
+}
+
+
+/**
  *  Parses a GVariant object containing a an array/list of a single
  *  D-Bus data type into a C++ std::vector of the same corresponding
  *  data type.
