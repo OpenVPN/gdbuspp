@@ -13,6 +13,11 @@ project(
         meson_version: '>= 0.58'
 )
 
+cxx = meson.get_compiler('cpp')
+if (not cxx.has_argument('-m64'))
+        error('GDBus++ requires a 64-bit capable compiler')
+endif
+
 fs = import('fs')
 if fs.exists(meson.project_source_root() / '.git')
         custom_target('version.txt',

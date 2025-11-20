@@ -31,6 +31,9 @@ To see the configuration options available:
 See the [meson documentation](https://mesonbuild.com/Commands.html#configure)
 how to modify these settings.
 
+### IMPORTANT NOTICE
+GDBus++ supports **only 64-bit platforms**.
+
 
 Basic concepts and the namespaces
 ---------------------------------
