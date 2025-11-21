@@ -53,7 +53,7 @@ bool checkParams_no_fail_no_container()
 {
     std::vector<std::uint16_t> test_data_array = {{1, 2, 3, 4, 5}};
     GVariant *data_array = glib2::Value::Create(test_data_array);
-    std::cout << "data_array=" << g_variant_print(data_array, true)
+    std::cout << "data_array=" << glib2::Utils::DumpToString(data_array)
               << std::endl;
     glib2::Utils::checkParams(__func__, data_array, "aq");
     glib2::Utils::checkParams(__func__, data_array, "aq", 5);
@@ -65,7 +65,7 @@ bool checkParams_no_fail_no_container()
                  "Incorrect parameter format: aq, expected aq (elements expected: 2, received: 5)");
 
     GVariant *data_ints = g_variant_new("(qq)", 123, 456);
-    std::cout << "data_int=" << g_variant_print(data_ints, true) << std::endl;
+    std::cout << "data_int=" << glib2::Utils::DumpToString(data_ints) << std::endl;
     glib2::Utils::checkParams(__func__, data_ints, "(qq)");
     glib2::Utils::checkParams(__func__, data_ints, "(qq)", 2);
     expect_throw([data_ints]()
@@ -78,7 +78,7 @@ bool checkParams_no_fail_no_container()
     GVariantBuilder *data_dict_b = glib2::Builder::Create("a{ss}");
     glib2::Builder::Add(data_dict_b, g_variant_new("{ss}", "Key", "Value"));
     GVariant *data_dict = glib2::Builder::Finish(data_dict_b);
-    std::cout << "data_dict=" << g_variant_print(data_dict, true) << std::endl;
+    std::cout << "data_dict=" << glib2::Utils::DumpToString(data_dict) << std::endl;
     glib2::Utils::checkParams(__func__, data_dict, "a{ss}");
     glib2::Utils::checkParams(__func__, data_dict, "a{ss}", 1);
     expect_throw([data_dict]()
@@ -90,7 +90,7 @@ bool checkParams_no_fail_no_container()
 
     std::string test_data_string{"Hello tester"};
     GVariant *data_string = glib2::Value::Create(test_data_string);
-    std::cout << "data_string=" << g_variant_print(data_string, true) << std::endl;
+    std::cout << "data_string=" << glib2::Utils::DumpToString(data_string) << std::endl;
     glib2::Utils::checkParams(__func__, data_string, "s");
     expect_throw([data_string]()
                  {
@@ -100,7 +100,7 @@ bool checkParams_no_fail_no_container()
                  "Parameter type is not a container, it has no children");
 
     GVariant *data_bool = glib2::Value::Create(true);
-    std::cout << "data_bool=" << g_variant_print(data_bool, true) << std::endl;
+    std::cout << "data_bool=" << glib2::Utils::DumpToString(data_bool) << std::endl;
     glib2::Utils::checkParams(__func__, data_bool, "b");
     expect_throw([data_bool]()
                  {

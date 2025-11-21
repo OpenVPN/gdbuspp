@@ -259,7 +259,7 @@ class Proxy
                     << "'" << object_path << "', "
                     << "'" << interface << "', "
                     << "'" << method << "', "
-                    << "params=" << (params ? g_variant_print(params, true) : "(none)")
+                    << "params=" << glib2::Utils::DumpToString(params)
                     << ")");
         GError *err = nullptr;
         GVariant *ret = g_dbus_proxy_call_sync(proxy,
@@ -293,7 +293,7 @@ class Proxy
                     << "'" << object_path << "', "
                     << "'" << interface << "', "
                     << "'" << method << "', "
-                    << "params=" << (params ? g_variant_print(params, true) : "(none)")
+                    << "params=" << glib2::Utils::DumpToString(params)
                     << ") [NO RESPONSE CALL]");
 
         g_dbus_proxy_call(proxy,
@@ -350,7 +350,7 @@ class Proxy
                     << "'" << object_path << "', "
                     << "'" << interface << "', "
                     << "'" << method << "', "
-                    << "params=" << (params ? g_variant_print(params, true) : "(none)")
+                    << "params=" << glib2::Utils::DumpToString(params)
                     << ") ");
 
         GUnixFDList *ret_fd = nullptr;
@@ -431,7 +431,7 @@ class Proxy
                     << "'" << method << "'"
                     << ") "
                     << "Result: "
-                    << (res ? g_variant_print(res, true) : "(none)"));
+                    << glib2::Utils::DumpToString(res));
     }
 };
 

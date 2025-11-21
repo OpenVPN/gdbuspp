@@ -103,6 +103,19 @@ void checkParams(const char *func,
     }
 }
 
+
+std::string DumpToString(GVariant *data, bool type_annotate) noexcept
+{
+    if (!data)
+    {
+        return "[nullptr]";
+    }
+    gchar *content = g_variant_print(data, type_annotate);
+    std::string ret{content};
+    g_free(content);
+    return ret;
+}
+
 } // namespace Utils
 
 

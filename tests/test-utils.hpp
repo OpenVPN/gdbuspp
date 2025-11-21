@@ -72,7 +72,7 @@ bool check_data_type(const std::string &expect_type, GVariant *data);
 /**
  *  Checks the data contents of a GVariant object against an expected
  *  value.  The format of this string must be formatted in the same way
- *  g_variant_print() formats the data.
+ *  glib2::Utils::RetrieveContent() (g_variant_print()) formats the data.
  *
  * @param expect_value std::string with the complete representation of the
  *                     value which is expected to be found

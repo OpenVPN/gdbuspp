@@ -18,6 +18,7 @@
 #include <glib.h>
 
 #include "../features/debug-log.hpp"
+#include "../glib2/utils.hpp"
 #include "../glib2/strings.hpp"
 #include "../object/path.hpp"
 #include "exceptions.hpp"
@@ -67,7 +68,7 @@ bool Emit::SendGVariant(const std::string &signal_name, GVariant *params) const
     {
         GDBUSPP_LOG("Signals::Emit -- " << tgt << "; "
                                         << "signal_name='" << signal_name << "'"
-                                        << ", params=" << g_variant_print(params, true));
+                                        << ", params=" << glib2::Utils::DumpToString(params));
         if (!g_dbus_connection_emit_signal(connection->ConnPtr(),
                                            str2gchar(tgt->busname),
                                            str2gchar(tgt->object_path),

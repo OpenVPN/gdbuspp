@@ -787,7 +787,7 @@ int test_base_data_types()
                                      data,
                                      [&vector_ui16](const std::string &key, GVariant *value)
                                      {
-                                         // std::cout << "IterateDictionary: key='" << key << "' value: " << g_variant_print(value, true) << '\n';
+                                         // std::cout << "IterateDictionary: key='" << key << "' value: " << glib2::Utils::RetrieveContent(value) << '\n';
 
                                          if ("type_int32" == key
                                              && 123 != glib2::Value::Get<int32_t>(value))

@@ -391,7 +391,7 @@ void Callback::Execute(AsyncProcess::Request::UPtr &req)
     GVariant *result = method_args->GetReturnArgs();
     GDBUSPP_LOG("Callback::Execute (return) - "
                 << req << " - Result: "
-                << (result ? g_variant_print(result, true) : "(n/a)"));
+                << (result ? glib2::Utils::DumpToString(result) : "(n/a)"));
 #endif
 
     method_args->PrepareResponse(req);

@@ -84,6 +84,22 @@ void checkParams(const char *func,
                  const char *format,
                  unsigned int num = 0);
 
+
+/**
+ *  Generate a human readable string of the content of a GVariant
+ *  container.
+ *
+ *  This is a convenience wrapper around g_variant_print() which
+ *  removes the need to care about releasing the memory buffer
+ *  returned by that function.
+ *
+ * @param data           GVariant object to retrieve data from
+ * @param type_annotate  (optional) bool flag, to enable or disable
+ *                       type anotation in the result. Defaults to true.
+ * @return std::string
+ */
+std::string DumpToString(GVariant *data, bool type_annotate = true) noexcept;
+
 } // namespace Utils
 
 

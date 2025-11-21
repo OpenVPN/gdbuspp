@@ -85,16 +85,14 @@ void OptionParser::help(const std::string &argv0, struct option options[])
 
 void dump_gvariant(std::ostringstream &log, const std::string &prefix, GVariant *data)
 {
-    log << prefix << " type: " << g_variant_get_type_string(data) << std::endl;
-    char *dump = g_variant_print(data, false);
-    log << prefix << " data: " << std::string(dump) << std::endl;
-    free(dump);
+    log << prefix << " type: " << glib2::DataType::Extract(data) << std::endl;
+    log << prefix << " data: " << glib2::Utils::DumpToString(data) << std::endl;
 }
 
 
 bool check_data_type(const std::string &expect_type, GVariant *data)
 {
-    std::string gv_type(g_variant_get_type_string(data));
+    std::string gv_type = glib2::DataType::Extract(data);
     bool ret = gv_type == expect_type;
     if (!ret)
     {
@@ -107,9 +105,7 @@ bool check_data_type(const std::string &expect_type, GVariant *data)
 
 bool check_data_value(const std::string &expect_value, GVariant *data)
 {
-    char *tmpstr = g_variant_print(data, false);
-    std::string gv_value(tmpstr);
-    free(tmpstr);
+    std::string gv_value = glib2::Utils::DumpToString(data, false);
     bool ret = gv_value == expect_value;
     if (!ret)
     {
