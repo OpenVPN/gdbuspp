@@ -14,6 +14,7 @@
  */
 
 #include <any>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <limits>
@@ -142,8 +143,9 @@ int test_fd_receive_read(int argc, char **argv)
             return 2;
         }
 
-        char buf[opts.bufsize + 1];
-        memset(&buf, 0, opts.bufsize + 1);
+        char *buf = nullptr;
+        buf = static_cast<char *>(std::calloc(1, opts.bufsize + 1));
+        memset(buf, 0, opts.bufsize + 1);
 
         std::ofstream outstr;
         if (!opts.output.empty())
@@ -154,7 +156,7 @@ int test_fd_receive_read(int argc, char **argv)
         ssize_t s = -1;
         do
         {
-            s = ::read(fd, &buf, opts.bufsize);
+            s = ::read(fd, buf, opts.bufsize);
             if (s < 0)
             {
                 throw DBus::Exception("main()",
@@ -173,9 +175,10 @@ int test_fd_receive_read(int argc, char **argv)
             {
                 std::cout.write(buf, s);
             }
-            memset(&buf, 0, opts.bufsize + 1);
+            memset(buf, 0, opts.bufsize + 1);
         } while (s > 0);
         close(fd);
+        free(buf);
     }
     catch (const DBus::Exception &excp)
     {
