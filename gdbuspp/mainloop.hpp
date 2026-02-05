@@ -87,6 +87,8 @@ class MainLoop
     /**
      *  Stops an already running main loop.  This can be called from a
      *  different process thread to stop the program
+     *
+     *  @throws DBus::MainLoop::Exception if there is no running main loop
      */
     void Stop();
 
