@@ -44,7 +44,7 @@ namespace DBus {
 
 
 Object::Base::Base(const Object::Path &path, const std::string &interf)
-    : object_path(path), interface(interf)
+    : object_path_(path), interface_(interf)
 {
     methods = Object::Method::Collection::Create();
     properties = Object::Property::Collection::Create();
@@ -53,13 +53,13 @@ Object::Base::Base(const Object::Path &path, const std::string &interf)
 
 const Object::Path &Object::Base::GetPath() const noexcept
 {
-    return object_path;
+    return object_path_;
 }
 
 
 const std::string &Object::Base::GetInterface() const noexcept
 {
-    return interface;
+    return interface_;
 }
 
 
@@ -69,7 +69,7 @@ void Object::Base::AddPropertyBySpec(const std::string &name,
                                      Property::BySpec::SetPropertyCallback set_cb)
 {
     Property::BySpec::Ptr prop = Property::BySpec::Create(
-        interface,
+        interface_,
         name,
         true,
         dbustype,
@@ -89,7 +89,7 @@ void Object::Base::AddPropertyBySpec(const std::string &name,
             throw Object::Exception("Property '" + prop.GetName() + "' is read-only");
         }};
 
-    Property::BySpec::Ptr prop = Property::BySpec::Create(interface,
+    Property::BySpec::Ptr prop = Property::BySpec::Create(interface_,
                                                           name,
                                                           false,
                                                           dbustype,
@@ -151,8 +151,8 @@ void Object::Base::RegisterSignals(const Signals::Group::Ptr signal_group)
 const std::string Object::Base::GenerateIntrospection() const
 {
     std::ostringstream xml;
-    xml << "<node name='" << object_path << "'>"
-        << "  <interface name='" << interface << "'>"
+    xml << "<node name='" << object_path_ << "'>"
+        << "  <interface name='" << interface_ << "'>"
         << methods->GenerateIntrospection()
         << properties->GenerateIntrospection()
         << (signals ? signals->GenerateIntrospection() : "")

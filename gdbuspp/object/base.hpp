@@ -103,7 +103,7 @@ class Base : public std::enable_shared_from_this<Base>
                      const std::string &override_dbus_type = "")
     {
         Property::Interface::Ptr prop;
-        prop = std::make_shared<PropertyType<T>>(interface,
+        prop = std::make_shared<PropertyType<T>>(interface_,
                                                  propname,
                                                  readwrite,
                                                  variable,
@@ -143,7 +143,7 @@ class Base : public std::enable_shared_from_this<Base>
                      const std::string &override_dbus_type = "")
     {
         Property::Interface::Ptr prop;
-        prop = std::make_shared<PropertyType<std::vector<T>>>(interface,
+        prop = std::make_shared<PropertyType<std::vector<T>>>(interface_,
                                                               propname,
                                                               readwrite,
                                                               variable);
@@ -353,16 +353,16 @@ class Base : public std::enable_shared_from_this<Base>
     friend std::ostream &operator<<(std::ostream &os, const Base &object)
     {
         std::ostringstream r;
-        r << "Object(path=" << object.object_path
-          << ", interface=" << object.interface << ")";
+        r << "Object(path=" << object.object_path_
+          << ", interface=" << object.interface_ << ")";
         return os << r.str();
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Base *object)
     {
         std::ostringstream r;
-        r << "Object(path=" << object->object_path
-          << ", interface=" << object->interface << ")";
+        r << "Object(path=" << object->object_path_
+          << ", interface=" << object->interface_ << ")";
         return os << r.str();
     }
 
@@ -691,12 +691,13 @@ class Base : public std::enable_shared_from_this<Base>
     //
     // DBus::Object::Base private variables
     //
+    DBus::Connection::Ptr dbusconn_;
 
     /// D-Bus object path this object is accessible from
-    const Object::Path object_path;
+    const Object::Path object_path_;
 
     /// D-Bus object interface scope of this C++ is responsible for
-    const std::string interface;
+    const std::string interface_;
 
     /// Disable the idle detection checks, see DisableIdleDetector() for details
     bool disable_idle_detection = false;
