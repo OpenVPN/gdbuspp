@@ -194,4 +194,11 @@ const bool Object::Base::GetIdleDetectorDisabled() const
     return disable_idle_detection;
 }
 
+
+void Object::Base::SetConnection(DBus::Connection::Ptr conn)
+{
+    dbusconn_ = std::move(conn);
+}
+
+
 } // namespace DBus

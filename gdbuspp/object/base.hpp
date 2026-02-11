@@ -405,6 +405,16 @@ class Base : public std::enable_shared_from_this<Base>
     void DisableIdleDetector(const bool enable);
 
 
+    /**
+     *  Assigns a DBus::Connection to this DBus::Object::base object
+     *
+     *  This is required when making use of the DBUs::Object::UpdateProperty()
+     *  method.
+     *
+     * @param conn   DBus::Connection this object need to use
+     */
+    void SetConnection(DBus::Connection::Ptr conn);
+
   private:
     //
     //  Internal property related classes
