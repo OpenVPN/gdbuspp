@@ -65,6 +65,7 @@ class Event
         r << "Signal::Event("
           << "sender=" << ev->sender << ", "
           << "path=" << ev->object_path << ", "
+          << "interface=" << ev->object_interface << ", "
           << "signal_name=" << ev->signal_name << ", ";
         if (ev->params)
         {
