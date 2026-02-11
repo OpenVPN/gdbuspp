@@ -201,4 +201,32 @@ void Object::Base::SetConnection(DBus::Connection::Ptr conn)
 }
 
 
+void Object::Base::send_property_update_signal(const std::string &property_name, Object::Property::Update::Ptr update_data)
+{
+    if (!dbusconn_)
+    {
+        throw Object::Property::Exception(this, property_name, "Cannot send PropertyChanged signals without a D-Bus connection set");
+    }
+
+    if (update_data)
+    {
+        GError *local_err = nullptr;
+        g_dbus_connection_emit_signal(dbusconn_->ConnPtr(),
+                                      nullptr,
+                                      object_path_.c_str(),
+                                      "org.freedesktop.DBus.Properties",
+                                      "PropertiesChanged",
+                                      update_data->Finalize(),
+                                      &local_err);
+        if (local_err)
+        {
+            throw Object::Property::Exception(this,
+                                              property_name,
+                                              "Failed signaling new property value",
+                                              local_err);
+        }
+    }
+}
+
+
 } // namespace DBus

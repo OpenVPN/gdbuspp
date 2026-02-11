@@ -228,6 +228,82 @@ class Base : public std::enable_shared_from_this<Base>
     Property::Update::Ptr SetProperty(const std::string &propname, GVariant *value);
 
 
+    /**
+     *  Update the value of a D-Bus object property
+     *
+     *  This method will both set the new value to the C++ variable and
+     *  send the org.freedesktop.DBus.Properties.PropertiesChanged D-Bus
+     *  signal.
+     *
+     *  The purpose of this method is to send the D-Bus signal when
+     *  a property value is changed from the C++ side.  When the property
+     *  is modified via the org.freedesktop.DBus.Properties.Set() method,
+     *  the signal is automatically sent the internal glib2 callback handler
+     *  (glib2::Callbacks::_int_dbusobject_callback_set_property()).
+     *
+     *  Using this method REQUIRES a DBus::Connection object to be set
+     *  using the DBus::Object::Base::SetConnection() method first,
+     *  otherwise an exception will be thrown.
+     *
+     * @tparam T              C++ data type of the value being set
+     * @param property_name   std::string, D-Bus object property name to update
+     * @param value           Value to assign to the property.
+     * @throws DBus::Object::Property::Exception
+     */
+    template <typename T>
+    void UpdateProperty(const std::string &property_name, T const &value)
+    {
+        try
+        {
+            GVariant *new_value = glib2::Value::Create(value);
+            Object::Property::Update::Ptr upd = properties->SetValue(property_name, new_value);
+            send_property_update_signal(property_name, upd);
+            g_variant_unref(new_value);
+        }
+        catch (const DBus::Exception &excp)
+        {
+            throw Property::Exception(this, property_name, excp.GetRawError());
+        }
+    }
+
+    /**
+     *  Update the value of a D-Bus object property
+     *
+     *  This method will both set the new vector value to the C++
+     *  variable and send the org.freedesktop.DBus.Properties.PropertiesChanged
+     *  D-Bus signal.
+     *
+     *  The purpose of this method is to send the D-Bus signal when
+     *  a property value is changed from the C++ side.  When the property
+     *  is modified via the org.freedesktop.DBus.Properties.Set() method,
+     *  the signal is automatically sent the internal glib2 callback handler
+     *  (glib2::Callbacks::_int_dbusobject_callback_set_property()).
+     *
+     *  Using this method REQUIRES a DBus::Connection object to be set
+     *  using the DBus::Object::Base::SetConnection() method first,
+     *  otherwise an exception will be thrown.
+     *
+     * @tparam T              C++ data type of the value being set
+     * @param property_name   std::string, D-Bus object property name to update
+     * @param value           Value to assign to the property.
+     * @throws DBus::Object::Property::Exception
+     */
+    template <typename T>
+    void UpdateProperty(const std::string &property_name, const std::vector<T> &value)
+    {
+        try
+        {
+            GVariant *new_value = glib2::Value::Create(value);
+            Object::Property::Update::Ptr upd = properties->SetValue(property_name, new_value);
+            send_property_update_signal(property_name, upd);
+            // NOTE: For some odd reasons, the new_value is properly freed in this code path
+            //       and need not be done here.
+        }
+        catch (const DBus::Exception &excp)
+        {
+            throw Property::Exception(this, property_name, excp.GetRawError());
+        }
+    }
 
     /**
      *  Add a new D-Bus method to this object.  The provided callback
@@ -697,6 +773,27 @@ class Base : public std::enable_shared_from_this<Base>
         const std::string dbus_array_type; ///< D-Bus data type of the array
     };
     // End of DBus::Object::PropertyType/PropertyTypeBase related classes
+
+
+    /**
+     *  Internal helper method used to send the
+     *  net.freedesktop.DBus.Properties.PropertiesChanged D-Bus
+     *  signals when a D-Bus object property has changed.
+     *
+     *  This is only used by the Object::UpdateProperty() methods.
+     *  Properties changed via the D-Bus
+     *  net.freedesktop.DBus.Properties.Set() method will have the
+     *  same PropertiesChanged D-Bus signal sent automaticall via the
+     *  glib2::Callbacks::_int_dbusobject_callback_set_property()
+     *  method.
+     *
+     * @param property_name  std::string with the D-Bus object property being modified
+     * @param update_data    DBus::Object::Property::Update object with the update
+     *                       details
+     * @throws DBus::Object::Property::Exception if a D-Bus connection is not
+     *         provided to this object.  This is set via DBus::Object::Base::SetConnection()
+     */
+    void send_property_update_signal(const std::string &property_name, Property::Update::Ptr update_data);
 
     //
     // DBus::Object::Base private variables
