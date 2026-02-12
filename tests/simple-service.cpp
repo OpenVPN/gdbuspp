@@ -146,11 +146,12 @@ class Object : public DBus::Object::Base
 class PropertyTests : public DBus::Object::Base
 {
   public:
-    explicit PropertyTests(Logger::Ptr log_)
+    explicit PropertyTests(DBus::Connection::Ptr conn_, Logger::Ptr log_)
         : DBus::Object::Base(Constants::GenPath("simple1/properties"),
                              Constants::GenInterface("simple1")),
           log(log_)
     {
+        SetConnection(conn_);
         DisableIdleDetector(true);
         RegisterSignals(log);
 
@@ -200,6 +201,36 @@ class PropertyTests : public DBus::Object::Base
                           {
                               return this->GetDictionary(prop);
                           });
+
+
+        auto arg_set_string = AddMethod("SetStringValue",
+                                        [this](DBus::Object::Method::Arguments::Ptr args)
+                                        {
+                                            this->property_update_method(args, "string_val");
+                                        });
+        arg_set_string->AddInput("new_value", glib2::DataType::DBus<std::string>());
+
+        auto arg_set_stringarr = AddMethod("SetStringArray",
+                                           [this](DBus::Object::Method::Arguments::Ptr args)
+                                           {
+                                               this->property_update_method(args, "string_array");
+                                           });
+        arg_set_stringarr->AddInput("new_value", glib2::DataType::DBus<std::string>());
+
+        auto arg_set_longval = AddMethod("SetLongVal",
+                                         [this](DBus::Object::Method::Arguments::Ptr args)
+                                         {
+                                             this->property_update_method(args, "long_val");
+                                         });
+        arg_set_longval->AddInput("new_value", glib2::DataType::DBus<long>());
+
+        auto arg_set_uintarr = AddMethod("SetUintArray",
+                                         [this](DBus::Object::Method::Arguments::Ptr args)
+                                         {
+                                             this->property_update_method(args, "uint_array");
+                                         });
+        arg_set_uintarr->AddInput("new_value", glib2::DataType::DBus<std::string>());
+
 
         Log(__func__, "Initialized");
     }
@@ -445,6 +476,49 @@ class PropertyTests : public DBus::Object::Base
     void Log(const std::string &func, const std::string &msg) const
     {
         log->Log("PropertyTests::" + func, msg);
+    }
+
+
+    void property_update_method(DBus::Object::Method::Arguments::Ptr args, const std::string &property_name)
+    {
+        GVariant *params = args->GetMethodParameters();
+        if ("string_val" == property_name)
+        {
+            glib2::Utils::checkParams(__func__, params, "(s)", 1);
+            UpdateProperty(property_name, glib2::Value::Extract<std::string>(params, 0));
+        }
+        else if ("string_array" == property_name)
+        {
+            glib2::Utils::checkParams(__func__, params, "(s)", 1);
+            std::stringstream input(glib2::Value::Extract<std::string>(params, 0));
+            std::string v;
+            std::vector<std::string> values;
+            while (std::getline(input, v, '|'))
+            {
+                values.push_back(v);
+            }
+            UpdateProperty(property_name, values);
+        }
+        else if ("long_val" == property_name)
+        {
+            glib2::Utils::checkParams(__func__, params, "(x)", 1);
+            auto value = glib2::Value::Extract<long>(params, 0);
+            UpdateProperty(property_name, value);
+        }
+        else if ("uint_array" == property_name)
+        {
+            // This parses a string of elements separated by '|'
+            // and converts that to an array of uint32_t
+            glib2::Utils::checkParams(__func__, params, "(s)", 1);
+            std::stringstream input(glib2::Value::Extract<std::string>(params, 0));
+            std::string v;
+            std::vector<uint32_t> values;
+            while (std::getline(input, v, '|'))
+            {
+                values.push_back(static_cast<uint32_t>(std::stoi(v)));
+            }
+            UpdateProperty(property_name, values);
+        }
     }
 };
 
@@ -815,7 +889,7 @@ class MainHandler : public DBus::Object::Base
         RegisterSignals(log);
         log->AddTarget("");
 
-        property_tests = object_mgr->CreateObject<PropertyTests>(log);
+        property_tests = object_mgr->CreateObject<PropertyTests>(conn, log);
         method_tests = object_mgr->CreateObject<MethodTests>(object_mgr, log);
         failing_meths = object_mgr->CreateObject<FailingMethodTests>();
 
@@ -1030,7 +1104,10 @@ int test_simple_service(int argc, char **argv)
         auto handler = simple_service->CreateServiceHandler<SimpleService::MainHandler>(dbuscon,
                                                                                         simple_service->GetObjectManager());
 
-        simple_service->PrepareIdleDetector(std::chrono::seconds(60));
+        if (!(argc > 1 && std::string(argv[1]) == "--no-idle-check"))
+        {
+            simple_service->PrepareIdleDetector(std::chrono::seconds(60));
+        }
 
         // Run internal tests first
         simple_service->InternalTests(simple_service->GetObjectManager(),
