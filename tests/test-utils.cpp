@@ -206,6 +206,87 @@ GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
 }
 
 
+std::string parse_gvariant_to_string(GVariant *value)
+{
+    std::string ret;
+    std::string type = glib2::DataType::Extract(value);
+
+    if ("a{sv}" == type)
+    {
+        ret = "{";
+        glib2::Dict::IterateDictionary(
+            value,
+            [&ret](const std::string &key, GVariant *val)
+            {
+                ret += key + "='" + parse_gvariant_to_string(val) + "', ";
+            });
+        ret += "}";
+        return ret;
+    }
+
+
+    switch (type[0])
+    {
+    case '(':
+        ret = "(";
+        for (const auto &val : convert_from_gvariant(value))
+        {
+            ret += val + ", ";
+        }
+        ret += ")";
+        break;
+    case ')':
+        break;
+    case 'a':
+        ret = "[";
+        glib2::Value::IterateArray(value, [&ret](GVariant *val)
+                                   {
+                                       ret += "'" + parse_gvariant_to_string(val) + "', ";
+                                   });
+        ret += "]";
+        break;
+    case 'b':
+        ret = (glib2::Value::Get<bool>(value) ? "true" : "false");
+        break;
+    case 'd':
+        ret = std::to_string(glib2::Value::Get<double>(value));
+        break;
+    case 'i':
+    case 'h':
+        ret = std::to_string(glib2::Value::Get<int32_t>(value));
+        break;
+    case 'n':
+        ret = std::to_string(glib2::Value::Get<int16_t>(value));
+        break;
+    case 'o':
+        ret = glib2::Value::Get<DBus::Object::Path>(value);
+        break;
+    case 't':
+        ret = std::to_string(glib2::Value::Get<uint64_t>(value));
+        break;
+    case 'q':
+        ret = std::to_string(glib2::Value::Get<uint16_t>(value));
+        break;
+    case 'u':
+        ret = std::to_string(glib2::Value::Get<uint32_t>(value));
+        break;
+    case 'x':
+        ret = std::to_string(glib2::Value::Get<int64_t>(value));
+        break;
+    case 'y':
+        ret = std::to_string(std::to_integer<uint8_t>(glib2::Value::Get<std::byte>(value)));
+        break;
+    case 's':
+        ret = glib2::Value::Get<std::string>(value);
+        break;
+    default:
+        ret = "<UNKNOWN D-BUS DATA TYPE: " + type + ">";
+        break;
+    }
+    return ret;
+}
+
+
 std::vector<std::string> convert_from_gvariant(GVariant *values)
 {
     std::vector<std::string> ret{};

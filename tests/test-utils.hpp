@@ -112,6 +112,18 @@ bool log_data_type_value_check(std::ostringstream &log,
 GVariant *convert_to_gvariant(const std::string &type, const std::string &value);
 
 /**
+ *  Parse a GVariant result into a single string with some very simple
+ *  type of content formatting.
+ *
+ *  Dictionary content are enclosed in '{' and '}', arrays in '[' and ']'
+ *  and structured data in '(' and ')'.
+ *
+ * @param value          GVariant object ro parse
+ * @return std::string
+ */
+std::string parse_gvariant_to_string(GVariant *value);
+
+/**
  *  Convert a GVariant result of more values into a basic std::vector<std::string>
  *  All data types are converted into a std::string reprentation, regardless
  *  of their initial data type.
