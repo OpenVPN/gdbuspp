@@ -181,6 +181,8 @@ GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
         case 'h':
         case 'n':
             return glib2::Value::CreateType(type.substr(0).c_str(), std::stoi(value));
+        case 'o':
+            return glib2::Value::CreateType(glib2::DataType::DBUS_TYPE_OBJECTPATH, value);
         case 't':
             return glib2::Value::CreateType("t", stoul(value));
         case 'q':
@@ -229,6 +231,9 @@ std::vector<std::string> convert_from_gvariant(GVariant *values)
             break;
         case 'n':
             v = std::to_string(glib2::Value::Extract<int16_t>(values, field));
+            break;
+        case 'o':
+            v = glib2::Value::Extract<DBus::Object::Path>(values, field);
             break;
         case 't':
             v = std::to_string(glib2::Value::Extract<uint64_t>(values, field));
