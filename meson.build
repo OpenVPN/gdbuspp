@@ -2,8 +2,8 @@
 #
 #  SPDX-License-Identifier: AGPL-3.0-only
 #
-#  Copyright (C)  OpenVPN Inc <sales@openvpn.net>
-#  Copyright (C)  David Sommerseth <davids@openvpn.net>
+#  Copyright (C) 2023-  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C) 2023-  David Sommerseth <davids@openvpn.net>
 
 project(
         'gdbuspp','cpp',
@@ -394,6 +394,23 @@ signal_subscribe = executable(
         install_dir: get_option('libexecdir') + '/gdbuspp/tests'
 )
 
+#  Tests org.freedesktop.DBus.Properties.PropertiesChanged signals
+signal_property_change = executable(
+        'test_signal-property-change',
+        [
+                'tests/signal-property-change.cpp',
+        ],
+        link_with: [
+                gdbuspp_lib.get_static_lib(),
+                tests_lib,
+        ],
+        dependencies: [
+                glib2_deps,
+        ],
+        install: get_option('install_testprogs'),
+        install_dir: get_option('libexecdir') + '/gdbuspp/tests'
+)
+
 # Tests receving a file descriptor passed from test_simple-service
 test_fd_recv = executable(
         'test_fd-receive-read',
@@ -553,6 +570,19 @@ test('signals',
         timeout: 60,
         is_parallel: false
 )
+
+test('signals-property-change',
+        server_runner,
+        args: [find_program('tests/scripts/test-signals-property').full_path()],
+        depends: [
+                simple_service,
+                signal_property_change
+        ],
+        priority: 90,
+        timeout: 60,
+        is_parallel: false
+)
+
 
 test('test-data-types-plain',
         test_data_types,

@@ -1,0 +1,186 @@
+#!/usr/bin/python3
+#  GDBus++ - glib2 GDBus C++ wrapper
+#
+#  SPDX-License-Identifier: AGPL-3.0-only
+#
+#  Copyright (C) 2026-  OpenVPN Inc <sales@openvpn.net>
+#  Copyright (C) 2026-  David Sommerseth <davids@openvpn.net>
+#
+
+##
+# @file tests/scripts/test-signals-property
+#
+# @brief Runs two programs, one subscribing to specific signals and the
+#        other one emiting signals.  Checking that the content and right
+#        amount of messages are received correctly
+#
+
+import os
+import subprocess
+import sys
+from time import sleep
+
+
+def prog(bin_name):
+    build_dir = os.getenv('BUILD_DIR')
+    if build_dir is None:
+        build_dir='.'
+    return build_dir + '/' + bin_name
+
+
+##
+#  Runs a signal monitor specific to
+#  org.freedesktop.DBus.Properties.PropertiesChanged
+#  D-Bus signals
+#
+#  This tool will only look out for the first match
+#  on the given D-Bus path, interface and property name
+#  and check if the received value(s) matches the expectations
+#
+def run_signal_subscribe_property_change(path, interface, prop_name, prop_value):
+    all_args = [prog('test_signal-property-change'), '-v', '-p', path, '-i', interface, '-C', '1', '-X', prop_name, '-x', prop_value]
+    print('signal subscribe (PropertiesChanged): {}'.format(' '.join(all_args)))
+    ret = subprocess.Popen(all_args, bufsize=0, stdout=subprocess.PIPE)
+    return ret
+
+
+##
+#  Changes a D-Bus object property using the
+#  org.freedesktop.DBus.Properties.Set() D-Bus method
+#  in the target service.
+#
+def run_set_property_direct(path, interface, property_name, data_type, values):
+    value_args = []
+    for v in values:
+        value_args.append('-v')
+        value_args.append(str(v))
+    all_args = [prog('test_proxy'), '-d', 'net.openvpn.gdbuspp.test.simple',
+                     '-p', path, '-i', interface, '-s', property_name,
+                     '-t', data_type] + value_args
+    print('Running proxy: {}'.format(' '.join(all_args)))
+    return subprocess.Popen(all_args, bufsize=0, stdout=subprocess.PIPE)
+
+##
+#  Changes a D-Bus object property a service specific D-Bus
+#  method to change a specific D-Bus object property
+#
+def run_set_property_method(path, interface, method, data_type, values):
+    all_args = [prog('test_proxy'), '-d', 'net.openvpn.gdbuspp.test.simple', '-p', path, '-i', interface, '-m', method, '-t', data_type, '-v', "|".join([str(v) for v in values])]
+    print('Running proxy: {}'.format(' '.join(all_args)))
+    return subprocess.Popen(all_args, bufsize=0, stdout=subprocess.PIPE)
+
+
+##
+#  Parses the results from one of the run_*() functions
+#  and evalutes if it was a successful run or not
+#
+#  This expects the return value from subprocess.Popen()
+#  for the execution results
+#
+def parse_result(res, expect_fail, timeout=2):
+    out = ''
+    err = ''
+    try:
+        res.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        pass
+
+    try:
+        o, e = res.communicate(timeout=timeout*2)
+        if o:
+            out = out + o.decode('utf-8')
+        if e:
+            err = err + e.decode('utf-8')
+    except subprocess.TimeoutExpired:
+        pass
+
+    ec = res.returncode
+    if (expect_fail == False and ec and ec > 0) \
+        or (expect_fail == True and ec == 0):
+        print('~'*40)
+        print('FAILED: {}'.format(" ".join(res.args)))
+        print('        >> Expected {}, exit code: {}'.format(expect_fail and "failure" or "success", ec))
+        print(out)
+        print('-'*20)
+        print(err)
+        print('~'*40)
+        return False
+    return (expect_fail and ec > 1 or ec == 0)
+
+
+#
+# Test the the DBus::Object::UpdateProperty() C++ methods
+#
+path = '/gdbuspp/tests/simple1/properties'
+interface = 'gdbuspp.test.simple1'
+errors = 0
+
+#
+#   Testing setting a property with a single string value
+#
+s = run_signal_subscribe_property_change(path, interface, 'string_val', 'Changing Property string_val')
+run_set_property_method(path, interface, 'SetStringValue', 's', ['Changing Property string_val',])
+if (parse_result(s, False) is False):
+    errors += 1
+
+s = run_signal_subscribe_property_change(path, interface, 'string_val', 'Another String value now')
+run_set_property_direct(path, interface, 'string_val', 's', ['Another String value now',])
+if (parse_result(s, False) is False):
+    errors += 1
+
+#
+#   Testing setting a property with an array of string
+#
+array_data1_str = ['Test Array Element 1', 'Another Array element', 'Some more text', 'Extending with more text strings','More data']
+array_data1_str_expected = "['Test Array Element 1', 'Another Array element', 'Some more text', 'Extending with more text strings', 'More data', ]"
+s = run_signal_subscribe_property_change(path, interface, 'string_array', array_data1_str_expected)
+run_set_property_method(path, interface, 'SetStringArray', 's', array_data1_str)
+if (parse_result(s, False) is False):
+    errors += 1
+
+array_data2_str = ['I came, I saw, I conquered.', 'I think, therefore I am', 'Keep calm and carry on', 'Wisely, and slow. They stumble that run fast.']
+array_data2_str_expected = "['I came, I saw, I conquered.', 'I think, therefore I am', 'Keep calm and carry on', 'Wisely, and slow. They stumble that run fast.', ]"
+s = run_signal_subscribe_property_change(path, interface, 'string_array', array_data2_str_expected)
+run_set_property_direct(path, interface, 'string_array', 'as', array_data2_str)
+if (parse_result(s, False) is False):
+    errors += 1
+
+
+#
+#   Testing setting a property with a single long int value
+#
+s = run_signal_subscribe_property_change(path, interface, 'long_val', '3141527926')
+run_set_property_method(path, interface, 'SetLongVal', 'x', ['3141527926',])
+if (parse_result(s, False) is False):
+    errors += 1
+
+
+#
+#   Testing setting a property with an array of uint
+#
+
+array_data1_uint = [2, 3, 4, 5, 6, 8, 9, 10, 12, 16, 18, 20, 24, 30, 36, 48, 60, 72, 84, 120, 180, 240, 360, 720, 840, 2520, 5040]
+array_data1_uint_expected = "['2', '3', '4', '5', '6', '8', '9', '10', '12', '16', '18', '20', '24', '30', '36', '48', '60', '72', '84', '120', '180', '240', '360', '720', '840', '2520', '5040', ]"
+s = run_signal_subscribe_property_change(path, interface, 'uint_array', array_data1_uint_expected)
+run_set_property_method(path, interface, 'SetUintArray', 's', array_data1_uint)
+if (parse_result(s, False) is False):
+    errors += 1
+
+array_data2_uint =  [12, 18, 20, 24, 30, 36, 40, 42, 48, 54, 56, 60, 66, 70, 72, 78, 80, 84, 88, 90, 96, 100, 102, 104, 108, 112, 114, 120]
+array_data2_uint_expected = "['12', '18', '20', '24', '30', '36', '40', '42', '48', '54', '56', '60', '66', '70', '72', '78', '80', '84', '88', '90', '96', '100', '102', '104', '108', '112', '114', '120', ]"
+s = run_signal_subscribe_property_change(path, interface, 'uint_array', array_data2_uint_expected)
+run_set_property_direct(path, interface, 'uint_array', 'au', array_data2_uint)
+if (parse_result(s, False) is False):
+    errors += 1
+
+
+#
+#  Wrap up the test results
+#
+print('-'*40)
+if errors > 0:
+    print('Overall test result: FAIL ... {} errors'.format(errors))
+    sys.exit(2)
+else:
+    print('Overall test result: Pass')
+    sys.exit(0)
