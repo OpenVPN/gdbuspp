@@ -64,7 +64,7 @@ def run_signal_subscribe(args):
     all_args = [prog('test_signal-subscribe'), '-p', '/gdbuspp/tests/signals', '-i', 'gdbuspp.test.signals'] + args
     print('signal subscribe: {}'.format(' '.join(all_args)))
     ret = subprocess.Popen(all_args, bufsize=0, stdout=subprocess.PIPE)
-    sleep(1)
+    sleep(0.3)
     return ret
 
 
