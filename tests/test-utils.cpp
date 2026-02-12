@@ -283,7 +283,8 @@ GVariant *generate_gvariant(std::ostringstream &log,
         {
             throw Tests::Utils::Exception(__func__, "data values requires data types");
         }
-        if (data_type.length() != data_values.size())
+
+        if (data_type[0] != 'a' && data_type.length() != data_values.size())
         {
             throw Tests::Utils::Exception(__func__, "data type string does not contain enough field to describe all data values");
         }
@@ -293,6 +294,23 @@ GVariant *generate_gvariant(std::ostringstream &log,
         if (!wrap_single_value && data_values.size() == 1)
         {
             data = convert_to_gvariant(data_type, data_values[0]);
+        }
+        else if (data_type[0] == 'a')
+        {
+            if (data_type.length() > 2)
+            {
+                throw Tests::Utils::Exception(__func__, "only arrays with a single data type is supported");
+            }
+
+            log << "   " << data_type << " [";
+            GVariantBuilder *bld = glib2::Builder::Create(data_type.c_str());
+            for (const auto &v : data_values)
+            {
+                glib2::Builder::Add(bld, convert_to_gvariant(data_type.substr(1, 1), v));
+                log << "'" << v << "',";
+            }
+            log << "]" << std::endl;
+            data = glib2::Builder::Finish(bld);
         }
         else
         {
