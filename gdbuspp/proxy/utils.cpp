@@ -59,12 +59,21 @@ const bool Query::Ping() const noexcept
 
 const std::string Query::Introspect(const Object::Path &path) const
 {
-    GVariant *res = proxy->Call(path,
-                                "org.freedesktop.DBus.Introspectable",
-                                "Introspect",
-                                nullptr);
-    std::string ret = glib2::Value::Extract<std::string>(res, 0);
-    g_variant_unref(res);
+    std::string ret;
+    for (uint8_t attempts = 3; attempts > 0; attempts--)
+    {
+        GVariant *res = proxy->Call(path,
+                                    "org.freedesktop.DBus.Introspectable",
+                                    "Introspect",
+                                    nullptr);
+        ret = glib2::Value::Extract<std::string>(res, 0);
+        g_variant_unref(res);
+        if (ret.length() > 218)
+        {
+            break;
+        }
+        usleep(100000);
+    }
     return ret;
 }
 

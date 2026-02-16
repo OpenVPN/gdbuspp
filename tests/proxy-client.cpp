@@ -222,10 +222,8 @@ int test_proxy_client(int argc, char **argv)
         if (options.introspect)
         {
             auto prx = Proxy::Client::Create(conn, options.destination);
-            GVariant *res = prx->Call(options.object_path,
-                                      "org.freedesktop.DBus.Introspectable",
-                                      "Introspect");
-            std::cout << glib2::Value::Extract<std::string>(res, 0);
+            auto prxqry = Proxy::Utils::Query::Create(prx);
+            std::cout << prxqry->Introspect(options.object_path);
             return 0;
         }
 
