@@ -13,6 +13,10 @@
  */
 
 
+#include <regex>
+#include <fmt/format.h>
+#include <fmt/compile.h>
+
 #include "../object/path.hpp"
 #include "utils.hpp"
 
@@ -62,6 +66,57 @@ const std::string Query::Introspect(const Object::Path &path) const
     std::string ret = glib2::Value::Extract<std::string>(res, 0);
     g_variant_unref(res);
     return ret;
+}
+
+
+bool Query::LookupObject(const Object::Path &path) const
+{
+    DBus::Object::Path parent_object_path;
+    std::string child_object;
+    auto split_point = path.find_last_of("/");
+    if (split_point == std::string::npos)
+    {
+        throw Proxy::Exception("Invalid path - no separator character found");
+    }
+
+    // Split up the D-Bus object path into the parent object path
+    // of the requested path, and preserve the final
+    parent_object_path = {path.substr(0, split_point)};
+    child_object = {path.substr(split_point + 1)};
+
+    if (!parent_object_path.empty() && child_object.empty())
+    {
+        throw Proxy::Exception("Invalid D-Bus path - no trailing slash (/) allowed");
+    }
+
+    if (parent_object_path.empty())
+    {
+        parent_object_path = "/";
+    }
+
+
+    std::string introsp = Query::Introspect(parent_object_path);
+    if (!introsp.empty() && child_object.empty() && "/" == parent_object_path)
+    {
+        // This is a special case for checking the root (/) object
+        // If the introspection didn't fail, the object exists.
+        return true;
+    }
+
+    const std::regex lookup_expr{fmt::format(FMT_COMPILE("\\<node name=\"({})\"/\\>"),
+                                             child_object)};
+    std::smatch m;
+    if (std::regex_search(introsp, m, lookup_expr))
+    {
+        // If a <node name="$child_object"/> element is found in the
+        // introspection, only a single such node is expected.  The
+        // check for m.size() == 2 is due to m[0] holding the whole regex
+        // match, while m[1] holds just the content of the 'name' attribute.
+        // The content of the 'name' attribute must match the requested
+        // child_object.
+        return (m.size() == 2 && m[1] == child_object);
+    }
+    return false;
 }
 
 

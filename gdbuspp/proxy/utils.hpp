@@ -69,6 +69,25 @@ class Query
      */
     const std::string Introspect(const Object::Path &path) const;
 
+
+    /**
+     *  This is a lightweight approach to check if an object is
+     *  available.  It will not do anything efforts to verify the
+     *  existence and accessibility of an object, it will just
+     *  use the introspection data and lookup up the object node
+     *  in that data.
+     *
+     *  For a more thorough check, CheckObjectExists() will
+     *  do more checks to verify the object really is accessible.
+     *  But this approach might be too time consuming in some
+     *  sitution.
+     *
+     * @param path       D-Bus object path to look for
+     * @return true if the object is found in the introspection data,
+     *         otherwise false
+     */
+    bool LookupObject(const Object::Path &path) const;
+
     /**
      *  Does a few checks to try to reach a D-Bus object in the service.
      *

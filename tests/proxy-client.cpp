@@ -24,6 +24,7 @@
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
 #include "../gdbuspp/proxy.hpp"
+#include "../gdbuspp/proxy/utils.hpp"
 #include "test-utils.hpp"
 
 
@@ -65,6 +66,7 @@ class ProxyOpts : protected Tests::Utils::OptionParser
             {"expect-result", required_argument, nullptr, 'x'},
             {"quiet",         no_argument,       nullptr, 'q'},
             {"introspect",    no_argument,       nullptr, 'Q'},
+            {"lookup",        no_argument,       nullptr, 'L'},
             {"help", no_argument, nullptr, 'h'},
             {nullptr, 0, nullptr, 0}
             // clang-format on
@@ -72,7 +74,7 @@ class ProxyOpts : protected Tests::Utils::OptionParser
 
         int opt;
         optind = 1;
-        while ((opt = getopt_long(argc, argv, "YEd:p:i:m:g:s:S:I:U:B:t:v:X:x:qQh", long_opts, nullptr)) != -1)
+        while ((opt = getopt_long(argc, argv, "YEd:p:i:Lm:g:s:S:I:U:B:t:v:X:x:qQh", long_opts, nullptr)) != -1)
         {
             switch (opt)
             {
@@ -93,6 +95,9 @@ class ProxyOpts : protected Tests::Utils::OptionParser
                 break;
             case 'Q':
                 introspect = true;
+                break;
+            case 'L':
+                lookup_object = true;
                 break;
             case 'm':
                 method = std::string(optarg);
@@ -158,6 +163,12 @@ class ProxyOpts : protected Tests::Utils::OptionParser
                 }
             }
         }
+
+        if (introspect && lookup_object)
+        {
+            throw DBus::Exception("test_proxy", "Cannot use both --introspect and --lookup at the same time");
+        }
+
         preset = Proxy::TargetPreset::Create(object_path, object_interface);
     };
 
@@ -175,6 +186,7 @@ class ProxyOpts : protected Tests::Utils::OptionParser
     std::vector<std::string> data_values{};
     PropertyMode property_mode = PropertyMode::UNSET;
     bool introspect = false;
+    bool lookup_object = false;
     bool quiet = false;
 };
 
@@ -215,6 +227,28 @@ int test_proxy_client(int argc, char **argv)
                                       "Introspect");
             std::cout << glib2::Value::Extract<std::string>(res, 0);
             return 0;
+        }
+
+        if (options.lookup_object)
+        {
+            auto prx = Proxy::Client::Create(conn, options.destination);
+            auto prxqry = Proxy::Utils::Query::Create(prx);
+            if (prxqry->LookupObject(options.object_path))
+            {
+                if (!options.quiet)
+                {
+                    std::cout << "Found object at " << options.object_path << '\n';
+                }
+                return 0;
+            }
+            else
+            {
+                if (!options.quiet)
+                {
+                    std::cout << "Object " << options.object_path << " not found\n";
+                }
+                return 2;
+            }
         }
 
         // Process all the --data-value values into a GVariant *
