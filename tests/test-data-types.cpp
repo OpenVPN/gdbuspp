@@ -711,6 +711,21 @@ int test_base_data_types()
                              return TestResult("glib2::Builder::AddKeyValue - a{so})", result);
                          });
 
+    failures += run_test([]()
+                         {
+                             GVariantBuilder *keyval = glib2::Builder::Create("a{sv}");
+                             glib2::Builder::AddKeyValue<std::string, GVariant *>(keyval, "pathA", glib2::Value::Create<DBus::Object::Path>("/example/gdbuspp/path1"));
+                             glib2::Builder::AddKeyValue<std::string, GVariant *>(keyval, "a_string", glib2::Value::Create<std::string>("some random string"));
+                             glib2::Builder::AddKeyValue<std::string, GVariant *>(keyval, "an_int", glib2::Value::Create<int32_t>(12345));
+                             glib2::Builder::AddKeyValue<std::string, GVariant *>(keyval, "null_value", nullptr);
+                             GVariant *data = glib2::Builder::Finish(keyval);
+                             bool result = Tests::Utils::check_data_type("a{sv}", data)
+                                           && Tests::Utils::check_data_value(
+                                               "{'pathA': <objectpath '/example/gdbuspp/path1'>, 'a_string': <'some random string'>, 'an_int': <12345>, 'null_value': <@mv nothing>}",
+                                               data);
+                             g_variant_unref(data);
+                             return TestResult("glib2::Builder::AddKeyValue - a{sv}", result);
+                         });
 
     failures += run_test([]()
                          {

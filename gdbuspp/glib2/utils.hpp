@@ -498,50 +498,30 @@ inline void AddKeyValue(GVariantBuilder *builder,
                         const TVAL &value)
 {
     std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
-    g_variant_builder_add(builder, dbus_type.c_str(), key, value);
-}
 
+    // Internal helper function to "unwrap" std::string to a C char ** type string
+    static auto get_content = [](const auto &value)
+    {
+        if constexpr (std::is_same_v<std::decay_t<decltype(value)>, std::string>
+                      || std::is_same_v<std::decay_t<decltype(value)>, DBus::Object::Path>)
+        {
+            return value.c_str();
+        }
+        else
+        {
+            return value;
+        }
+    };
 
-/**
- *  Variant of AddKeyValue() where the data type for the dictionary `value` is `std::string`
- *
- *  @copydetails glib2::Builder::AddKeyValue()
- */
-template <typename TKEY, typename TVAL>
-inline void AddKeyValue(GVariantBuilder *builder,
-                        const TKEY &key,
-                        const std::string &value)
-{
-    std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
-    g_variant_builder_add(builder, dbus_type.c_str(), key, value.c_str());
-}
-
-/**
- *  Variant of AddKeyValue() where the data type for the dictionary `key` is `std::string`
- *
- *  @copydetails glib2::Builder::AddKeyValue()
- */
-template <typename TKEY, typename TVAL>
-inline void AddKeyValue(GVariantBuilder *builder,
-                        const std::string &key,
-                        const TVAL &value)
-{
-    std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
-    g_variant_builder_add(builder, dbus_type.c_str(), key.c_str(), value);
-}
-
-/**
- *  Variant of AddKeyValue() where the data type for both the dictionary `key` and `value` are `std::string`
- *
- *  @copydetails glib2::Builder::AddKeyValue()
- */
-template <typename TKEY, typename TVAL>
-inline void AddKeyValue(GVariantBuilder *builder,
-                        const std::string &key,
-                        const std::string &value)
-{
-    std::string dbus_type = std::string("{") + DataType::DBus<TKEY>() + DataType::DBus<TVAL>() + "}";
-    g_variant_builder_add(builder, dbus_type.c_str(), key.c_str(), value.c_str());
+    if constexpr (std::is_same_v<TVAL, GVariant *>)
+    {
+        // The variant data type ("v") cannot be nullptr, use "maybe variant" ("mv")
+        // in the case of nullptr values
+        GVariant *v = (value != nullptr ? value : glib2::Value::NullVariant(false));
+        g_variant_builder_add(builder, dbus_type.c_str(), get_content(key), v);
+        return;
+    }
+    g_variant_builder_add(builder, dbus_type.c_str(), get_content(key), get_content(value));
 }
 
 
