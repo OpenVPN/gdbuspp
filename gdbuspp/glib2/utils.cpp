@@ -253,8 +253,12 @@ GVariant *CreateEmpty(const char *type)
 
 GVariant *Finish(GVariantBuilder *builder) noexcept
 {
-    GVariant *ret = g_variant_builder_end(builder);
-    g_variant_builder_unref(builder);
+    GVariant *ret = nullptr;
+    if (builder)
+    {
+        ret = g_variant_builder_end(builder);
+        g_variant_builder_unref(builder);
+    }
     return ret;
 }
 

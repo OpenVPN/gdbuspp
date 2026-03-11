@@ -355,6 +355,8 @@ GVariant *CreateEmpty(const char *type);
  *  Just a wrapper around g_variant_builder_end() with a memory cleanup.
  *  This function is primarily here to provide a consistent C++ API.
  *
+ *  Note: This will return nullptr if the input is nullptr.
+ *
  * @param builder   GVariantBuilder object to complete
  * @return GVariant* The finialized GVariantBuilder object as a GVariant object
  */
