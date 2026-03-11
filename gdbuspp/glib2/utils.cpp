@@ -172,9 +172,10 @@ void IterateArray(GVariant *array, std::function<void(GVariant *data)> parser)
 }
 
 
-GVariant *NullVariant()
+GVariant *NullVariant(bool variant_wrap)
 {
-    return g_variant_new_variant(nullptr);
+    GVariant *mv = g_variant_new_maybe(G_VARIANT_TYPE_VARIANT, nullptr);
+    return (variant_wrap ? g_variant_new_variant(mv) : mv);
 }
 
 

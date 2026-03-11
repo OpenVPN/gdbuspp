@@ -257,6 +257,33 @@ inline const char *DBus<GVariant *>() noexcept
 
 
 
+namespace Value {
+/**
+ *  Creates a "nullptr" GVariant object.
+ *
+ *  The "variant" data type in GVariant cannot be a nullptr
+ *  by definition.  Instead the "maybe variant" data type
+ *  allows a nullptr.
+ *
+ *  This function will by default wrap a "maybe variant" (mv)
+ *  data type object inside an ordinary variant object.  Since
+ *  the "mv" data type is not the same as "v", it would break
+ *  the D-Bus contract when a return value is expected to be "v"
+ *
+ *  By explicilty setting the variant_wrap argument to false,
+ *  the wrapping into a variant container ("v") is skipped.  This
+ *  is useful when this output is to put into a glib2::Builder based
+ *  object or similar targets which already can receive a "v"
+ *  data type.
+ *
+ * @param variant_wrap  If true, the 'mv' nullptr value is wrapped
+ *                      inside a variant container.
+ * @return GVariant*
+ */
+GVariant *NullVariant(bool variant_wrap = true);
+} // namespace Value
+
+
 //////////////////////////////////////////////////////////////////////////
 ////                                                                  ////
 ////   namespace glib2::Builder                                       ////
@@ -968,15 +995,6 @@ inline std::vector<T> ExtractVector(GVariant *params,
  *         incorrect, otherwise the exceptions produced by the parser function
  */
 void IterateArray(GVariant *array, std::function<void(GVariant *data)> parser);
-
-
-/**
- *  Creates a new, empty GVariant object of
- *  the "variant" D-Bus type
- *
- * @return GVariant*
- */
-GVariant *NullVariant();
 
 
 /**
