@@ -21,6 +21,7 @@
 #include <sstream>
 #include <string>
 #include <glib.h>
+#include <fmt/ostream.h>
 
 #include "../object/path.hpp"
 
@@ -103,3 +104,9 @@ using CallbackFnc = std::function<void(DBus::Signals::Event::Ptr &event)>;
 
 } // namespace Signals
 } // namespace DBus
+
+
+template <>
+struct fmt::formatter<DBus::Signals::Event::Ptr> : ostream_formatter
+{
+};

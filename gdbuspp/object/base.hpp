@@ -832,3 +832,6 @@ class Base : public std::enable_shared_from_this<Base>
 
 } // namespace Object
 } // namespace DBus
+
+// NOTE: fmt::formatter<DBus::Object::Base::Ptr> is declared
+//       in async-process.hpp to simplify header inclusion order

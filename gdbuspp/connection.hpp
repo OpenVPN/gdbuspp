@@ -11,6 +11,8 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <glib.h>
 #include <gio/gio.h>
 
@@ -135,3 +137,8 @@ class Connection
 };
 
 } // namespace DBus
+
+template <>
+struct fmt::formatter<DBus::Connection::Ptr> : ostream_formatter
+{
+};

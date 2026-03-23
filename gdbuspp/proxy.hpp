@@ -16,9 +16,10 @@
 
 #pragma once
 
-#include <iostream> // DEBUG: Remove with std::cout
 #include <memory>
 #include <glib.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include "connection.hpp"
 #include "exceptions.hpp"
@@ -483,3 +484,19 @@ class Client
 
 } // namespace Proxy
 } // namespace DBus
+
+
+template <>
+struct fmt::formatter<DBus::Proxy::TargetPreset *> : ostream_formatter
+{
+};
+
+template <>
+struct fmt::formatter<DBus::Proxy::TargetPreset::Ptr> : ostream_formatter
+{
+};
+
+template <>
+struct fmt::formatter<DBus::Proxy::Client::Ptr> : ostream_formatter
+{
+};

@@ -448,3 +448,9 @@ class Collection
 } // namespace Method
 } // namespace Object
 } // namespace DBus
+
+
+template <>
+struct fmt::formatter<std::shared_ptr<DBus::Object::Method::Arguments>> : fmt::ostream_formatter
+{
+};

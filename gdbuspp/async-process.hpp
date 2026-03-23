@@ -16,8 +16,9 @@
  */
 
 #include <memory>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <string>
-#include <sstream>
 #include <gio/gio.h>
 
 #include "exceptions.hpp"
@@ -30,9 +31,15 @@ namespace DBus {
 namespace Object {
 class Base;
 }; // namespace Object
+} // namespace DBus
+
+template <>
+struct fmt::formatter<std::shared_ptr<DBus::Object::Base>> : ostream_formatter
+{
+};
 
 
-
+namespace DBus {
 /**
  *  The AsyncProcess scope contains a wrapper for glib2's thread pool API
  *  with adoptations to handle D-Bus requests, specific for D-Bus objects
@@ -267,3 +274,8 @@ class Pool
 }; // namespace AsyncProcess
 
 }; // namespace DBus
+
+template <>
+struct fmt::formatter<DBus::AsyncProcess::Request::UPtr> : ostream_formatter
+{
+};

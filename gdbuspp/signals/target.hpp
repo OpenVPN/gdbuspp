@@ -20,6 +20,7 @@
 #include <sstream>
 #include <vector>
 #include <glib.h>
+#include <fmt/ostream.h>
 
 #include "../object/path.hpp"
 
@@ -104,3 +105,9 @@ class Target
 
 } // namespace Signals
 } // namespace DBus
+
+
+template <>
+struct fmt::formatter<DBus::Signals::Target::Ptr> : ostream_formatter
+{
+};

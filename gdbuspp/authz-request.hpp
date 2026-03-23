@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <fmt/ostream.h>
 #include <string>
 
 #include "async-process.hpp"
@@ -148,3 +149,9 @@ class Exception : public DBus::Exception
 
 } // namespace Authz
 } // namespace DBus
+
+
+template <>
+struct fmt::formatter<DBus::Authz::Request::Ptr> : ostream_formatter
+{
+};
