@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <fmt/compile.h>
 
 #include "../features/debug-log.hpp"
 #include "../glib2/utils.hpp"
@@ -234,6 +235,14 @@ const std::string Arguments::GetCallerBusName() const noexcept
     return sender;
 }
 
+
+std::string Arguments::str() const
+{
+    return fmt::format(FMT_COMPILE("Arguments(sender={}, call_params_type='{}', pass_fd_mode={})"),
+                       sender,
+                       g_variant_get_type_string(call_params),
+                       PassFDmodeStr());
+}
 
 const bool Arguments::empty() const
 {

@@ -23,6 +23,8 @@
 
 #include <sstream>
 #include <string>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 #include <glib.h>
 
 #include "../async-process.hpp"
@@ -192,6 +194,14 @@ void Object::Base::DisableIdleDetector(const bool disable)
 const bool Object::Base::GetIdleDetectorDisabled() const
 {
     return disable_idle_detection;
+}
+
+
+std::string Object::Base::str() const
+{
+    return fmt::format("Object(path={}, interface={})",
+                       object_path_,
+                       interface_);
 }
 
 

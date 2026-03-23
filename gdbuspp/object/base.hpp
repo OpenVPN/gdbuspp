@@ -426,20 +426,23 @@ class Base : public std::enable_shared_from_this<Base>
     const bool GetIdleDetectorDisabled() const;
 
 
+    /**
+     *  Get a human readable presentation of the key attributes for this
+     *  object: Object path and interface
+     *
+     * @return std::string
+     */
+    std::string str() const;
+
+
     friend std::ostream &operator<<(std::ostream &os, const Base &object)
     {
-        std::ostringstream r;
-        r << "Object(path=" << object.object_path_
-          << ", interface=" << object.interface_ << ")";
-        return os << r.str();
+        return os << object.str();
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Base *object)
     {
-        std::ostringstream r;
-        r << "Object(path=" << object->object_path_
-          << ", interface=" << object->interface_ << ")";
-        return os << r.str();
+        return os << object->str();
     }
 
   protected:

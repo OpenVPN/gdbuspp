@@ -14,6 +14,9 @@
  */
 
 #include <string>
+#include <fmt/compile.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include "../object/path.hpp"
 #include "../proxy/utils.hpp"
@@ -59,6 +62,27 @@ const char *Target::GetBusName(std::shared_ptr<Proxy::Utils::DBusServiceQuery> s
     // as that is accepted by the glib2 APIs to not match on bus names
     return (!unique_busname.empty() ? unique_busname.c_str()
                                     : (!busname.empty() ? busname.c_str() : nullptr));
+}
+
+
+std::string Target::str() const
+{
+    std::vector<std::string> details;
+    if (!busname.empty())
+    {
+        details.push_back(fmt::format(FMT_COMPILE("busname={}"), busname));
+    }
+
+    if (!object_path.empty())
+    {
+        details.push_back(fmt::format(FMT_COMPILE("object_path={}"), object_path));
+    }
+    if (!object_interface.empty())
+    {
+        details.push_back(fmt::format(FMT_COMPILE("interface={:?}"), object_interface));
+    }
+
+    return fmt::format(FMT_COMPILE("Signals::Target({})"), fmt::join(details, ", "));
 }
 
 

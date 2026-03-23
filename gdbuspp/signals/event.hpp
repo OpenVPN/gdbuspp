@@ -24,6 +24,7 @@
 #include <fmt/ostream.h>
 
 #include "../object/path.hpp"
+#include "gdbuspp/glib2/utils.hpp"
 
 namespace DBus {
 namespace Signals {
@@ -60,20 +61,28 @@ class Event
     ~Event() noexcept = default;
 
 
+    std::string str() const
+    {
+        std::string signal_data = fmt::format(
+            "sender={}, path={}, interface={}, signal_name={}",
+            sender,
+            object_path,
+            object_interface,
+            signal_name);
+
+        if (params)
+        {
+            signal_data.append(
+                fmt::format(", parameter_type={}",
+                            glib2::DataType::Extract(params)));
+        }
+        return fmt::format("Signal::Event({})", signal_data);
+    }
+
+
     friend std::ostream &operator<<(std::ostream &os, const Event::Ptr &ev)
     {
-        std::ostringstream r;
-        r << "Signal::Event("
-          << "sender=" << ev->sender << ", "
-          << "path=" << ev->object_path << ", "
-          << "interface=" << ev->object_interface << ", "
-          << "signal_name=" << ev->signal_name << ", ";
-        if (ev->params)
-        {
-            r << "parameter_type=" << std::string(g_variant_get_type_string(ev->params));
-        }
-        r << ")";
-        return os << r.str();
+        return os << ev->str();
     }
 
 

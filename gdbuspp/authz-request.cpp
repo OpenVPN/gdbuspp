@@ -13,6 +13,7 @@
  */
 
 #include <string>
+#include <fmt/format.h>
 
 #include "authz-request.hpp"
 #include "object/base.hpp"
@@ -126,6 +127,18 @@ const std::string Authz::Request::OperationString() const noexcept
 {
     return Object::OperationString(operation);
 }
+
+
+std::string Authz::Request::str() const
+{
+    return fmt::format("AuthzRequest(caller={}, operation={}, path={}, interface={}, target={})",
+                       caller,
+                       OperationString(),
+                       object_path,
+                       interface,
+                       target);
+}
+
 
 } // namespace Authz
 } // namespace DBus

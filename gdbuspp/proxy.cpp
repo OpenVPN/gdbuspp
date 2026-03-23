@@ -17,6 +17,7 @@
 #include <functional>
 #include <string>
 #include <sstream>
+#include <fmt/format.h>
 #include <glib.h>
 #include <gio/gio.h>
 
@@ -488,6 +489,12 @@ TargetPreset::TargetPreset(const Object::Path &object_path_,
 }
 
 
+std::string TargetPreset::str() const
+{
+    return fmt::format("object_path={}, interface={}", object_path, interface);
+}
+
+
 
 Client::Client(Connection::Ptr conn, const std::string &dest, uint8_t timeout)
     : connection(conn), destination(dest)
@@ -640,6 +647,13 @@ void Client::SetPropertyGVariant(const TargetPreset::Ptr preset,
 {
     SetPropertyGVariant(preset->object_path, preset->interface, property_name, params);
 }
+
+
+std::string Client::str() const
+{
+    return fmt::format("Proxy({}, '{}')", connection, destination);
+}
+
 
 } // namespace Proxy
 } // namespace DBus

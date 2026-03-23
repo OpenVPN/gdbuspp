@@ -16,6 +16,8 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fmt/format.h>
+#include <fmt/printf.h>
 #include <string>
 #include <memory>
 
@@ -86,6 +88,27 @@ void AsyncProcess::Request::SetProperty(const std::string &propname, GVariant *p
 }
 
 
+std::string AsyncProcess::Request::str() const
+{
+    std::string op;
+    switch (request_type)
+    {
+    case Object::Operation::METHOD_CALL:
+        op = fmt::format(", method={}", method);
+        break;
+    case Object::Operation::PROPERTY_SET:
+    case Object::Operation::PROPERTY_GET:
+        op = fmt::format(", property={}", property);
+        break;
+    case Object::Operation::NONE:
+        break;
+    }
+
+    return fmt::format("{{AsyncPool::Request {}: Type={}{}}}",
+                       object,
+                       Object::OperationString(request_type),
+                       op);
+}
 
 //
 //   AsyncProcess::Pool

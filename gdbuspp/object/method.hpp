@@ -196,16 +196,17 @@ class Arguments
     const std::string GetCallerBusName() const noexcept;
 
 
+    /**
+     *  Retrieve a human readable representation of this Arguments object
+     *
+     * @return std::string
+     */
+    std::string str() const;
+
+
     friend std::ostream &operator<<(std::ostream &os, const Arguments::Ptr &args)
     {
-        std::ostringstream ret;
-        ret << "Arguments("
-            << "sender=" << args->sender << ", "
-            << "call_params_type='" << g_variant_get_type_string(args->call_params) << "', "
-            << "pass_fd_mode=" << args->PassFDmodeStr()
-            << ")";
-
-        return os << ret.str();
+        return os << args->str();
     }
 
 

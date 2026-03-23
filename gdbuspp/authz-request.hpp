@@ -101,6 +101,13 @@ class Request
     const std::string OperationString() const noexcept;
 
     /**
+     *  Provide a human readable representation of this Authz::Request object
+     *
+     * @return std::string
+     */
+    std::string str() const;
+
+    /**
      *  Standard iostream compliant stream operator, providing a human readable
      *  representation of the important information carried by this Request object.
      *
@@ -108,14 +115,13 @@ class Request
      */
     friend std::ostream &operator<<(std::ostream &os, const Request::Ptr req)
     {
-        std::ostringstream r;
-        r << "AuthzRequest("
-          << "caller=" << req->caller << ", "
-          << "operation=" << req->OperationString() << ", "
-          << "path=" << req->object_path << ", "
-          << "interface=" << req->interface << ", "
-          << "target=" << req->target << ")";
-        return os << r.str();
+        return os << req->str();
+    }
+
+
+    friend std::ostream &operator<<(std::ostream &os, const Request &req)
+    {
+        return os << req.str();
     }
 
 

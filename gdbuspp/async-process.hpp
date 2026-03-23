@@ -175,6 +175,15 @@ struct Request
 
 
     /**
+     *  Retrieve a human readable represenation of the AsyncProcess::Request
+     *  object
+     *
+     * @return std::string
+     */
+    std::string str() const;
+
+
+    /**
      *  Standard iostream compliant stream operator, providing a human readable
      *  representation of the important information carried by this Request object.
      *
@@ -182,24 +191,7 @@ struct Request
      */
     friend std::ostream &operator<<(std::ostream &os, const Request::UPtr &req)
     {
-        std::ostringstream r;
-        r << "{AsyncPool::Request " << req->object
-          << ": Type=" << Object::OperationString(req->request_type);
-
-        switch (req->request_type)
-        {
-        case Object::Operation::METHOD_CALL:
-            r << ", method=" << req->method;
-            break;
-        case Object::Operation::PROPERTY_SET:
-        case Object::Operation::PROPERTY_GET:
-            r << ", property=" << req->property;
-        case Object::Operation::NONE:
-            break;
-        }
-        r << "}";
-
-        return os << r.str();
+        return os << req->str();
     }
 
 

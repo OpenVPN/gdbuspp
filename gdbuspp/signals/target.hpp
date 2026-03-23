@@ -17,7 +17,6 @@
 #pragma once
 
 #include <memory>
-#include <sstream>
 #include <vector>
 #include <glib.h>
 #include <fmt/ostream.h>
@@ -83,15 +82,21 @@ class Target
      */
     const char *GetBusName(std::shared_ptr<Proxy::Utils::DBusServiceQuery> = nullptr);
 
+    /**
+     *  Retrieve human readable string representation of the Target object
+     *
+     *  This contains mostly just debug information
+     *
+     * @return std::string
+     */
+    std::string str() const;
+
     bool operator==(const Target::Ptr cmp);
     bool operator!=(const Target::Ptr &cmp);
 
     friend std::ostream &operator<<(std::ostream &os, const Target::Ptr &tgt)
     {
-        return os << "Signals::Target("
-                  << "busname=" << tgt->busname << ", "
-                  << "object_path=" << tgt->object_path << ", "
-                  << "interface=" << tgt->object_interface << ")";
+        return os << tgt->str();
     }
 
 

@@ -77,10 +77,11 @@ class TargetPreset
     const Object::Path object_path;
     const std::string interface;
 
+    std::string str() const;
+
     friend std::ostream &operator<<(std::ostream &os, const TargetPreset *trgt)
     {
-        return os << "object_path=" << trgt->object_path << ", "
-                  << "interface=" << trgt->interface;
+        return os << trgt->str();
     };
 
   private:
@@ -466,12 +467,11 @@ class Client
     }
 
 
+    std::string str() const;
 
-    friend std::ostream &
-    operator<<(std::ostream &os, const Client *prx)
+    friend std::ostream &operator<<(std::ostream &os, const Client *prx)
     {
-        return os << std::string("Proxy(") << prx->connection << ", "
-                  << "'" << prx->destination << "')";
+        return os << prx->str();
     }
 
 
