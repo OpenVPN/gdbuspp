@@ -13,7 +13,6 @@
  *         sending D-Bus signals
  */
 
-#include <iostream>
 #include <limits>
 #include <string>
 #include <vector>
@@ -224,8 +223,6 @@ class LogExample : public Signals::Group
 
 int test_signal_group(int argc, char **argv)
 {
-
-    std::ostringstream log;
     try
     {
         Options opts(argc, argv);
@@ -239,7 +236,7 @@ int test_signal_group(int argc, char **argv)
 
         if (opts.show_introspection)
         {
-            std::cout << sig_log->GenerateIntrospection();
+            fmt::print("{}", sig_log->GenerateIntrospection());
             return 0;
         }
 
@@ -282,7 +279,7 @@ int test_signal_group(int argc, char **argv)
                     {
                         if (!opts.quiet)
                         {
-                            std::cout << "log->Invalid() test passed" << std::endl;
+                            fmt::println("log->Invalid() test passed");
                         }
                     }
                     else
@@ -297,8 +294,7 @@ int test_signal_group(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        std::cout << log.str() << std::endl;
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
+        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
 }

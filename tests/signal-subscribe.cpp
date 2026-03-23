@@ -13,7 +13,6 @@
  *         DBus::Signals::SubscriptionManager
  */
 
-#include <iostream>
 #include <limits>
 #include <string>
 #include <vector>
@@ -106,26 +105,26 @@ class Options : protected Tests::Utils::OptionParser
 
         if (signal_name.empty() && !check_type.empty())
         {
-            std::cerr << argv[0] << ":"
-                      << " ** ERROR ** --expect-type requires --signal-name"
-                      << std::endl;
+            fmt::println(stderr,
+                         "{}:  ** ERROR ** --expect-type requires --signal-name",
+                         argv[0]);
             exit(1);
         }
 
         if (check_type.length() != check_value.size())
         {
-            std::cerr << argv[0] << ":"
-                      << " ** ERROR ** Too few or too many --expect-value "
-                      << "arguments compared to type described by --expect-type"
-                      << std::endl;
+            fmt::println(stderr,
+                         "{}: ** ERROR ** Too few or too many --expect-value "
+                         "arguments compared to type described by --expect-type",
+                         argv[0]);
             exit(1);
         }
 
         if (verbose && quiet)
         {
-            std::cerr << argv[0] << ":"
-                      << " --verbose and --quiet cannot be combined"
-                      << std::endl;
+            fmt::println(stderr,
+                         ": --verbose and --quiet cannot be combined",
+                         argv[0]);
             exit(1);
         }
 
@@ -151,12 +150,12 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 {
     if (!opts.quiet)
     {
-        std::cout << "{" << std::to_string(signal_count) << "} " << event << std::endl;
+        fmt::println("{{{}}} {}", signal_count, event);
         if (opts.verbose)
         {
             std::ostringstream evdata;
             Tests::Utils::dump_gvariant(evdata, "        Signal Event", event->params);
-            std::cout << evdata.str();
+            fmt::println("{}", evdata.str());
         }
     }
 
@@ -167,8 +166,11 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
         std::string type(g_variant_get_type_string(event->params));
         if (type != "(" + opts.check_type + ")")
         {
-            std::cerr << "        Received unexpected data type: '" << type << "'"
-                      << ", expected '" << opts.check_type << "'" << std::endl;
+            fmt::println(stderr,
+                         "        Received unexpected data type:  {:?}, expected {:?}",
+                         type,
+                         opts.check_type);
+
             error = true;
         };
 
@@ -179,29 +181,27 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
         {
             if (opts.verbose)
             {
-                std::cout << "           type=" << type[idx + 1] << ", "
-                          << "value='" << v << "'"
-                          << std::endl;
+                fmt::println("           type={}, value={:?}\n",
+                             type[idx + 1],
+                             v);
             }
             if (idx < opts.check_value.size())
             {
                 if (v != opts.check_value[idx])
                 {
-                    std::cout << "       Received unexpected data value: "
-                              << "[" << std::to_string(idx) << "] - "
-                              << "received '" << v << "'"
-                              << ", expected '" << opts.check_value[idx] << "'"
-                              << std::endl;
+                    fmt::println("       Received unexpected data value: [{}] - received {:?}, expected {:?}",
+                                 idx,
+                                 v,
+                                 opts.check_value[idx]);
                     error = true;
                 }
                 ++idx;
             }
             else
             {
-                std::cout << "       Received unexpected additional data value: "
-                          << "[" << std::to_string(idx) << "] - "
-                          << "received '" << v << "'"
-                          << std::endl;
+                fmt::println("       Received unexpected additional data value: [{}] - received {:?}",
+                             idx,
+                             v);
                 error = true;
             }
         }
@@ -212,8 +212,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 
         if (opts.check_count > 0 && opts.check_count == signal_count)
         {
-            std::cout << "Received the expected " << std::to_string(signal_count)
-                      << " signals" << std::endl;
+            fmt::println("Received the expected {} signals", signal_count);
             mainloop->Stop();
         }
     }
@@ -224,7 +223,6 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 int test_signal_subscribe(int argc, char **argv)
 {
     Options opts(argc, argv);
-    std::ostringstream log;
     try
     {
         auto dbuscon = DBus::Connection::Create(opts.bustype);
@@ -238,24 +236,21 @@ int test_signal_subscribe(int argc, char **argv)
                               signal_handler(mainloop, opts, event);
                           });
 
-        std::cout << "This process' unique D-Bus name:" << dbuscon->GetUniqueBusName() << std::endl;
+        fmt::println("This process' unique D-Bus name: {}", dbuscon->GetUniqueBusName());
         mainloop->Run();
 
         sigmgr->Unsubscribe(opts.target, opts.signal_name);
 
         if (signal_errors > 0)
         {
-            std::cout << "Signal test result: FAIL.  "
-                      << std::to_string(signal_errors) << " errors occurred"
-                      << std::endl;
+            fmt::println("Signal test result: FAIL.  {} errors occured", signal_errors);
             return 2;
         }
         return 0;
     }
     catch (const DBus::Exception &excp)
     {
-        std::cout << log.str() << std::endl;
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
+        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
 }

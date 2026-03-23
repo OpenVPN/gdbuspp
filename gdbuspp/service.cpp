@@ -13,8 +13,9 @@
  *         applications providing a service on the D-Bus.
  */
 
-#include <iostream>
 #include <string>
+#include <fmt/compile.h>
+#include <fmt/printf.h>
 #include <glib.h>
 
 #include "connection.hpp"
@@ -108,8 +109,9 @@ Service::~Service() noexcept
     }
     catch (const DBus::Exception &err)
     {
-        std::cerr << "** ERROR **   D-Bus service '" << busname << "': "
-                  << std::string(err.what()) << std::endl;
+        fmt::print(FMT_COMPILE("** ERROR **   D-Bus service {:?}: {}\n"),
+                   busname,
+                   err.what());
     }
 }
 

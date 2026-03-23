@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <glib.h>
 

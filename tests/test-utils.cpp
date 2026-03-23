@@ -14,11 +14,13 @@
  */
 
 #include <exception>
-#include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
 #include <getopt.h>
+#include <fmt/compile.h>
+#include <fmt/format.h>
+#include <fmt/printf.h>
 #include <glib.h>
 
 #include "gdbuspp/glib2/utils.hpp"
@@ -40,9 +42,7 @@ const char *Exception::what() const noexcept
 
 void OptionParser::help(const std::string &argv0, struct option options[])
 {
-    std::cout << "Usage: " << argv0 << " <options>" << std::endl
-              << std::endl
-              << "Options:" << std::endl;
+    fmt::print("Usage: {} <options>\n\nOptions:\n", argv0);
 
     int idx = 0;
     bool done = false;
@@ -51,27 +51,19 @@ void OptionParser::help(const std::string &argv0, struct option options[])
         const struct option *opt = &options[idx];
         if (opt->name)
         {
-            if (opt->val > 0)
-            {
-                std::cout << "  -" << char(opt->val) << " |";
-            }
-            else
-            {
-                std::cout << "      ";
-            }
-            std::cout << " --" << opt->name;
-            switch (opt->has_arg)
-            {
-            case required_argument:
-                std::cout << " <arg>";
-                break;
-            case optional_argument:
-                std::cout << " [arg]";
-                break;
-            default:
-                break;
-            }
-            std::cout << std::endl;
+            fmt::print("{}",
+                       (opt->val > 0
+                            ? fmt::format("  -{:c} |", opt->val)
+                            : "       "));
+
+
+            fmt::println(" --{}{}",
+                         opt->name,
+                         (opt->has_arg == required_argument
+                              ? " <arg>"
+                              : (opt->has_arg == optional_argument
+                                     ? " [arg]"
+                                     : "")));
             ++idx;
         }
         else
@@ -79,7 +71,7 @@ void OptionParser::help(const std::string &argv0, struct option options[])
             done = true;
         }
     }
-    std::cout << std::endl;
+    fmt::println("");
 }
 
 
@@ -96,8 +88,11 @@ bool check_data_type(const std::string &expect_type, GVariant *data)
     bool ret = gv_type == expect_type;
     if (!ret)
     {
-        std::cerr << "    ** Expected data type: |" << expect_type << "|\n"
-                  << "    ** Received data type: |" << gv_type << "|\n";
+        fmt::print(stderr,
+                   FMT_COMPILE("    ** Expected data type: |{}|\n"
+                               "    ** Received data type: |{}|\n"),
+                   expect_type,
+                   gv_type);
     }
     return ret;
 }
@@ -109,8 +104,11 @@ bool check_data_value(const std::string &expect_value, GVariant *data)
     bool ret = gv_value == expect_value;
     if (!ret)
     {
-        std::cerr << "    ** Expected value: |" << expect_value << "|\n"
-                  << "    **  Data contents: |" << gv_value << "|\n";
+        fmt::print(stderr,
+                   FMT_COMPILE("    ** Expected value: |{}|\n"
+                               "    **  Data contents: |{}|\n"),
+                   expect_value,
+                   gv_value);
     }
     return ret;
 }

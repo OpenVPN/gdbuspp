@@ -22,6 +22,7 @@
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
+#include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/proxy.hpp"
@@ -135,8 +136,9 @@ int test_fd_receive_read(int argc, char **argv)
         g_variant_unref(r);
         if (!opts.quiet)
         {
-            std::cout << "Success: " << (res ? "true" : "false") << std::endl;
-            std::cout << "Buffer size: " << std::to_string(opts.bufsize) << std::endl;
+            fmt::print("Success: {}\nBuffer size: \n",
+                       res,
+                       opts.bufsize);
         }
         if (!res)
         {
@@ -160,14 +162,15 @@ int test_fd_receive_read(int argc, char **argv)
             if (s < 0)
             {
                 throw DBus::Exception("main()",
-                                      "Failed reading from file descriptor:"
-                                          + std::string(strerror(errno)));
+                                      fmt::format("Failed reading from file descriptor: {} ({})",
+                                                  strerror(errno),
+                                                  errno));
             }
             if (!opts.output.empty())
             {
                 if (!opts.quiet)
                 {
-                    std::cout << "Read " << std::to_string(s) << " bytes" << std::endl;
+                    fmt::println("Read {} bytes", s);
                 }
                 outstr.write(buf, s);
             }
@@ -182,7 +185,7 @@ int test_fd_receive_read(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
+        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
     return 0;

@@ -14,7 +14,8 @@
  */
 
 #include <future>
-#include <iostream>
+#include <fmt/printf.h>
+
 
 #include "../gdbuspp/bus-watcher.hpp"
 #include "../gdbuspp/mainloop.hpp"
@@ -37,7 +38,7 @@ int buswatch_test(int argc, char **argv)
         watcher.SetNameDisappearedHandler(
             [&](const std::string &bus_name)
             {
-                std::cout << "Bus name disappeared: " << bus_name << std::endl;
+                fmt::println("Bus name disappeared: {}", bus_name);
                 loop->Stop();
             });
 
@@ -47,31 +48,29 @@ int buswatch_test(int argc, char **argv)
                                              loop->Run();
                                          });
 
-        std::cout << "Waiting for bus name " << busname
-                  << " to appear ..." << std::endl;
+        fmt::println("Waiting for bus name {} to appear ...", busname);
 
         if (!watcher.WaitFor(10s))
         {
             loop->Stop();
             async_mainloop.get();
 
-            std::cerr << "Timeout waiting for " << busname << " to appear!"
-                      << std::endl;
+            fmt::println(stderr, "Timeout waiting for {} to appear!", busname);
             return 1;
         }
 
-        std::cout << busname << " appeared!" << std::endl;
+        fmt::println("{} appeared!", busname);
 
         async_mainloop.get();
     }
     catch (const DBus::Exception &excp)
     {
-        std::cout << "EXCEPTION (DBus): " << excp.what() << std::endl;
+        fmt::println("EXCEPTION (DBus): {}", excp.what());
         return 9;
     }
     catch (const std::exception &excp)
     {
-        std::cout << "EXCEPTION: " << excp.what() << std::endl;
+        fmt::println("EXCEPTION: {}", excp.what());
         return 8;
     }
     return 0;

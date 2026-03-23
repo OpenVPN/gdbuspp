@@ -14,8 +14,8 @@
  */
 
 #include <algorithm>
-#include <iostream>
 #include <string>
+#include <fmt/printf.h>
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
 #include "../gdbuspp/object/path.hpp"
@@ -23,6 +23,7 @@
 
 #include "test-constants.hpp"
 #include "tests/test-utils.hpp"
+
 
 
 namespace Tests::Program {
@@ -53,9 +54,10 @@ bool test_dictionary(DBus::Proxy::Client::Ptr prx)
     try
     {
         auto wrong_type = glib2::Dict::Lookup<int>(dict, "key");
-        std::cout << "glib2::Value::Dict::Lookup() test with "
-                  << "incorrect data type FAILED" << std::endl
-                  << "  Retrieved value: '" << wrong_type << "'" << std::endl;
+        fmt::print("glib2::Value::Dict::Lookup() test with "
+                   "incorrect data type FAILED\n"
+                   "  Retrieved value: '{}'\n",
+                   wrong_type);
         return true;
     }
     catch (const glib2::Utils::Exception &excp)
@@ -71,9 +73,10 @@ bool test_dictionary(DBus::Proxy::Client::Ptr prx)
     try
     {
         auto non_exist = glib2::Dict::Lookup<std::string>(dict, "no-such-key");
-        std::cout << "glib2::Value::Dict::Lookup() test with "
-                  << "non-existing key FAILED" << std::endl
-                  << "  Retrieved value: '" << non_exist << "'" << std::endl;
+        fmt::print("glib2::Value::Dict::Lookup() test with "
+                   "non-existing key FAILED\n"
+                   "  Retrieved value: '{}'",
+                   non_exist);
         return true;
     }
     catch (const glib2::Utils::Exception &excp)
@@ -91,18 +94,21 @@ bool test_dictionary(DBus::Proxy::Client::Ptr prx)
         && (numbers == 123)
         && true_val == true)
     {
-        std::cout << "glib2::Value::Dict::Lookup() test PASSED" << std::endl;
+        fmt::println("glib2::Value::Dict::Lookup() test PASSED");
         return false;
     }
 
-    std::cout << "glib2::Value::Dict::Lookup() test FAILED" << std::endl;
-    std::cout << "--------------------------------" << std::endl
-              << "      name='" << name << "'" << std::endl
-              << "       key='" << key << "'" << std::endl
-              << "   numbers=" << numbers << std::endl
-              << "      bool=" << (true_val ? "true" : "false") << std::endl
-              << "--------------------------------" << std::endl
-              << std::endl;
+    fmt::print("glib2::Value::Dict::Lookup() test FAILED\n"
+               "--------------------------------\n"
+               "      name='{}'\n"
+               "       key='{}'\n"
+               "   numbers={}\n"
+               "      bool={}\n"
+               "--------------------------------\n",
+               name,
+               key,
+               numbers,
+               true_val);
     return true;
 }
 
@@ -222,13 +228,15 @@ template <typename FUNC>
 inline int run_test(FUNC &&testfunc)
 {
     TestResult test = testfunc();
-    std::cout << test.message << ": " << (test.result ? "Pass" : "FAIL") << std::endl;
+    fmt::println("{}: {}",
+                 test.message,
+                 (test.result ? "Pass" : "FAIL"));
     return (test.result ? 0 : 1);
 }
 
 int test_base_data_types()
 {
-    std::cout << ":: Testing base data types ..." << std::endl;
+    fmt::println(":: Testing base data types ...");
     int failures = 0;
 
     failures += run_test([]()
@@ -749,7 +757,7 @@ int test_base_data_types()
                              }
                              catch (const std::runtime_error &err)
                              {
-                                 std::cerr << "    ** IterateArray exception: " << err.what() << '\n';
+                                 fmt::println(stderr, "    ** IterateArray exception: {}", err.what());
                                  result = false;
                              }
                              g_variant_unref(array);
@@ -802,8 +810,6 @@ int test_base_data_types()
                                      data,
                                      [&vector_ui16](const std::string &key, GVariant *value)
                                      {
-                                         // std::cout << "IterateDictionary: key='" << key << "' value: " << glib2::Utils::RetrieveContent(value) << '\n';
-
                                          if ("type_int32" == key
                                              && 123 != glib2::Value::Get<int32_t>(value))
                                          {
@@ -844,13 +850,15 @@ int test_base_data_types()
                              }
                              catch (const std::runtime_error &err)
                              {
-                                 std::cerr << "    ** IterateDictionary exception: " << err.what() << '\n';
+                                 fmt::println(stderr,
+                                              "    ** IterateDictionary exception: {}",
+                                              err.what());
                              }
                              return TestResult("glib2::Dict::IterateDictionary", result);
                          });
-    std::cout << ":: Base data type test failures: " << failures
-              << std::endl
-              << std::endl;
+
+
+    fmt::print(":: Base data type test failures: {}\n\n", failures);
     return failures;
 }
 
@@ -858,7 +866,7 @@ int test_base_data_types()
 
 int test_base_vector()
 {
-    std::cout << ":: Testing vectorized base data types ..." << std::endl;
+    fmt::println(":: Testing vectorized base data types ...");
     int failures = 0;
 
     // std::byte
@@ -974,9 +982,7 @@ int test_base_vector()
                          });
 
 
-    std::cout << ":: Vectorized data type test failures: " << failures
-              << std::endl
-              << std::endl;
+    fmt::print(":: Vectorized data type test failures: {}\n\n", failures);
     return failures;
 };
 
@@ -1004,8 +1010,7 @@ int test_data_types_main(int argc, char **argv)
 
     if (failures > 0)
     {
-        std::cout << "OVERALL TEST RESULT:  FAIL "
-                  << "(" << failures << " tests failed) " << std::endl;
+        fmt::println("OVERALL TEST RESULT:  FAIL ({} tests failed)", failures);
         return 2;
     }
     return 0;

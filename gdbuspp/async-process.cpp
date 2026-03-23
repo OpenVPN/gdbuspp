@@ -15,7 +15,6 @@
  */
 
 #include <algorithm>
-#include <iostream>
 #include <fmt/format.h>
 #include <fmt/printf.h>
 #include <string>
@@ -142,7 +141,7 @@ void AsyncProcess::Pool::PushCallback(Request::UPtr &req)
     void *ptr = req.release();
     if (!ptr)
     {
-        std::cerr << "ctx.release() returned nullptr" << std::endl;
+        fmt::println(stderr, "ctx.release() returned nullptr");
         return;
     }
 
@@ -153,15 +152,18 @@ void AsyncProcess::Pool::PushCallback(Request::UPtr &req)
     {
         if (err)
         {
-            std::cerr << "** ERROR ** AsyncProcess::Pool::PushCallback:"
-                      << std::string(err->message) << std::endl
-                      << "         ** " << &req << std::endl;
+            fmt::print(stderr,
+                       "** ERROR ** AsyncProcess::Pool::PushCallback: {}\n"
+                       "         ** {}\n",
+                       err->message,
+                       req);
         }
         else
         {
-            std::cerr << "** ERROR **  AsyncProcess::Pool::PushCallback:"
-                      << "Failed calling g_thread_pool_push() {" << &req << "}"
-                      << std::endl;
+            fmt::println(stderr,
+                         "** ERROR **  AsyncProcess::Pool::PushCallback: "
+                         "Failed calling g_thread_pool_push() {{{}}}",
+                         req);
         }
     }
 }

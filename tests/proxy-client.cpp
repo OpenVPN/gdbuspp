@@ -14,9 +14,9 @@
  */
 
 #include <any>
-#include <iostream>
 #include <limits>
 #include <string>
+#include <sstream>
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
@@ -202,13 +202,13 @@ int test_proxy_client(int argc, char **argv)
         bool errors = false;
         if (options.destination.empty())
         {
-            std::cerr << "** ERROR **  Missing --destination" << std::endl;
+            fmt::println(stderr, "** ERROR **  Missing --destination");
             errors = true;
         }
 
         if (options.object_path.empty())
         {
-            std::cerr << "** ERROR **  Missing --object-path" << std::endl;
+            fmt::println("** ERROR **  Missing --object-path");
             errors = true;
         }
         if (errors)
@@ -223,7 +223,7 @@ int test_proxy_client(int argc, char **argv)
         {
             auto prx = Proxy::Client::Create(conn, options.destination);
             auto prxqry = Proxy::Utils::Query::Create(prx);
-            std::cout << prxqry->Introspect(options.object_path);
+            fmt::println("{}", prxqry->Introspect(options.object_path));
             return 0;
         }
 
@@ -235,7 +235,7 @@ int test_proxy_client(int argc, char **argv)
             {
                 if (!options.quiet)
                 {
-                    std::cout << "Found object at " << options.object_path << '\n';
+                    fmt::println("Found object at {}", options.object_path);
                 }
                 return 0;
             }
@@ -243,7 +243,7 @@ int test_proxy_client(int argc, char **argv)
             {
                 if (!options.quiet)
                 {
-                    std::cout << "Object " << options.object_path << " not found\n";
+                    fmt::println("Object {} not found", options.object_path);
                 }
                 return 2;
             }
@@ -261,7 +261,7 @@ int test_proxy_client(int argc, char **argv)
         }
         catch (const Tests::Utils::Exception &excp)
         {
-            std::cerr << "** ERROR ** " << excp.what() << std::endl;
+            fmt::println(stderr, "** ERROR ** {}", excp.what());
             return 2;
         }
 
@@ -281,7 +281,7 @@ int test_proxy_client(int argc, char **argv)
         {
             if (options.object_interface.empty())
             {
-                std::cerr << "** ERROR **   --interface is missing" << std::endl;
+                fmt::println(stderr, "** ERROR **   --interface is missing");
                 return 2;
             }
 
@@ -298,8 +298,7 @@ int test_proxy_client(int argc, char **argv)
             {
                 if (options.quiet)
                 {
-                    std::cout << "UNEXPECTED RESULT:" << std::endl
-                              << check_log.str();
+                    fmt::println("UNEXPECTED RESULT:\n{}", check_log.str());
                     return 3;
                 }
             }
@@ -311,13 +310,13 @@ int test_proxy_client(int argc, char **argv)
         {
             if (options.object_interface.empty())
             {
-                std::cerr << "** ERROR **   --interface is missing" << std::endl;
+                fmt::println(stderr, "** ERROR **   --interface is missing");
                 errors = true;
             }
 
             if (options.property.empty())
             {
-                std::cerr << "** ERROR **  The property name cannot be empty" << std::endl;
+                fmt::println(stderr, "** ERROR **  The property name cannot be empty");
                 errors = true;
             }
             if (errors)
@@ -424,8 +423,7 @@ int test_proxy_client(int argc, char **argv)
             {
                 if (options.quiet)
                 {
-                    std::cout << "UNEXPECTED RESULT:" << std::endl
-                              << check_log.str();
+                    fmt::println(stderr, "UNEXPECTED RESULT:\n{}", check_log.str());
                     return 3;
                 }
             }
@@ -437,22 +435,22 @@ int test_proxy_client(int argc, char **argv)
         {
             if (options.object_interface.empty())
             {
-                std::cerr << "** ERROR **   --interface is missing" << std::endl;
+                fmt::println(stderr, "** ERROR **   --interface is missing");
                 errors = true;
             }
             if (options.property.empty())
             {
-                std::cerr << "** ERROR **  The property name cannot be empty" << std::endl;
+                fmt::println(stderr, "** ERROR **  The property name cannot be empty");
                 errors = true;
             }
             if (ProxyOpts::PropertyMode::SET == options.property_mode && !data)
             {
-                std::cerr << "** ERROR **  Missing new data value (--data-type, --data-value)" << std::endl;
+                fmt::println(stderr, "** ERROR **  Missing new data value (--data-type, --data-value)");
                 errors = true;
             }
             else if (ProxyOpts::PropertyMode::SET_ANY == options.property_mode && !options.prop_val.has_value())
             {
-                std::cerr << "** ERROR **  Missing property value to --property-set-*" << std::endl;
+                fmt::println(stderr, "** ERROR **  Missing property value to --property-set-*");
             }
             if (errors)
             {
@@ -487,22 +485,20 @@ int test_proxy_client(int argc, char **argv)
         }
         else
         {
-            std::cerr << "No operation provided: --introspect, --method, "
-                      << "--property-get, --property-set"
-                      << std::endl;
+            fmt::println(stderr, "No operation provided: --introspect, --method, --property-get, --property-set");
             return 1;
         }
 
         if (!options.quiet)
         {
-            std::cout << log.str();
+            fmt::println("{}", log.str());
         }
         g_thread_pool_stop_unused_threads();
     }
     catch (const DBus::Exception &excp)
     {
-        std::cout << log.str() << std::endl;
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
+        fmt::println("{}", log.str());
+        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
     return 0;

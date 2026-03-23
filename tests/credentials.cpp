@@ -13,9 +13,9 @@
  *         sending D-Bus signals
  */
 
-#include <iostream>
 #include <string>
 #include <getopt.h>
+#include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/credentials/query.hpp"
@@ -89,7 +89,7 @@ class Options : public Tests::Utils::OptionParser
 
         if (destination.empty())
         {
-            std::cerr << "Missing destination to check (--destination)" << std::endl;
+            fmt::println(stderr, "Missing destination to check (--destination)");
             exit(1);
         }
 
@@ -97,8 +97,7 @@ class Options : public Tests::Utils::OptionParser
         {
             if (!expect_result.empty())
             {
-                std::cerr << "Using --expect-result requires one of --get-bus-name, --get-uid or --get-pid"
-                          << std::endl;
+                fmt::println("Using --expect-result requires one of --get-bus-name, --get-uid or --get-pid");
                 exit(1);
             }
 
@@ -117,9 +116,7 @@ void check_expectations(const std::string &expect, const std::string &result)
     {
         if (expect != result)
         {
-            std::cerr << "Unexpected result; expected "
-                      << "'" << expect << "'"
-                      << std::endl;
+            fmt::println("Unexpected result; expected {:?}", expect);
             exit(3);
         }
         exit(0);
@@ -139,27 +136,27 @@ int test_credential_query(int argc, char **argv)
         if (opts.get_ubusname)
         {
             std::string result = creds->GetUniqueBusName(opts.destination);
-            std::cout << "Unique bus name: " << result << std::endl;
+            fmt::println("Unique bus name: {:?}", result);
             check_expectations(opts.expect_result, result);
         }
 
         if (opts.get_uid)
         {
-            std::string result = std::to_string(creds->GetUID(opts.destination));
-            std::cout << "Owning user ID (uid): " << result << std::endl;
-            check_expectations(opts.expect_result, result);
+            uid_t result = creds->GetUID(opts.destination);
+            fmt::println("Owning user ID (uid): {}", result);
+            check_expectations(opts.expect_result, std::to_string(result));
         }
 
         if (opts.get_pid)
         {
-            std::string result = std::to_string(creds->GetPID(opts.destination));
-            std::cout << "Owning process ID (pid): " << result << std::endl;
-            check_expectations(opts.expect_result, result);
+            pid_t result = creds->GetPID(opts.destination);
+            fmt::println("Owning process ID (pid): {}", result);
+            check_expectations(opts.expect_result, std::to_string(result));
         }
     }
     catch (const DBus::Exception &excp)
     {
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
+        fmt::println(stderr, "** EXCEPTION **  ", excp.what());
         return 2;
     }
 

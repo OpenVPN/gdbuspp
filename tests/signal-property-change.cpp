@@ -13,11 +13,11 @@
  *         DBus::Signals::SubscriptionManager
  */
 
-#include <iostream>
 #include <limits>
 #include <string>
 #include <vector>
 #include <getopt.h>
+#include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -83,7 +83,9 @@ class Options : protected Tests::Utils::OptionParser
             case 'X':
                 if (!chk_property_name.empty())
                 {
-                    std::cerr << argv[0] << ": Cannot use -X again without haven passed -x first\n";
+                    fmt::println(stderr,
+                                 "{}: Cannot use -X again without haven passed -x first",
+                                 argv[0]);
                     exit(1);
                 }
                 chk_property_name = std::string(optarg);
@@ -91,7 +93,9 @@ class Options : protected Tests::Utils::OptionParser
             case 'x':
                 if (chk_property_name.empty())
                 {
-                    std::cerr << argv[0] << ": Cannot use -x before haven passed -X first\n";
+                    fmt::println(stderr,
+                                 "{}: Cannot use -x before haven passed -X first",
+                                 argv[0]);
                     exit(1);
                 }
                 check_properties[chk_property_name] = std::string(optarg);
@@ -114,14 +118,13 @@ class Options : protected Tests::Utils::OptionParser
 
         if (!chk_property_name.empty())
         {
-            std::cerr << argv[0] << ": Missing -x argument after -X\n";
+            fmt::println("{}: Missing -x argument after -X", argv[0]);
             exit(1);
         }
 
         if (verbose && quiet)
         {
-            std::cerr << argv[0] << ":"
-                      << " --verbose and --quiet cannot be combined\n";
+            fmt::println("{}:  --verbose and --quiet cannot be combined", argv[0]);
             exit(1);
         }
 
@@ -159,17 +162,18 @@ class ParsePropertiesChanged
 
     void Dump() const
     {
-        std::cout << "\n **   PropertiesChanged:\n"
-                  << "\tinterface: " << interface << '\n'
-                  << "\tproperties:\n";
+        fmt::print("\n **   PropertiesChanged:\n"
+                   "\tinterface:  {}\n"
+                   "\tproperties:\n",
+                   interface);
         for (const auto &[name, value] : changed)
         {
-            std::cout << "\t    - " << name << ": " << value << "\n";
+            fmt::println("\t    - {}: {}", name, value);
         }
-        std::cout << "\tinvalidated:\n";
+        fmt::println("\tinvalidated:");
         for (const auto &name : invalidated)
         {
-            std::cout << "\t    - " << name << "\n";
+            fmt::println("\t    - {}", name);
         }
     }
 
@@ -203,12 +207,12 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 {
     if (!opts.quiet)
     {
-        std::cout << "{" << std::to_string(signal_count) << "} " << event << '\n';
+        fmt::println("{{{}}} {}", signal_count, event);
         if (opts.verbose)
         {
             std::ostringstream evdata;
             Tests::Utils::dump_gvariant(evdata, "        Signal Event", event->params);
-            std::cout << evdata.str();
+            fmt::println("{}", evdata.str());
         }
     }
 
@@ -216,7 +220,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
     if (opts.verbose)
     {
         prop_chg.Dump();
-        std::cout << "----------------\n";
+        fmt::println("----------------");
     }
 
     // Check the content of the signal
@@ -235,8 +239,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 
         if (opts.check_count > 0 && opts.check_count == signal_count)
         {
-            std::cout << "Received the expected " << std::to_string(signal_count)
-                      << " signals\n";
+            fmt::println("Received the expected {} signals", signal_count);
             mainloop->Stop();
         }
     }
@@ -247,7 +250,6 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 int test_signal_property_change(int argc, char **argv)
 {
     Options opts(argc, argv);
-    std::ostringstream log;
     try
     {
         auto dbuscon = DBus::Connection::Create(opts.bustype);
@@ -263,11 +265,11 @@ int test_signal_property_change(int argc, char **argv)
 
         if (!opts.quiet)
         {
-            std::cout << "This process' unique D-Bus name:" << dbuscon->GetUniqueBusName() << '\n';
+            fmt::println("This process' unique D-Bus name: {}", dbuscon->GetUniqueBusName());
         }
         if (opts.verbose)
         {
-            std::cout << "Watching for: " << opts.target << '\n';
+            fmt::println("Watching for: {}", opts.target);
         }
         mainloop->Run();
 
@@ -275,16 +277,15 @@ int test_signal_property_change(int argc, char **argv)
 
         if (signal_errors > 0)
         {
-            std::cout << "Signal test result: FAIL.  "
-                      << std::to_string(signal_errors) << " errors occurred\n";
+            fmt::println("Signal test result: FAIL.  {} errors occurred",
+                         signal_errors);
             return 2;
         }
         return 0;
     }
     catch (const DBus::Exception &excp)
     {
-        std::cout << log.str() << '\n';
-        std::cerr << "** EXCEPTION **  " << excp.what() << '\n';
+        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
 }

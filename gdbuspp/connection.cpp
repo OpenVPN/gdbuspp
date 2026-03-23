@@ -12,9 +12,9 @@
  * @brief Implementation of the DBus::Connection class
  */
 
-#include <iostream>
 #include <string>
 #include <glib.h>
+#include <fmt/printf.h>
 #include <gio/gio.h>
 
 #include "connection.hpp"
@@ -67,7 +67,7 @@ Connection::~Connection() noexcept
     }
     catch (const Connection::Exception &err)
     {
-        std::cerr << std::string(err.what()) << std::endl;
+        fmt::println("{}", err.what());
     }
 }
 

@@ -13,7 +13,6 @@
  * @brief  Implements the non-template based methods for the DBus::ObjectManager
  */
 
-#include <iostream>
 #include <string>
 #include <map>
 #include <mutex>

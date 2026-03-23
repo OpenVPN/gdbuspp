@@ -24,6 +24,9 @@
 #include <random>
 #include <string>
 #include <getopt.h>
+#include <fmt/compile.h>
+#include <fmt/format.h>
+#include <fmt/printf.h>
 #include <glib.h>
 #include <unistd.h>
 
@@ -536,9 +539,11 @@ int test_proxy_utils(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        std::cout << log.str() << std::endl;
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
-        std::cerr << "** EXCEPTION **  RawError: '" << excp.GetRawError() << "'" << std::endl;
+        fmt::println("{}", log.str());
+        fmt::print(stderr, "** EXCEPTION **  {}\n"
+                           "** EXCEPTION ** RawError: {}\n",
+                   excp.what(),
+                   excp.GetRawError());
         return 2;
     }
     return 9;

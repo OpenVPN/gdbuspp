@@ -13,9 +13,10 @@
  *         for sending D-Bus signals
  */
 
-#include <iostream>
 #include <string>
 #include <glib.h>
+#include <fmt/compile.h>
+#include <fmt/printf.h>
 
 #include "../features/debug-log.hpp"
 #include "../glib2/utils.hpp"
@@ -77,13 +78,11 @@ bool Emit::SendGVariant(const std::string &signal_name, GVariant *params) const
                                            params,
                                            &err))
         {
-            std::cerr << "[GDBus++ Error: " << tgt << "] "
-                      << "Failed to send signal '" << signal_name << "' ";
-            if (err)
-            {
-                std::cerr << "glib2 Error: " << err->message;
-            }
-            std::cerr << std::endl;
+            fmt::print(stderr,
+                       FMT_COMPILE("[GDBus++ Error: {}] Failed to send signal {:?}{}\n"),
+                       tgt,
+                       signal_name,
+                       (err ? fmt::format(FMT_COMPILE("  glib2 Error: {}"), err->message) : ""));
             return false;
         }
     }

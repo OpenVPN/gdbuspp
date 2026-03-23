@@ -13,7 +13,7 @@
  *         by the glib2 gdbus APIs
  */
 
-#include <iostream>
+#include <fmt/format.h>
 #include <glib.h>
 #include <gio/gio.h>
 
@@ -134,17 +134,19 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
                 g_dbus_method_invocation_return_gerror(req->invocation, dbuserr);
                 g_error_free(dbuserr);
 
-                std::cerr << "** ERROR ** Async call failed: "
-                          << excp.what() << std::endl
-                          << "                 error domain: "
-                          << excp.DBusErrorDomain() << std::endl;
+                fmt::print(stderr,
+                           FMT_COMPILE("** ERROR ** Async call failed: {}\n"
+                                       "            error domain: {}\n"),
+                           excp.what(),
+                           excp.DBusErrorDomain());
             }
             else
             {
                 // This should only happen with ReqType::SETPROP and
                 // ReqType::NONE; both very unlikely to end up here
-                std::cerr << "** ERROR **  Async call failed: "
-                          << excp.what() << std::endl;
+                fmt::print(stderr,
+                           FMT_COMPILE("** ERROR **  Async call failed: {}\n"),
+                           excp.what());
             }
         }
         req.reset();
@@ -164,10 +166,13 @@ void _int_dbusobject_callback_method_call(GDBusConnection *conn,
     auto cbl = static_cast<Object::CallbackLink *>(this_ptr);
     if (!cbl)
     {
-        std::cerr << __func__ << " MethodCall(sender=" << sender << ", "
-                  << "path=" << obj_path << ", "
-                  << "interface=" << intf_name << ", "
-                  << "method=" << meth_name << ") callback link is invalid" << std::endl;
+        fmt::print(stderr,
+                   FMT_COMPILE("{} MethodCall(sender={}, path={}, interface{}, method={}) callback link is invalid\n"),
+                   __func__,
+                   sender,
+                   obj_path,
+                   intf_name,
+                   meth_name);
         g_dbus_method_invocation_return_error(invoc,
                                               G_DBUS_ERROR,
                                               G_DBUS_ERROR_INVALID_ARGS,
@@ -213,14 +218,15 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         auto cbl = static_cast<Object::CallbackLink *>(this_ptr);
         if (!cbl)
         {
-            std::stringstream erm;
-            erm << __func__ << " GetProperty(sender=" << sender << ", "
-                << "path=" << obj_path << ", "
-                << "interface=" << intf_name << ", "
-                << "property=" << property_name << ") callback link is invalid";
-            std::cerr << erm.str() << std::endl;
-
-            throw Object::Exception(erm.str());
+            std::string errm = fmt::format(
+                FMT_COMPILE("{} GetProperty(sender={}, path={}, interface={}, property={}) callback link is invalid"),
+                __func__,
+                sender,
+                obj_path,
+                intf_name,
+                property_name);
+            fmt::println(stderr, "{}", errm);
+            throw Object::Exception(errm);
         }
 
         // Update the activity for the idle detector
@@ -310,14 +316,16 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         auto cbl = static_cast<Object::CallbackLink *>(this_ptr);
         if (!cbl)
         {
-            std::stringstream erm;
-            erm << __func__ << " SetProperty(sender=" << sender << ", "
-                << "path=" << obj_path << ", "
-                << "interface=" << intf_name << ", "
-                << "property=" << property_name << ") callback link is invalid";
-            std::cerr << erm.str() << std::endl;
+            std::string errm = fmt::format(
+                FMT_COMPILE("{} SetProperty(sender={}, path={}, interface={}, property{}) callback link is invalid"),
+                __func__,
+                sender,
+                obj_path,
+                intf_name,
+                property_name);
 
-            throw Object::Exception(erm.str());
+            fmt::println(stderr, "{}", errm);
+            throw Object::Exception(errm);
         }
 
         // Update the activity for the idle detector
@@ -421,8 +429,9 @@ void _int_dbusobject_callback_destruct(void *this_ptr)
     auto cbl = static_cast<Object::CallbackLink *>(this_ptr);
     if (!cbl)
     {
-        std::cerr << __func__
-                  << " Object destruction - callback link is invalid" << std::endl;
+        fmt::print(stderr,
+                   FMT_COMPILE("{} Object destruction - callback link is invalid\n"),
+                   __func__);
         return;
     }
 
@@ -436,8 +445,9 @@ void _int_dbusobject_callback_destruct(void *this_ptr)
     }
     else
     {
-        std::cerr << "** ERROR **  " << __func__ << ": "
-                  << "Could not get access to Object::Manager" << std::endl;
+        fmt::print(stderr,
+                   FMT_COMPILE("** ERROR **  {}: Could not get access to Object::Manager"),
+                   __func__);
     }
 }
 
@@ -454,14 +464,17 @@ void _int_dbus_connection_signal_handler(GDBusConnection *conn,
     auto sigsub = static_cast<Signals::SingleSubscription *>(this_ptr);
     if (!sigsub)
     {
-        std::stringstream erm;
-        erm << __func__ << " SingleSubscription(sender=" << sender << ", "
-            << "path=" << obj_path << ", "
-            << "interface=" << intf_name << ", "
-            << "signal_name=" << sign_name << ") object pointer is invalid";
-        std::cerr << erm.str() << std::endl;
+        std::string errm = fmt::format(
+            FMT_COMPILE("{} SingleSubscription(sender={}, path={}, interface={}, singal_name={}) "
+                        "object pointer is invalid"),
+            __func__,
+            sender,
+            obj_path,
+            intf_name,
+            sign_name);
+        fmt::println(stderr, "{}", errm);
 
-        throw Signals::Exception(erm.str());
+        throw Signals::Exception(errm);
     }
     // TODO:  Consider idle detection timestamp update on signal handling
     //        This will require access to the object manager, which need to

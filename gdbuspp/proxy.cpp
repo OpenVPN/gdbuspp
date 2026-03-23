@@ -491,7 +491,9 @@ TargetPreset::TargetPreset(const Object::Path &object_path_,
 
 std::string TargetPreset::str() const
 {
-    return fmt::format("object_path={}, interface={}", object_path, interface);
+    return fmt::format(FMT_COMPILE("object_path={}, interface={}"),
+                       std::string(object_path),
+                       interface);
 }
 
 

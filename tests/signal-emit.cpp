@@ -12,11 +12,11 @@
  * @brief  Very simple and generic D-Bus signal sender tool
  */
 
-#include <iostream>
 #include <limits>
 #include <string>
 #include <vector>
 #include <getopt.h>
+#include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -135,7 +135,7 @@ int test_signal_emit(int argc, char **argv)
         }
         catch (const Tests::Utils::Exception &excp)
         {
-            std::cerr << "** ERROR ** " << excp.what() << std::endl;
+            fmt::println(stderr, "** ERROR ** {}", excp.what());
             return 2;
         }
 
@@ -156,15 +156,15 @@ int test_signal_emit(int argc, char **argv)
 
         if (!options.quiet)
         {
-            std::cout << log.str();
+            fmt::println("{}", log.str());
         }
 
         return 0;
     }
     catch (const DBus::Exception &excp)
     {
-        std::cout << log.str() << std::endl;
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
+        fmt::println("{}", log.str());
+        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
 }

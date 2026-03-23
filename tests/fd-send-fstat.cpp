@@ -14,7 +14,6 @@
  */
 
 #include <any>
-#include <iostream>
 #include <limits>
 #include <string>
 #include <getopt.h>
@@ -23,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/proxy.hpp"
@@ -121,16 +121,19 @@ int test_fd_send_fstat(int argc, char **argv)
         {
             std::ostringstream l;
             Tests::Utils::dump_gvariant(l, opts.method + " results", r);
-            std::cout << l.str();
+            fmt::println("{}", l.str());
         }
         else
         {
             uid_t uid = glib2::Value::Extract<uint32_t>(r, 0);
             gid_t gid = glib2::Value::Extract<uint32_t>(r, 1);
             uint64_t size = glib2::Value::Extract<uint64_t>(r, 2);
-            std::cout << "export testresult_uid=" << std::to_string(uid) << std::endl;
-            std::cout << "export testresult_gid=" << std::to_string(gid) << std::endl;
-            std::cout << "export testresult_size=" << std::to_string(size) << std::endl;
+            fmt::print("export testresult_uid={}\n"
+                       "export testresult_gid={}\n"
+                       "export testresult_size={}\n",
+                       uid,
+                       gid,
+                       size);
         }
         g_variant_unref(r);
 
@@ -141,7 +144,7 @@ int test_fd_send_fstat(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        std::cerr << "** EXCEPTION **  " << excp.what() << std::endl;
+        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
     return 0;

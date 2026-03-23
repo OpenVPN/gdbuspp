@@ -15,10 +15,10 @@
  */
 
 #include <chrono>
-#include <iostream>
 #include <memory>
 #include <thread>
 #include <unistd.h>
+#include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/mainloop.hpp"
@@ -91,19 +91,6 @@ class IdleCheckEnabled : public DBus::Object::Base
 };
 
 
-/**
- *  Very simple conversion of a std::chrono::time_point to std::string
- *
- * @param tp     std::chrono::time_point to convert
- * @return const std::string containing the time point as plain text
- */
-const std::string conv_tstamp(std::chrono::time_point<std::chrono::system_clock> &tp)
-{
-    std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
-    return std::string(std::ctime(&ttp));
-}
-
-
 uint32_t success = 0; ///< Global: Count of successfully completed tests
 uint32_t failed = 0;  ///< Global: Count of failed tests
 
@@ -126,45 +113,43 @@ void time_execution(const std::string &descr,
 {
     auto start = std::chrono::system_clock::now();
     bool exception = false;
-    std::cout << "::: " << descr << ":    start=" << conv_tstamp(start);
+    fmt::println("::: {}:    start={}", descr, start);
     try
     {
         testfunc();
     }
     catch (const std::exception &excp)
     {
-        std::cout << "::: " << descr << ": EXCEPTION ## " << excp.what() << std::endl;
+        fmt::println("\n::: {}: EXCEPTION ## {}", descr, excp.what());
         exception = true;
     }
     auto end = std::chrono::system_clock::now();
-    std::cout << "::: " << descr << ":      end=" << conv_tstamp(end);
+    fmt::println("::: {}:      end={}", descr, end);
 
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    std::cout << "::: " << descr << ": duration=" << duration.count() << "s, ";
+    fmt::print("::: {}: duration={}s, ", descr, duration.count());
     if (deviation == 0)
     {
-        std::cout << "expected=" << runtime_sec << "s";
+        fmt::print("expected={}s", runtime_sec);
     }
     else
     {
-        std::cout << "expected " << runtime_sec - deviation << "s "
-                  << "to " << runtime_sec + deviation << "s";
+        fmt::print("expected {}s to {}s",
+                   runtime_sec - deviation,
+                   runtime_sec + deviation);
     }
-    std::cout << " ==> result=";
-
 
     bool runtime_pass = (duration.count() >= runtime_sec - deviation)
                         && (duration.count() <= runtime_sec + deviation);
     if (!exception && runtime_pass)
     {
-        std::cout << "Pass" << std::endl;
         ++success;
     }
     else
     {
-        std::cout << "FAILED" << std::endl;
         ++failed;
     }
+    fmt::println(" ==> result={}", (!exception && runtime_pass ? "Pass" : "FAILED"));
 }
 
 
@@ -343,11 +328,12 @@ int test_idle_detect(int argc, char **argv)
     }
 
     // Summarize the test results
-    std::cout << ">> Passed tests: " << std::to_string(success) << std::endl
-              << ">> Failed tests: " << std::to_string(failed) << std::endl
-              << ">> OVERALL TEST RESULT: "
-              << (success > 0 && failed == 0 ? "PASS" : "FAIL")
-              << std::endl;
+    fmt::print(">> Passed tests: {}\n"
+               ">> Failed tests: {}\n"
+               ">> OVERALL TEST RESULT: {}\n",
+               success,
+               failed,
+               (success > 0 && failed == 0 ? "PASS" : "FAIL"));
     return (success > 0 && failed == 0) ? 0 : 2;
 }
 
