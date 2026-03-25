@@ -13,6 +13,7 @@ regr_glib2_utils = executable(
     ],
     link_with: [
         gdbuspp_lib.get_static_lib(),
+        tests_lib,
     ],
     dependencies: [
             glib2_deps,
