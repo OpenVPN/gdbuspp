@@ -15,9 +15,13 @@
 
 #pragma once
 
+#include <cinttypes>
+#include <functional>
 #include <string>
 #include <vector>
 #include <glib.h>
+
+#include "../gdbuspp/proxy.hpp"
 
 namespace Tests::Utils {
 
@@ -49,14 +53,121 @@ class OptionParser
 
 
 /**
+ *  Provide an infrastructure to run test cases
+ *  and log the results.
+ *
+ */
+class ResultLog
+{
+  public:
+    /**
+     *  Initialise the result logger
+     *
+     * @param verbose  If true, log output will happen as the test runs.
+     *                 Otherwise the log output may be collected uses
+     *                 DumpLogs();  The DumpLogs() call will not dump
+     *                 any data if the verbose flag is true.
+     */
+    ResultLog(bool verbose = false);
+
+    /**
+     *  Runs a functional test.
+     *
+     *  This will execute a provided test function which should not
+     *  throw any exceptions for a successful test run.
+     *
+     *  If the test function depends on a DBus::Proxy::Client, the
+     *  proxy client can be given as an extra argument, which is
+     *  used to extract details for logging purposes only.
+     *
+     * @param descr       String containing a description of the test (for logging only)
+     * @param proxy       DBus::Proxy::Client object, if used. May be nullptr. (for logging only)
+     * @param test_func   std::function containing the code to run as a test. This function must
+     *                    return true on success, otherwise false.
+     * @param expect      Indicates the expected return value of the test function.  If this value
+     *                    does not match the return value of test_func(), this test is logged as
+     *                    failed.
+     */
+    void RunFunctionTest(const std::string &descr,
+                         DBus::Proxy::Client::Ptr proxy,
+                         std::function<bool()> &&test_func,
+                         bool expect);
+
+    /**
+     *  Runs an exception test
+     *
+     *  This tests scenarios where the test function is expected to throw
+     *  an exception.
+     *
+     * @param descr           String containing a description of the test (for logging only)
+     * @param proxy           DBus::Proxy::Client object, if used. May be nullptr. (for logging only)
+     * @param test_func       std::function containing the code to run as a test. This function must
+     *                        throw an exception where the output of the std::exception::what() method
+     *                        matches a list of expected error strings.
+     * @param exception_list  std::vector<std::string> if error messages expected in the exception
+     */
+    void RunExceptionTest(const std::string &descr,
+                          DBus::Proxy::Client::Ptr proxy,
+                          std::function<void()> &&testfunc,
+                          const std::vector<std::string> &exception_list);
+
+    /**
+     *   Adds a single log line to the log
+     *
+     * @param line        string contianing the log line to append
+     * @param after_test  If true, log line is added after the test result
+     */
+    void AddLogLine(const std::string &line, bool after_test = false);
+
+
+    /**
+     *   Print the final test report summary.
+     *
+     *  This will print a summary of number of successful and failed tests
+     *  which has been run.  In addition it will add an "overall test result"
+     *  which will only get a "PASSED" flag if there were no errors.
+     *
+     * @return bool  Returns the overall test result, if true - all tests were
+     *               successful and no errors were logged.
+     */
+    bool PrintTestReport();
+
+    /**
+     *   Dump all the collected log lines to stdout.
+     *
+     *   Will only provide output if the verbose flag to the
+     *   constructor was false
+     */
+    void DumpLogs();
+
+  private:
+    struct TestResult;
+
+    bool verbose = false;
+    std::vector<std::string> testlog;
+    std::vector<std::string> testcase_log;
+    uint32_t success = 0;
+    uint32_t failed = 0;
+
+
+    TestResult run_test(bool expected, std::function<bool()> &&test_func);
+
+    void log_result(TestResult &result,
+                    DBus::Proxy::Client::Ptr proxy,
+                    const std::string &msg);
+};
+
+
+/**
  *  Dumps a human readable string of both the data type and value
  *  contained in a GVariant object.  This is just a wrapper around
  *  a couple of helper functions found in the glib2 library
  *
- * @param log     std::ostringstream where to the generated output is put
+ * @param log     ResultLog object where to the generated output is logged
  * @param prefix  std::string containing a prefix before each written line of text
  * @param data    GVariant * to object to parse
  */
+void dump_gvariant(ResultLog &log, const std::string &prefix, GVariant *data);
 void dump_gvariant(std::ostringstream &log, const std::string &prefix, GVariant *data);
 
 /**
@@ -87,12 +198,17 @@ bool check_data_value(const std::string &expect_value, GVariant *data);
  *  See those functions for details on the expected format of the type and
  *  value arguments.
  *
- * @param log    std::ostringstream where the results are written
+ * @param log    ResultLog object where the results are logged
  * @param type   std::string with the expected data type string
  * @param value  std::string with the expected data value
  * @param data   GVariant * to object to validate
  * @returns On successful validation, true is returned. Otherwise false
  */
+bool log_data_type_value_check(ResultLog &log,
+                               const std::string &type,
+                               const std::string &value,
+                               GVariant *data);
+
 bool log_data_type_value_check(std::ostringstream &log,
                                const std::string &type,
                                const std::string &value,
@@ -144,13 +260,18 @@ std::vector<std::string> convert_from_gvariant(GVariant *values);
  *  a single value in a GVariant * unless the wrap_single_value flag is
  *  true, then the single value will be inside a tuple container.
  *
- * @param log                std::ostringstream where to put log data
+ * @param log                ResultLog object where to put log data
  * @param data_type          std::string of the complete data type of the data set
  * @param data_values        std::vector<string> with all the data to parse
  * @param wrap_single_value  bool flag, enables tuple wrapping if only a single
  *                           variable is being processed
  * @return GVariant* with all the data values converted in proper D-Bus values
  */
+GVariant *generate_gvariant(ResultLog &log,
+                            const std::string &data_type,
+                            const std::vector<std::string> &data_values,
+                            bool wrap_single_value);
+
 GVariant *generate_gvariant(std::ostringstream &log,
                             const std::string &data_type,
                             const std::vector<std::string> &data_values,

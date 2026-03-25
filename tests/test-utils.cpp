@@ -21,6 +21,7 @@
 #include <fmt/compile.h>
 #include <fmt/format.h>
 #include <fmt/printf.h>
+#include <fmt/ranges.h>
 #include <glib.h>
 
 #include "gdbuspp/glib2/utils.hpp"
@@ -75,6 +76,232 @@ void OptionParser::help(const std::string &argv0, struct option options[])
 }
 
 
+struct ResultLog::TestResult
+{
+    TestResult(bool res, bool exp, time_t start, time_t end);
+
+    void AddLogDetail(const std::string &log);
+    bool HaveLogDetails() const;
+
+    std::vector<std::string> GetLogDetails();
+
+    const bool raw_result;       //< The result returned by the test function
+    const bool expected;         //< The result which was expected
+    const bool result;           //< If the raw_result matches the expected result
+    const double execution_time; //<  The time it took to execute the test
+
+
+  private:
+    std::vector<std::string> log_details;
+};
+
+
+ResultLog::TestResult::TestResult(bool res, bool exp, time_t start, time_t end)
+    : raw_result(res), expected(exp), result(res == exp), execution_time(end - start) {};
+
+
+void ResultLog::TestResult::AddLogDetail(const std::string &log)
+{
+    log_details.push_back(std::move(log));
+}
+
+
+bool ResultLog::TestResult::HaveLogDetails() const
+{
+    return !log_details.empty();
+}
+
+
+std::vector<std::string> ResultLog::TestResult::GetLogDetails()
+{
+    auto res = std::move(log_details);
+    log_details.clear();
+    return res;
+};
+
+
+ResultLog::ResultLog(bool verb)
+    : verbose(verb)
+{
+}
+
+
+void ResultLog::AddLogLine(const std::string &line, bool after_test)
+{
+    if (after_test)
+    {
+        testcase_log.push_back(line);
+        return;
+    }
+    if (verbose)
+    {
+        fmt::print(FMT_COMPILE("{}\n"), line);
+    }
+    else
+    {
+        testlog.push_back(line);
+    }
+}
+
+
+void ResultLog::RunFunctionTest(const std::string &descr,
+                                DBus::Proxy::Client::Ptr proxy,
+                                std::function<bool()> &&test_func,
+                                bool expect)
+{
+    if (verbose)
+    {
+        fmt::print(FMT_COMPILE(">> {} - {}\n"), __func__, descr);
+    }
+    TestResult result = run_test(expect, std::move(test_func));
+    log_result(result, proxy, descr);
+}
+
+
+void ResultLog::RunExceptionTest(const std::string &descr,
+                                 DBus::Proxy::Client::Ptr proxy,
+                                 std::function<void()> &&testfunc,
+                                 const std::vector<std::string> &exception_list)
+{
+    if (verbose)
+    {
+        fmt::print(FMT_COMPILE(">> {} - {}\n"), __func__, descr);
+    }
+
+    std::string error_msg{};
+    auto test_code = [&testfunc, &exception_list, &error_msg]() -> bool
+    {
+        bool res = false;
+        try
+        {
+            testfunc();
+            res = false;
+        }
+        catch (const DBus::Exception &excp)
+        {
+            for (const auto &exception : exception_list)
+            {
+                error_msg = std::string(excp.GetRawError());
+                res = (error_msg == exception);
+                if (res)
+                {
+                    break;
+                }
+            }
+        }
+        return res;
+    };
+
+
+    TestResult result = run_test(true, test_code);
+    if (!result.raw_result)
+    {
+        if (!error_msg.empty())
+        {
+            result.AddLogDetail(fmt::format("Received exception message: {}", error_msg));
+        }
+        else
+        {
+            result.AddLogDetail("EMPTY EXCEPTION MESSAGE");
+        }
+    }
+    log_result(result, proxy, fmt::format(FMT_COMPILE("Expecting exception string['{}'] {}"), exception_list[0], descr));
+}
+
+
+bool ResultLog::PrintTestReport()
+{
+    bool test_result = (success > 0 && failed == 0);
+    fmt::print(">> Passed tests: {}\n"
+               ">> Failed tests: {}\n"
+               ">> OVERALL TEST RESULT: {}\n",
+               success,
+               failed,
+               (test_result ? "PASS" : "FAIL"));
+    return test_result;
+}
+
+
+void ResultLog::DumpLogs()
+{
+    for (const auto &l : testlog)
+    {
+        fmt::print(FMT_COMPILE("{}\n"), l);
+    }
+    testlog.clear();
+}
+
+
+ResultLog::TestResult ResultLog::run_test(bool expected, std::function<bool()> &&test_func)
+{
+    time_t start, end;
+    time(&start);
+    bool result = test_func();
+    time(&end);
+
+    return TestResult(result, expected, start, end);
+}
+
+
+void ResultLog::log_result(ResultLog::TestResult &result,
+                           DBus::Proxy::Client::Ptr proxy,
+                           const std::string &msg)
+{
+    std::string details;
+    if (result.HaveLogDetails())
+    {
+        details = "\n";
+        for (const auto &l : result.GetLogDetails())
+        {
+            details.append(fmt::format(FMT_COMPILE("       {}"), l));
+        }
+    }
+
+    std::string prx_details = (proxy ? fmt::format(FMT_COMPILE(" -- Proxy: {}"), proxy) : "");
+    std::string logline = fmt::format(
+        FMT_COMPILE("[{}] <result={}, expected={}, execution_time={}s>  {}{}{}"),
+        (result.result ? "PASS" : "FAIL"),
+        (result.raw_result ? "pass" : "fail"),
+        (result.expected ? "pass" : "fail"),
+        result.execution_time,
+        msg,
+        prx_details,
+        details);
+
+    for (const auto &tcl : testcase_log)
+    {
+        logline.append(fmt::format(FMT_COMPILE("\n......   {}"), tcl));
+    }
+    testcase_log.clear();
+
+    if (verbose)
+    {
+        fmt::print(FMT_COMPILE("{}\n"), logline);
+    }
+    else
+    {
+        testlog.push_back(std::move(logline));
+    }
+
+    if (result.result)
+    {
+        ++success;
+    }
+    else
+    {
+        ++failed;
+    }
+}
+
+
+
+void dump_gvariant(ResultLog &log, const std::string &prefix, GVariant *data)
+{
+    log.AddLogLine(fmt::format(FMT_COMPILE("{} type: {}"), prefix, glib2::DataType::Extract(data)));
+    log.AddLogLine(fmt::format(FMT_COMPILE("{} data: {}"), prefix, glib2::Utils::DumpToString(data)));
+}
+
+
 void dump_gvariant(std::ostringstream &log, const std::string &prefix, GVariant *data)
 {
     log << prefix << " type: " << glib2::DataType::Extract(data) << std::endl;
@@ -109,6 +336,38 @@ bool check_data_value(const std::string &expect_value, GVariant *data)
                                "    **  Data contents: |{}|\n"),
                    expect_value,
                    gv_value);
+    }
+    return ret;
+}
+
+
+bool log_data_type_value_check(ResultLog &log,
+                               const std::string &type,
+                               const std::string &value,
+                               GVariant *data)
+{
+    bool ret = true;
+    if (!type.empty())
+    {
+        bool r = check_data_type(type, data);
+        log.AddLogLine(fmt::format(
+            FMT_COMPILE("Checking expected data type: {}"), (r ? "Pass" : "Fail")));
+        if (!r)
+        {
+            log.AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), type));
+            ret = false;
+        }
+    }
+    if (!value.empty())
+    {
+        bool r = check_data_value(value, data);
+        log.AddLogLine(fmt::format(
+            FMT_COMPILE("Checking expected data value: {}"), (r ? "Pass" : "Fail")));
+        if (!r)
+        {
+            log.AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), value));
+            ret = false;
+        }
     }
     return ret;
 }
@@ -348,6 +607,66 @@ std::vector<std::string> convert_from_gvariant(GVariant *values)
     return ret;
 }
 
+
+GVariant *generate_gvariant(ResultLog &log,
+                            const std::string &data_type,
+                            const std::vector<std::string> &data_values,
+                            bool wrap_single_value)
+{
+    GVariant *data = nullptr;
+    if (data_values.size() > 0)
+    {
+        if (data_type.empty())
+        {
+            throw Tests::Utils::Exception(__func__, "data values requires data types");
+        }
+
+        if (data_type[0] != 'a' && data_type.length() != data_values.size())
+        {
+            throw Tests::Utils::Exception(__func__, "data type string does not contain enough field to describe all data values");
+        }
+
+        log.AddLogLine("-------------------------");
+        log.AddLogLine("Data values:");
+        if (!wrap_single_value && data_values.size() == 1)
+        {
+            data = convert_to_gvariant(data_type, data_values[0]);
+        }
+        else if (data_type[0] == 'a')
+        {
+            if (data_type.length() > 2)
+            {
+                throw Tests::Utils::Exception(__func__, "only arrays with a single data type is supported");
+            }
+
+            GVariantBuilder *bld = glib2::Builder::Create(data_type.c_str());
+            for (const auto &v : data_values)
+            {
+                glib2::Builder::Add(bld, convert_to_gvariant(data_type.substr(1, 1), v));
+            }
+            log.AddLogLine(fmt::format(FMT_COMPILE("   [{:?}]"), fmt::join(data_values, ", ")));
+            data = glib2::Builder::Finish(bld);
+        }
+        else
+        {
+            GVariantBuilder *bld = glib2::Builder::EmptyTuple();
+            uint32_t pos = 0;
+            for (const auto &v : data_values)
+            {
+                std::string type = data_type.substr(pos, 1);
+                glib2::Builder::Add(bld, convert_to_gvariant(type, v));
+                ++pos;
+            }
+            log.AddLogLine(fmt::format(FMT_COMPILE("   [{:?}]"), fmt::join(data_values, ", ")));
+
+            data = glib2::Builder::Finish(bld);
+        }
+
+        dump_gvariant(log, "GVariant data", data);
+        log.AddLogLine("-------------------------\n");
+    }
+    return data;
+}
 
 
 GVariant *generate_gvariant(std::ostringstream &log,
