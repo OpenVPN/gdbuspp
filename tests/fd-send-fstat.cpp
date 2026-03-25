@@ -91,6 +91,12 @@ class Options : public Tests::Utils::OptionParser
             }
         }
 
+        if (file.empty())
+        {
+            fmt::println(stderr, "Missing file name (--file|-f)");
+            exit(2);
+        }
+
         preset = DBus::Proxy::TargetPreset::Create(object_path, object_interface);
     }
 
