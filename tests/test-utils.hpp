@@ -168,18 +168,6 @@ class ResultLog
 
 
 /**
- *  Dumps a human readable string of both the data type and value
- *  contained in a GVariant object.  This is just a wrapper around
- *  a couple of helper functions found in the glib2 library
- *
- * @param log     ResultLog object where to the generated output is logged
- * @param prefix  std::string containing a prefix before each written line of text
- * @param data    GVariant * to object to parse
- */
-void dump_gvariant(ResultLog &log, const std::string &prefix, GVariant *data);
-void dump_gvariant(std::ostringstream &log, const std::string &prefix, GVariant *data);
-
-/**
  *  Checks the data type of a GVariant object against an expected data type
  *
  * @param expect_type  std::string with the complete representation of the

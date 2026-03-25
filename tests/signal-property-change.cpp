@@ -211,7 +211,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
         if (opts.verbose)
         {
             Tests::Utils::ResultLog evdata(true);
-            Tests::Utils::dump_gvariant(evdata, "        Signal Event", event->params);
+            evdata.AddGVariantDump("        Signal Event", event->params);
         }
     }
 

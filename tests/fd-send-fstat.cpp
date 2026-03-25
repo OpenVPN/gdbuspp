@@ -126,9 +126,7 @@ int test_fd_send_fstat(int argc, char **argv)
         if (!opts.quiet)
         {
             Utils::ResultLog log(true);
-            Tests::Utils::dump_gvariant(log,
-                                        fmt::format("{} results", opts.method),
-                                        r);
+            log.AddGVariantDump(fmt::format("{} results", opts.method), r);
         }
         else
         {

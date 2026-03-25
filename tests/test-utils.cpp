@@ -311,21 +311,6 @@ void ResultLog::log_result(ResultLog::TestResult &result,
 }
 
 
-
-void dump_gvariant(ResultLog &log, const std::string &prefix, GVariant *data)
-{
-    log.AddLogLine(fmt::format(FMT_COMPILE("{} type: {}"), prefix, glib2::DataType::Extract(data)));
-    log.AddLogLine(fmt::format(FMT_COMPILE("{} data: {}"), prefix, glib2::Utils::DumpToString(data)));
-}
-
-
-void dump_gvariant(std::ostringstream &log, const std::string &prefix, GVariant *data)
-{
-    log << prefix << " type: " << glib2::DataType::Extract(data) << std::endl;
-    log << prefix << " data: " << glib2::Utils::DumpToString(data) << std::endl;
-}
-
-
 bool check_data_type(const std::string &expect_type, GVariant *data)
 {
     std::string gv_type = glib2::DataType::Extract(data);
@@ -673,7 +658,7 @@ GVariant *generate_gvariant(ResultLog &log,
             data = glib2::Builder::Finish(bld);
         }
 
-        dump_gvariant(log, "GVariant data", data);
+        log.AddGVariantDump("GVariant data", data);
         log.AddLogLine("-------------------------\n");
     }
     return data;
