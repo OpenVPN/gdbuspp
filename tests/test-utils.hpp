@@ -56,6 +56,8 @@ class OptionParser
  *  Provide an infrastructure to run test cases
  *  and log the results.
  *
+ *  WARNING: This object is not thread-safe and CANNOT be shared across
+ *           multiple threads
  */
 class ResultLog
 {
@@ -115,9 +117,8 @@ class ResultLog
      *   Adds a single log line to the log
      *
      * @param line        string contianing the log line to append
-     * @param after_test  If true, log line is added after the test result
      */
-    void AddLogLine(const std::string &line, bool after_test = false);
+    void AddLogLine(const std::string &line);
 
 
     /**
@@ -148,7 +149,7 @@ class ResultLog
     std::vector<std::string> testcase_log;
     uint32_t success = 0;
     uint32_t failed = 0;
-
+    bool running_test = false;
 
     TestResult run_test(bool expected, std::function<bool()> &&test_func);
 

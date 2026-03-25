@@ -126,9 +126,16 @@ ResultLog::ResultLog(bool verb)
 }
 
 
-void ResultLog::AddLogLine(const std::string &line, bool after_test)
+void ResultLog::AddLogLine(const std::string &line)
 {
-    if (after_test)
+    // If this is called from within a RunFunctionTest() or RunExceptionTest()
+    // this log line should be added as part of that test, so we just "cache"
+    // these log lines and will print them via ResultLog::log() at the appropriate
+    // time.
+    //
+    // WARNING: This is not thread-safe!
+    //
+    if (running_test)
     {
         testcase_log.push_back(line);
         return;
@@ -149,6 +156,7 @@ void ResultLog::RunFunctionTest(const std::string &descr,
                                 std::function<bool()> &&test_func,
                                 bool expect)
 {
+    running_test = true;
     if (verbose)
     {
         fmt::print(FMT_COMPILE(">> {} - {}\n"), __func__, descr);
@@ -163,6 +171,7 @@ void ResultLog::RunExceptionTest(const std::string &descr,
                                  std::function<void()> &&testfunc,
                                  const std::vector<std::string> &exception_list)
 {
+    running_test = true;
     if (verbose)
     {
         fmt::print(FMT_COMPILE(">> {} - {}\n"), __func__, descr);
@@ -194,6 +203,7 @@ void ResultLog::RunExceptionTest(const std::string &descr,
 
 
     TestResult result = run_test(true, test_code);
+    running_test = false;
     if (!result.raw_result)
     {
         if (!error_msg.empty())

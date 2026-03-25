@@ -313,7 +313,7 @@ int test_proxy_utils(int argc, char **argv)
                         bool r = service_qry->StartServiceByName(srv) == 2;
                         if (r)
                         {
-                            testlogger.AddLogLine(fmt::format("            [lambda]      >>   Started service: {}", srv), true);
+                            testlogger.AddLogLine(fmt::format("            [lambda]      >>   Started service: {}", srv));
                             started_srv = srv;
                             return true;
                         }
