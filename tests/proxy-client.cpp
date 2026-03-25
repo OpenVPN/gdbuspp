@@ -16,7 +16,6 @@
 #include <any>
 #include <limits>
 #include <string>
-#include <sstream>
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
@@ -64,6 +63,7 @@ class ProxyOpts : protected Tests::Utils::OptionParser
             {"data-value",    required_argument, nullptr, 'v'},
             {"expect-type",   required_argument, nullptr, 'X'},
             {"expect-result", required_argument, nullptr, 'x'},
+            {"verbose",       no_argument,       nullptr, 'V'},
             {"quiet",         no_argument,       nullptr, 'q'},
             {"introspect",    no_argument,       nullptr, 'Q'},
             {"lookup",        no_argument,       nullptr, 'L'},
@@ -74,7 +74,7 @@ class ProxyOpts : protected Tests::Utils::OptionParser
 
         int opt;
         optind = 1;
-        while ((opt = getopt_long(argc, argv, "YEd:p:i:Lm:g:s:S:I:U:B:t:v:X:x:qQh", long_opts, nullptr)) != -1)
+        while ((opt = getopt_long(argc, argv, "YEd:p:i:Lm:g:s:S:I:U:B:t:v:X:x:VqQh", long_opts, nullptr)) != -1)
         {
             switch (opt)
             {
@@ -135,6 +135,9 @@ class ProxyOpts : protected Tests::Utils::OptionParser
             case 'x':
                 check_response = std::string(optarg);
                 break;
+            case 'V':
+                verbose = true;
+                break;
             case 'q':
                 quiet = true;
                 break;
@@ -169,6 +172,11 @@ class ProxyOpts : protected Tests::Utils::OptionParser
             throw DBus::Exception("test_proxy", "Cannot use both --introspect and --lookup at the same time");
         }
 
+        if (verbose && quiet)
+        {
+            throw DBus::Exception("test_proxy", "Cannot use both --verbose and --quiet at the same time");
+        }
+
         preset = Proxy::TargetPreset::Create(object_path, object_interface);
     };
 
@@ -187,6 +195,7 @@ class ProxyOpts : protected Tests::Utils::OptionParser
     PropertyMode property_mode = PropertyMode::UNSET;
     bool introspect = false;
     bool lookup_object = false;
+    bool verbose = false;
     bool quiet = false;
 };
 
@@ -194,28 +203,29 @@ class ProxyOpts : protected Tests::Utils::OptionParser
 
 int test_proxy_client(int argc, char **argv)
 {
-    std::ostringstream log;
+    ProxyOpts options(argc, argv);
+
+    bool errors = false;
+    if (options.destination.empty())
+    {
+        fmt::println(stderr, "** ERROR **  Missing --destination");
+        errors = true;
+    }
+
+    if (options.object_path.empty())
+    {
+        fmt::println("** ERROR **  Missing --object-path");
+        errors = true;
+    }
+    if (errors)
+    {
+        return 2;
+    };
+
+
+    Tests::Utils::ResultLog log(options.verbose);
     try
     {
-        ProxyOpts options(argc, argv);
-
-        bool errors = false;
-        if (options.destination.empty())
-        {
-            fmt::println(stderr, "** ERROR **  Missing --destination");
-            errors = true;
-        }
-
-        if (options.object_path.empty())
-        {
-            fmt::println("** ERROR **  Missing --object-path");
-            errors = true;
-        }
-        if (errors)
-        {
-            return 2;
-        };
-
 
         auto conn = DBus::Connection::Create(options.bustype);
 
@@ -267,15 +277,16 @@ int test_proxy_client(int argc, char **argv)
 
 
         auto prx = Proxy::Client::Create(conn, options.destination);
-        log << "Connected to: " << prx << std::endl;
+        log.AddLogLine(fmt::format("Connected to: {}", prx));
 
         // Check the Proxy::Client::GetDestination() method
         if (prx->GetDestination() != options.destination)
         {
-            log << "** ERROR ** Proxy::Client::GetDestination() "
-                << "did not return " << options.destination << std::endl;
+            log.AddLogLine(fmt::format(
+                "** ERROR ** Proxy::Client::GetDestination() did not return {}",
+                options.destination));
             throw DBus::Exception("Proxy::Client::GetDestination()",
-                                  "Unexpected result:" + prx->GetDestination());
+                                  fmt::format("Unexpected result: {}", prx->GetDestination()));
         }
         if (!options.method.empty())
         {
@@ -285,24 +296,25 @@ int test_proxy_client(int argc, char **argv)
                 return 2;
             }
 
-            log << "Method call: " << options.preset
-                << ", method=" << options.method << std::endl;
+            log.AddLogLine(fmt::format(
+                "Method call: {}, method={}",
+                options.preset,
+                options.method));
             GVariant *res = prx->Call(options.preset, options.method, data);
             Tests::Utils::dump_gvariant(log, "GVariant response", res);
 
-            std::ostringstream check_log;
-            if (!Tests::Utils::log_data_type_value_check(check_log,
+            if (!Tests::Utils::log_data_type_value_check(log,
                                                          options.check_type,
                                                          options.check_response,
                                                          res))
             {
                 if (options.quiet)
                 {
-                    fmt::println("UNEXPECTED RESULT:\n{}", check_log.str());
+                    fmt::println("UNEXPECTED RESULT");
+                    log.DumpLogs();
                     return 3;
                 }
             }
-            log << check_log.str();
 
             g_variant_unref(res);
         }
@@ -324,110 +336,150 @@ int test_proxy_client(int argc, char **argv)
                 return 2;
             }
 
-            log << "Get Property: " << options.preset
-                << ", property=" << options.property << std::endl;
+
+            // This does logic might seem silly, as the 'data' argument already contains all
+            // the information.  But it uses the data type from the GVariant *data to call
+            // call the appropriate GetProperty*<>() method.  This way, there is a check
+            // that the GetProperty*<>() method extracts the expected data type.  This is
+            // primarily a test for the GetProperty*<>() method.
+            auto fetch_content = [](DBus::Proxy::Client::Ptr &prx, const Proxy::TargetPreset::Ptr &tgt, const std::string &property, GVariant *data) -> std::string
+            {
+                std::string data_type = glib2::DataType::Extract(data);
+                std::string ret;
+                uint32_t idx = 0;
+                if (data_type[0] == 'a')
+                {
+                    switch (data_type[1])
+                    {
+                    case 'b':
+                        ret = "<bool>: \n";
+                        for (const auto &e : prx->GetPropertyArray<bool>(tgt, property))
+                        {
+                            ret.append(fmt::format("  [{}] {}\n", idx, static_cast<bool>(e)));
+                            idx++;
+                        }
+                        break;
+
+                    case 'i':
+                        ret = "<int32_t>: \n";
+                        for (const auto &e : prx->GetPropertyArray<int32_t>(tgt, property))
+                        {
+                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            idx++;
+                        }
+                        break;
+
+                    case 'o':
+                        ret = "<DBus::Object::Path>: \n";
+                        for (const auto &e : prx->GetPropertyArray<DBus::Object::Path>(tgt, property))
+                        {
+                            ret.append(fmt::format("  [{}] {:?}\n", idx, e));
+                            idx++;
+                        }
+                        break;
+
+                    case 's':
+                        ret = "<string>: \n";
+                        for (const auto &e : prx->GetPropertyArray<std::string>(tgt, property))
+                        {
+                            ret.append(fmt::format("  [{}] {:?}\n", idx, e));
+                            idx++;
+                        }
+                        break;
+
+                    case 't':
+                        ret = "<uint64_t>: \n";
+                        for (const auto &e : prx->GetPropertyArray<uint64_t>(tgt, property))
+                        {
+                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            idx++;
+                        }
+                        break;
+
+                    case 'u':
+                        ret = "<uint32_t>: \n";
+                        for (const auto &e : prx->GetPropertyArray<uint32_t>(tgt, property))
+                        {
+                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            idx++;
+                        }
+                        break;
+
+                    case 'x':
+                        ret = "<int64_t>: \n";
+                        for (const auto &e : prx->GetPropertyArray<uint64_t>(tgt, property))
+                        {
+                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            idx++;
+                        }
+                        break;
+
+                    default:
+                        ret = "";
+                        break;
+                    }
+                }
+                else
+                {
+                    switch (data_type[0])
+                    {
+                    case 'b':
+                        ret = fmt::format("<bool>:  {}", prx->GetProperty<bool>(tgt, property));
+                        break;
+
+                    case 'i':
+                        ret = fmt::format("<int32_t>:  {}", prx->GetProperty<int32_t>(tgt, property));
+                        break;
+
+                    case 'o':
+                        ret = fmt::format("<DBus::Object::Path>:  {:?}", prx->GetProperty<DBus::Object::Path>(tgt, property));
+                        break;
+
+                    case 's':
+                        ret = fmt::format("<std::string>:  {:?}", prx->GetProperty<std::string>(tgt, property));
+                        break;
+
+                    case 't':
+                        ret = fmt::format("<uint64_t>:  {}", prx->GetProperty<uint64_t>(tgt, property));
+                        break;
+
+                    case 'u':
+                        ret = fmt::format("<uint32_t>:  {}", prx->GetProperty<uint32_t>(tgt, property));
+                        break;
+
+                    case 'x':
+                        ret = fmt::format("<int64_t>:  {}", prx->GetProperty<int64_t>(tgt, property));
+                        break;
+
+                    default:
+                        ret = "";
+                        break;
+                    }
+                }
+                return ret;
+            };
+
+            log.AddLogLine(fmt::format(
+                "Get Property: {}, property={}",
+                options.preset,
+                options.property));
 
             GVariant *res = prx->GetPropertyGVariant(options.preset, options.property);
             Tests::Utils::dump_gvariant(log, "GVariant response", res);
+            log.AddLogLine(fmt::format("Get Property {}", fetch_content(prx, options.preset, options.property, res)));
 
-
-            std::string res_type = std::string(g_variant_get_type_string(res));
-            if ("s" == res_type || "o" == res_type || "as" == res_type || "ao" == res_type)
-            {
-                log << "Get Property <string>: ";
-                if ('a' == res_type[0])
-                {
-                    log << std::endl;
-                    unsigned int i = 0;
-                    for (const auto &e : prx->GetPropertyArray<std::string>(options.preset, options.property))
-                    {
-                        log << "  [" << std::to_string(i) << "] "
-                            << e << std::endl;
-                        ++i;
-                    }
-                }
-                else
-                {
-                    log << prx->GetProperty<std::string>(options.preset, options.property)
-                        << std::endl;
-                }
-            }
-            else if ("i" == res_type || "ai" == res_type)
-            {
-                log << "Get Property <int>: ";
-                if ('a' == res_type[0])
-                {
-                    log << std::endl;
-                    unsigned int i = 0;
-                    for (const auto &e : prx->GetPropertyArray<int>(options.preset, options.property))
-                    {
-                        log << "  [" << std::to_string(i) << "] "
-                            << std::to_string(e) << std::endl;
-                        ++i;
-                    }
-                }
-                else
-                {
-                    log << prx->GetProperty<int>(options.preset, options.property)
-                        << std::endl;
-                }
-            }
-            else if ("u" == res_type || "au" == res_type)
-            {
-                log << "Get Property <unsigned int>: ";
-                if ('a' == res_type[0])
-                {
-                    log << std::endl;
-                    unsigned int i = 0;
-                    for (const auto &e : prx->GetPropertyArray<unsigned int>(options.preset, options.property))
-                    {
-                        log << "  [" << std::to_string(i) << "] "
-                            << std::to_string(e) << std::endl;
-                        ++i;
-                    }
-                }
-                else
-                {
-                    log << prx->GetProperty<unsigned int>(options.preset, options.property)
-                        << std::endl;
-                }
-            }
-            else if ("t" == res_type || "at" == res_type)
-            {
-                log << "Get Property <uint64_t>: ";
-                if ('a' == res_type[0])
-                {
-                    log << std::endl;
-                    unsigned int i = 0;
-                    for (const auto &e : prx->GetPropertyArray<uint64_t>(options.preset, options.property))
-                    {
-                        log << "  [" << std::to_string(i) << "] "
-                            << std::to_string(e) << std::endl;
-                        ++i;
-                    }
-                }
-                else
-                {
-                    log << prx->GetProperty<uint64_t>(options.preset, options.property)
-                        << std::endl;
-                }
-            }
-
-
-
-            std::ostringstream check_log;
-            if (!Tests::Utils::log_data_type_value_check(check_log,
+            if (!Tests::Utils::log_data_type_value_check(log,
                                                          options.check_type,
                                                          options.check_response,
                                                          res))
             {
                 if (options.quiet)
                 {
-                    fmt::println(stderr, "UNEXPECTED RESULT:\n{}", check_log.str());
+                    fmt::println(stderr, "UNEXPECTED RESULT");
+                    log.DumpLogs();
                     return 3;
                 }
             }
-            log << check_log.str();
             g_variant_unref(res);
         }
         else if (ProxyOpts::PropertyMode::SET == options.property_mode
@@ -457,8 +509,7 @@ int test_proxy_client(int argc, char **argv)
                 return 2;
             }
 
-            log << "Set Property: " << options.preset
-                << ", property=" << options.property << std::endl;
+            log.AddLogLine(fmt::format("Set Property: {}, property={}", options.preset, options.property));
             if (ProxyOpts::PropertyMode::SET == options.property_mode)
             {
                 prx->SetPropertyGVariant(options.preset, options.property, data);
@@ -491,13 +542,13 @@ int test_proxy_client(int argc, char **argv)
 
         if (!options.quiet)
         {
-            fmt::println("{}", log.str());
+            log.DumpLogs();
         }
         g_thread_pool_stop_unused_threads();
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println("{}", log.str());
+        log.DumpLogs();
         fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
