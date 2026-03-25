@@ -30,7 +30,7 @@
 namespace Tests::Utils {
 
 Exception::Exception(const std::string &group, const std::string &err)
-    : errormsg("[" + group + "]: " + err)
+    : errormsg(fmt::format(FMT_COMPILE("[{}] {}"), group, err))
 {
 }
 
@@ -198,7 +198,7 @@ void ResultLog::RunExceptionTest(const std::string &descr,
     {
         if (!error_msg.empty())
         {
-            result.AddLogDetail(fmt::format("Received exception message: {}", error_msg));
+            result.AddLogDetail(fmt::format(FMT_COMPILE("Received exception message: {}"), error_msg));
         }
         else
         {
@@ -212,9 +212,9 @@ void ResultLog::RunExceptionTest(const std::string &descr,
 bool ResultLog::PrintTestReport()
 {
     bool test_result = (success > 0 && failed == 0);
-    fmt::print(">> Passed tests: {}\n"
-               ">> Failed tests: {}\n"
-               ">> OVERALL TEST RESULT: {}\n",
+    fmt::print(FMT_COMPILE(">> Passed tests: {}\n"
+                           ">> Failed tests: {}\n"
+                           ">> OVERALL TEST RESULT: {}\n"),
                success,
                failed,
                (test_result ? "PASS" : "FAIL"));
@@ -456,9 +456,9 @@ GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
     catch (const std::out_of_range &)
     {
         throw Tests::Utils::Exception(__func__,
-                                      "Type '" + type + "' "
-                                          + "with value '" + value + "' "
-                                          + "exceeds the range for the data type");
+                                      fmt::format(FMT_COMPILE("Type {:?} with value {:?} exceeds the range for the data type"),
+                                                  type,
+                                                  value));
     }
 }
 
@@ -470,37 +470,33 @@ std::string parse_gvariant_to_string(GVariant *value)
 
     if ("a{sv}" == type)
     {
-        ret = "{";
         glib2::Dict::IterateDictionary(
             value,
             [&ret](const std::string &key, GVariant *val)
             {
-                ret += key + "='" + parse_gvariant_to_string(val) + "', ";
+                ret.append(fmt::format(FMT_COMPILE("{}='{}', "), key, parse_gvariant_to_string(val)));
             });
-        ret += "}";
-        return ret;
+        return fmt::format(FMT_COMPILE("{{{}}}"), ret);
     }
 
 
     switch (type[0])
     {
     case '(':
-        ret = "(";
-        for (const auto &val : convert_from_gvariant(value))
-        {
-            ret += val + ", ";
-        }
-        ret += ")";
+        ret = fmt::format(FMT_COMPILE("({})"), fmt::join(convert_from_gvariant(value), ", "));
         break;
     case ')':
         break;
     case 'a':
-        ret = "[";
-        glib2::Value::IterateArray(value, [&ret](GVariant *val)
-                                   {
-                                       ret += "'" + parse_gvariant_to_string(val) + "', ";
-                                   });
-        ret += "]";
+        {
+            std::string values;
+            glib2::Value::IterateArray(value, [&values](GVariant *val)
+                                       {
+                                           values.append(fmt::format(FMT_COMPILE("'{}', "),
+                                                                     parse_gvariant_to_string(val)));
+                                       });
+            ret = fmt::format(FMT_COMPILE("[{}]"), values);
+        }
         break;
     case 'b':
         ret = (glib2::Value::Get<bool>(value) ? "true" : "false");
@@ -537,7 +533,7 @@ std::string parse_gvariant_to_string(GVariant *value)
         ret = glib2::Value::Get<std::string>(value);
         break;
     default:
-        ret = "<UNKNOWN D-BUS DATA TYPE: " + type + ">";
+        ret = fmt::format("<UNKNOWN D-BUS DATA TYPE: {}>", type);
         break;
     }
     return ret;
@@ -590,11 +586,9 @@ std::vector<std::string> convert_from_gvariant(GVariant *values)
             break;
         default:
             {
-                std::ostringstream err;
-                err << "D-Bus data type '" << type[pos + 1] << "'"
-                    << " has not been implemented.";
                 throw Tests::Utils::Exception("Tests::Utils::convert_from_gvariant",
-                                              err.str());
+                                              fmt::format("D-Bus data type '{}' has not been implemented.",
+                                                          type[pos + 1]));
             }
         }
 
