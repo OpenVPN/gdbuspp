@@ -16,7 +16,6 @@
 #include <any>
 #include <limits>
 #include <string>
-#include <sstream>
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
@@ -124,12 +123,12 @@ int test_fd_send_fstat(int argc, char **argv)
         int fd = open(opts.file.c_str(), O_RDONLY);
         GVariant *r = prx->SendFD(preset, opts.method, nullptr, fd);
 
-        std::ostringstream log;
         if (!opts.quiet)
         {
-            std::ostringstream l;
-            Tests::Utils::dump_gvariant(l, opts.method + " results", r);
-            fmt::println("{}", l.str());
+            Utils::ResultLog log(true);
+            Tests::Utils::dump_gvariant(log,
+                                        fmt::format("{} results", opts.method),
+                                        r);
         }
         else
         {

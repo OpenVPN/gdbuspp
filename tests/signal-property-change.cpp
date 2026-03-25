@@ -210,9 +210,8 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
         fmt::println("{{{}}} {}", signal_count, event);
         if (opts.verbose)
         {
-            std::ostringstream evdata;
+            Tests::Utils::ResultLog evdata(true);
             Tests::Utils::dump_gvariant(evdata, "        Signal Event", event->params);
-            fmt::println("{}", evdata.str());
         }
     }
 

@@ -14,7 +14,6 @@
 
 #include <limits>
 #include <string>
-#include <sstream>
 #include <vector>
 #include <getopt.h>
 #include <fmt/printf.h>
@@ -121,7 +120,7 @@ class EmitOpts : protected Tests::Utils::OptionParser
 int test_signal_emit(int argc, char **argv)
 {
     EmitOpts options(argc, argv);
-    std::ostringstream log;
+    Utils::ResultLog log(!options.quiet);
     try
     {
         // Process all the --data-value values into a GVariant *
@@ -157,14 +156,14 @@ int test_signal_emit(int argc, char **argv)
 
         if (!options.quiet)
         {
-            fmt::println("{}", log.str());
+            log.DumpLogs();
         }
 
         return 0;
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println("{}", log.str());
+        log.DumpLogs();
         fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
         return 2;
     }
