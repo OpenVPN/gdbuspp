@@ -16,7 +16,6 @@
 #include <algorithm>
 #include <functional>
 #include <string>
-#include <sstream>
 #include <fmt/printf.h>
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -142,57 +141,64 @@ TestResult check_data_type_gvariant(const std::string &msg,
                                     GVariant *value,
                                     const std::string &expect)
 {
-    std::ostringstream message;
-
-    message << msg << " - Expects '" << expect << "'  ";
+    std::string result = fmt::format("{} - Expects '{}' ", msg, expect);
 
     if (nullptr == value)
     {
-        message << "GVariant == nullptr";
-        return TestResult(message.str(), false);
+        result.append("GVariant == nullptr - FAILED");
+        return TestResult(result, false);
     }
 
+    // Check if the low-level glib2 data type extraction
+    // matches the expected data type in the GVariant object
+    std::string type_glib2 = std::string(g_variant_get_type_string(value));
+    bool pass_glib2 = type_glib2 == expect;
+    result.append(fmt::format(
+        "{{ g_variant_get_type_string(...) -> {} }}  ",
+        (pass_glib2 ? "Pass"
+                    : fmt::format("FAILED, received: '{}'",
+                                  type_glib2))));
+    std::string type = glib2::DataType::Extract(value);
 
-    bool pass = true;
-    message << "{ g_variant_get_type_string(...) -> ";
-    const char *type_c = g_variant_get_type_string(value);
-    std::string type = std::string(type_c ? type_c : "");
-    if (type != expect)
-    {
-        pass = false;
-        message << "FAILED, received: '" << type << "'";
-    }
-    else
-    {
-        message << "Pass";
-    }
-    message << " }  ::  ";
-
-    type = glib2::DataType::Extract(value);
-    message << "{ glib2::DataType::Exctract(...) -> ";
-    if (type != expect)
-    {
-        pass = false;
-        message << "  FAILED, received: " << type;
-    }
-    else
-    {
-        message << "Pass";
-    }
-    message << " } >>> Test";
+    // Same check as above, but use the glib2::DataType::Extract()
+    // function provided by GDBus++
+    bool pass = glib2::DataType::Extract(value) == expect;
+    result.append(fmt::format(
+        "{{ glib2::DataType::Extract(...) -> {} }}  ",
+        (pass ? "Pass"
+              : fmt::format("FAILED, received: '{}'",
+                            glib2::DataType::Extract(value)))));
 
     g_variant_unref(value);
-    return TestResult(message.str(), pass);
+    return TestResult(result, pass_glib2 && pass);
 }
 
 
-template <typename T>
-auto stream_iterator_value(T t)
+/**
+ *  Extract the iterator value by the native C++ type
+ *  of the value.
+ *
+ *  This is needed for fmt::format() to be able to
+ *  understand which data type it is going to process
+ *
+ * @tparam ITER  Iterator type, "wrapping" the real value
+ * @param itv    iterator carrying the real value
+ * @return auto  Returns the real value with the proper type,
+ *               "unwrapping" the iterator container.
+ */
+template <typename ITER>
+auto fmt_iterator_value(ITER itv)
 {
+    using T = typename std::iterator_traits<ITER>::value_type;
+
     if constexpr (std::is_same_v<std::byte, std::decay_t<T>>)
-        return std::to_integer<int>(t);
+    {
+        return std::to_integer<int>(*itv);
+    }
     else
-        return t;
+    {
+        return static_cast<T>(*itv);
+    }
 }
 
 
@@ -202,28 +208,28 @@ TestResult compare_vector(const std::string &msg,
                           T2 &vect2)
 
 {
-
-    std::ostringstream message;
-    message << "[std::vector check]  " << msg << " - Vector size: ";
+    std::string result = fmt::format(
+        "[std::vector check]  {} - Vector size: {}",
+        msg,
+        (vect1.size() == vect2.size() ? "Pass, " : "Different - FAILED"));
     if (vect1.size() != vect2.size())
     {
-        message << "Different - FAILED";
-        return TestResult(message.str(), false);
+        return TestResult(result, false);
     }
-    message << "Pass, ";
 
-    message << "Content: ";
     if (!std::equal(vect1.begin(), vect1.end(), vect2.begin(), vect2.end()))
     {
         auto [vect1_it, vect2_it] = std::mismatch(vect1.begin(),
                                                   vect1.end(),
                                                   vect2.begin(),
                                                   vect2.end());
-        message << "Differs ('" << stream_iterator_value(*vect1_it) << "', '" << stream_iterator_value(*vect2_it) << "'): FAILED";
-        return TestResult(message.str(), false);
+        result.append(fmt::format("Differs ({}, {}): FAILED",
+                                  fmt_iterator_value(vect1_it),
+                                  fmt_iterator_value(vect2_it)));
+        return TestResult(result, false);
     }
-    message << "Pass -> Test case";
-    return TestResult(message.str(), true);
+    result.append("Pass -> Test case");
+    return TestResult(result, true);
 }
 
 
@@ -751,7 +757,10 @@ int test_base_data_types()
                                                                 auto val = glib2::Value::Get<std::string>(element);
                                                                 if (val != data[array_counter])
                                                                 {
-                                                                    throw std::runtime_error("Unxpected data: '" + val + "' != '" + data[array_counter] + "'");
+                                                                    throw std::runtime_error(
+                                                                        fmt::format("Unxpected data: {:?} != {:?}",
+                                                                                    val,
+                                                                                    data[array_counter]));
                                                                 }
                                                                 ++array_counter;
                                                             });
