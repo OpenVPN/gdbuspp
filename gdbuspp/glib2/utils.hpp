@@ -22,8 +22,9 @@
 #include <functional>
 #include <vector>
 #include <string>
-#include <sstream>
 #include <type_traits>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 
 #include <gio/gunixfdlist.h>
 
@@ -939,15 +940,17 @@ template <typename T>
 inline std::vector<T> ExtractVector(GVariant *params,
                                     const char *override_type = nullptr) noexcept
 {
-    std::stringstream type;
     const bool wrapped = g_variant_type_is_tuple(g_variant_get_type(params));
-    type << (wrapped ? "(" : "")
-         << DataType::DBUS_TYPE_ARRAY
-         << (override_type ? std::string(override_type) : std::string(DataType::DBus<T>()))
-         << (wrapped ? ")" : "");
+    const char *declared_type = override_type ? override_type : DataType::DBus<T>();
+    std::string array_type = fmt::format(
+        FMT_COMPILE("{}{}{}{}"),
+        (wrapped ? "(" : ""),
+        DataType::DBUS_TYPE_ARRAY,
+        declared_type,
+        (wrapped ? ")" : ""));
 
     GVariantIter *list = nullptr;
-    g_variant_get(params, type.str().c_str(), &list);
+    g_variant_get(params, array_type.c_str(), &list);
 
     std::vector<T> ret;
     ret.reserve(g_variant_iter_n_children(list));

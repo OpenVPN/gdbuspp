@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <string>
+#include <sstream>
 #include <fmt/printf.h>
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -130,8 +131,9 @@ TestResult check_data_type_cpp(const std::string &type_str,
                                T &value,
                                const std::string &expect)
 {
-    return TestResult("glib2::DataType::DBus<" + type_str + ">() - Expects: '" + expect + "'",
-                      glib2::DataType::DBus<T>() == expect);
+    return TestResult(
+        fmt::format("glib2::DataType::DBus<{}>() - Expects: '{}'", type_str, expect),
+        glib2::DataType::DBus<T>() == expect);
 }
 
 

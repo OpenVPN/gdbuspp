@@ -13,8 +13,10 @@
  *
  */
 
-#include <sstream>
 #include <glib.h>
+#include <fmt/compile.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include "../exceptions.hpp"
 #include "target.hpp"
@@ -31,7 +33,7 @@ namespace Signals {
  *  but at the same time keep it in a separate namespace indicating it
  *  is not to be directly exposed to the users of the library.
  */
-namespace _private {
+namespace {
 
 /**
  *  Composes a string containing the details of a Signals::Target
@@ -41,24 +43,23 @@ namespace _private {
  */
 static std::string compose_errclass(Target::Ptr target)
 {
-    std::ostringstream erc;
-    erc << "DBus::Signal::Target(";
+    std::vector<std::string> details;
     if (!target->busname.empty())
     {
-        erc << "busname='" << target->busname << "', ";
+        details.push_back(fmt::format(FMT_COMPILE("busname={}"), target->busname));
     }
     if (!target->object_path.empty())
     {
-        erc << "object_path='" << target->object_path << "', ";
+        details.push_back(fmt::format(FMT_COMPILE("object_path={:?}"), std::string(target->object_path)));
     }
     if (!target->object_interface.empty())
     {
-        erc << "interface='" << target->object_interface << "'";
+        details.push_back(fmt::format(FMT_COMPILE("interface={:?}"), target->object_interface));
     }
-    erc << ")";
-    return erc.str();
+    return fmt::format(FMT_COMPILE("DBus::Signal::Target({})"), fmt::join(details, ", "));
 }
-} // namespace _private
+
+} // namespace
 
 
 Exception::Exception(const std::string &errm, GError *gliberr)
@@ -67,7 +68,7 @@ Exception::Exception(const std::string &errm, GError *gliberr)
 }
 
 Exception::Exception(Target::Ptr target, const std::string &errm, GError *gliberr)
-    : DBus::Exception(_private::compose_errclass(target), errm, gliberr)
+    : DBus::Exception(compose_errclass(target), errm, gliberr)
 {
 }
 

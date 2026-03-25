@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <fmt/compile.h>
+#include <fmt/format.h>
 
 #include "../features/debug-log.hpp"
 #include "../glib2/utils.hpp"
@@ -108,14 +109,13 @@ Exception::Exception(const std::string &errm, GError *gliberr)
  */
 static const std::string _arguments_gen_dbus_type(std::vector<struct _method_argument> arglist)
 {
-    std::ostringstream ret;
-    ret << "(";
+    std::string ret = "(";
     for (const auto &arg : arglist)
     {
-        ret << arg.dbustype;
+        ret.append(arg.dbustype);
     }
-    ret << ")";
-    return ret.str();
+    ret.append(")");
+    return ret;
 }
 
 
@@ -192,8 +192,9 @@ void Arguments::ValidateOutputType(GVariant *params) const
     }
     catch (const glib2::Utils::Exception &excp)
     {
-        throw Method::Exception(std::string("Unexpected return type - ")
-                                + excp.GetRawError());
+        throw Method::Exception(fmt::format(
+            FMT_COMPILE("Unexpected return type - {}"),
+            excp.GetRawError()));
     }
 }
 
@@ -252,20 +253,22 @@ const bool Arguments::empty() const
 
 const std::string Arguments::GenerateIntrospection() const
 {
-    std::ostringstream ret;
+    std::string ret;
     for (const auto &ia : input)
     {
-        ret << " <arg type='" << ia.dbustype << "'"
-            << " name='" << ia.name << "' "
-            << " direction='in'/>" << std::endl;
+        ret.append(fmt::format(
+            FMT_COMPILE(" <arg type={:?} name={:?} direction=\"in\"/>\n"),
+            ia.dbustype,
+            ia.name));
     }
     for (const auto &oa : output)
     {
-        ret << " <arg type='" << oa.dbustype << "'"
-            << " name='" << oa.name << "' "
-            << " direction='out'/>" << std::endl;
+        ret.append(fmt::format(
+            FMT_COMPILE(" <arg type={:?} name={:?} direction=\"out\"/>\n"),
+            oa.dbustype,
+            oa.name));
     }
-    return ret.str();
+    return ret;
 }
 
 
@@ -370,18 +373,15 @@ Arguments::Ptr Callback::GetArgsList() const
 
 const std::string Callback::GenerateIntrospection() const
 {
-    std::ostringstream ret;
     if (method_args->empty())
     {
-        ret << "<method name='" << method_name << "'/>" << std::endl;
+        return fmt::format(FMT_COMPILE("<method name={:?}/>"), method_name);
     }
-    else
-    {
-        ret << "<method name='" << method_name << "'>" << std::endl;
-        ret << method_args->GenerateIntrospection();
-        ret << "</method>" << std::endl;
-    }
-    return ret.str();
+
+    return fmt::format(
+        FMT_COMPILE("<method name={:?}>\n{}\n,</method>\n"),
+        method_name,
+        method_args->GenerateIntrospection());
 }
 
 
@@ -436,12 +436,12 @@ Arguments::Ptr Collection::AddMethod(const std::string &method_name,
 
 const std::string Collection::GenerateIntrospection() const
 {
-    std::ostringstream xml;
+    std::string xml;
     for (const auto &meth : methods)
     {
-        xml << meth->GenerateIntrospection();
+        xml.append(meth->GenerateIntrospection());
     }
-    return xml.str();
+    return xml;
 }
 
 
@@ -467,7 +467,7 @@ void Collection::Execute(AsyncProcess::Request::UPtr &req)
                            });
     if (methods.end() == it)
     {
-        throw Method::Exception("Method '" + req->method + "' does not exist");
+        throw Method::Exception(fmt::format(FMT_COMPILE("Method {:?} does not exist"), req->method));
     }
     it->get()->Execute(req);
 }

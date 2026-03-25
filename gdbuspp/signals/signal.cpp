@@ -19,8 +19,11 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 #include <glib.h>
 
+#include "../glib2/utils.hpp"
 #include "emit.hpp"
 #include "group.hpp"
 #include "signal.hpp"
@@ -72,13 +75,13 @@ const bool Signal::EmitSignal(GVariant *params) const
     // and the data type this signal is declared as; to verify it is
     // as expected
     const std::string signature{GetDBusType()};
-    const std::string param_type{g_variant_get_type_string(params)};
+    const std::string param_type{glib2::DataType::Extract(params)};
     if (param_type != signature)
     {
-        std::ostringstream err;
-        err << "Signal signature does not match expectations: "
-            << param_type << " != " << signature;
-        throw Signals::Exception(err.str());
+        throw Signals::Exception(fmt::format(
+            FMT_COMPILE("Signal signature does not match expectations: {} != {}"),
+            param_type,
+            signature));
     }
 
     // Send the signal via the Signals::Emit object

@@ -134,9 +134,9 @@ int test_signal_signal(int argc, char **argv)
     auto testsig = Signals::Signal::Create<TestSignal>(sig_emit);
     for (uint32_t i = 0; i < opts.repeat_send; ++i)
     {
-        std::stringstream msg;
-        msg << "Test Signal " << std::to_string(i + 1);
-        testsig->Send(msg.str(), (i % 2), 101 + i);
+        testsig->Send(fmt::format("Test Signal {}", i + 1),
+                      (i % 2),
+                      101 + i);
     }
     return 0;
 }

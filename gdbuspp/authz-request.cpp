@@ -13,6 +13,7 @@
  */
 
 #include <string>
+#include <fmt/compile.h>
 #include <fmt/format.h>
 
 #include "authz-request.hpp"
@@ -38,24 +39,26 @@ const std::string Exception::compose_error(const Request::Ptr req,
         return errmsg;
     }
 
-    std::ostringstream r;
-    r << "Authorization failed for " << req->caller;
+    std::string operation;
     switch (req->operation)
     {
     case Object::Operation::METHOD_CALL:
-        r << " performing method call ";
+        operation = "performing method call";
         break;
     case Object::Operation::PROPERTY_GET:
-        r << " reading property ";
+        operation = "reading property";
         break;
     case Object::Operation::PROPERTY_SET:
-        r << " setting property ";
+        operation = "setting property";
         break;
     case Object::Operation::NONE:
-        r << " [NO OPERATION] ";
+        operation = "[NO OPERATION]";
     }
-    r << req->target << " in object " << req->object_path;
-    return std::string(r.str());
+    return fmt::format(FMT_COMPILE("Authorization failed for {} {} {} in object {}"),
+                       req->caller,
+                       operation,
+                       req->target,
+                       req->object_path);
 }
 
 
@@ -81,21 +84,22 @@ static inline const std::string extract_authzreq_target(const Object::Operation 
                                                         const std::string &method,
                                                         const std::string &property)
 {
-    std::string trgt = interface + ".";
+    std::string detail;
     switch (reqtype)
     {
     case Object::Operation::METHOD_CALL:
-        trgt += method;
+        detail = method;
         break;
     case Object::Operation::PROPERTY_GET:
     case Object::Operation::PROPERTY_SET:
-        trgt += property;
+        detail = property;
         break;
     default:
         throw DBus::Exception("Authz::Request::Create",
                               "Invalid request type conversion");
     }
-    return trgt;
+    return fmt::format(FMT_COMPILE("{}.{}"), interface, detail);
+    ;
 }
 
 
@@ -131,12 +135,13 @@ const std::string Authz::Request::OperationString() const noexcept
 
 std::string Authz::Request::str() const
 {
-    return fmt::format("AuthzRequest(caller={}, operation={}, path={}, interface={}, target={})",
-                       caller,
-                       OperationString(),
-                       object_path,
-                       interface,
-                       target);
+    return fmt::format(
+        FMT_COMPILE("AuthzRequest(caller={}, operation={}, path={}, interface={}, target={})"),
+        caller,
+        OperationString(),
+        object_path,
+        interface,
+        target);
 }
 
 

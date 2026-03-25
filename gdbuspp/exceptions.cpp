@@ -14,7 +14,7 @@
 
 
 #include <string>
-#include <sstream>
+#include <fmt/format.h>
 #include <gio/gio.h>
 
 #include "exceptions.hpp"
@@ -26,18 +26,24 @@ Exception::Exception(const std::string &classn,
                      const std::string &err,
                      GError *gliberr)
 {
-    std::ostringstream errbuf;
-    errbuf << err;
-    if (gliberr)
+
+    static auto add_g_error = [](GError *err) -> std::string
     {
-        g_dbus_error_strip_remote_error(gliberr);
-        errbuf << (err.empty() ? "" : " ") << std::string(gliberr->message);
-        g_error_free(gliberr);
-    }
+        if (err)
+        {
+            g_dbus_error_strip_remote_error(err);
+            std::string ret = fmt::format("{}", err->message);
+            g_error_free(err);
+            return ret;
+        }
+        return "";
+    };
+
+    std::string errbuf = fmt::format("{}{}", err, add_g_error(gliberr));
 
     // If the error is prefixed with a glib2 "GDBUs.Error:", it can be
     // split up into an error domain and an error message
-    std::string tmperror = errbuf.str();
+    std::string tmperror = errbuf;
     auto gdbuserr_start = tmperror.find("GDBus.Error:");
     if (std::string::npos != gdbuserr_start)
     {
@@ -59,10 +65,7 @@ Exception::Exception(const std::string &classn,
         error = tmperror;
     }
 
-
-    std::ostringstream s;
-    s << "[" << classn << "] " << errbuf.str();
-    classerr = s.str();
+    classerr = fmt::format("[{}] {}", classn, errbuf);
 }
 
 

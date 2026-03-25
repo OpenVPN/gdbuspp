@@ -14,6 +14,8 @@
 
 #include <string>
 #include <glib.h>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 
 #include "../glib2/utils.hpp"
 #include "../object/path.hpp"
@@ -41,7 +43,8 @@ void Group::RegisterSignal(const std::string &signal_name, const SignalArgList &
     try
     {
         (void)registered_signals.at(signal_name);
-        throw Signals::Exception("Signal '" + signal_name + "' is already registered");
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?} is already registered"),
+                                             signal_name));
     }
     catch (const std::out_of_range &)
     {
@@ -52,30 +55,29 @@ void Group::RegisterSignal(const std::string &signal_name, const SignalArgList &
 
 const std::string Group::GenerateIntrospection()
 {
-    std::ostringstream ret;
+    std::string ret;
 
-    for (const auto &sig : registered_signals)
+    for (const auto &[sig_name, sig_type] : registered_signals)
     {
-        // Prepare a temp storage to use for the D-Bus data type cache
-        std::ostringstream type;
+        std::string type_elem;
+        std::string introsp;
 
-        type << "(";
-        ret << "    <signal name='" << sig.first << "'>" << std::endl;
-        for (const auto &spec : sig.second)
+        for (const auto &spec : sig_type)
         {
-            ret << "      <arg type='" << spec.type << "' "
-                << "name='" << spec.name << "'/>" << std::endl;
-
-            // Collect data type for the argument for the type cache
-            type << spec.type;
+            type_elem.append(spec.type);
+            introsp.append(fmt::format(
+                FMT_COMPILE("      <arg name={:?} type={:?}/>\n"),
+                spec.name,
+                spec.type));
         }
-        ret << "    </signal>" << std::endl;
 
-        // Save the gathered type into the type cache
-        type << ")";
-        type_cache[sig.first] = type.str();
+        type_cache[sig_name] = fmt::format(FMT_COMPILE("({})"), type_elem);
+        ret.append(fmt::format(
+            FMT_COMPILE("    <signal name={:?}>\n{}    </signal>\n"),
+            sig_name,
+            introsp));
     }
-    return ret.str();
+    return ret;
 }
 
 
@@ -96,7 +98,7 @@ void Group::GroupCreate(const std::string &groupname)
     try
     {
         (void)signal_groups.at(groupname);
-        throw Signals::Exception("Group name '" + groupname + "' exists");
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?}"), groupname));
     }
     catch (const std::out_of_range &)
     {
@@ -116,7 +118,7 @@ void Group::GroupRemove(const std::string &groupname)
     const auto it = signal_groups.find(groupname);
     if (signal_groups.end() == it)
     {
-        throw Signals::Exception("Group name '" + groupname + "' is not created");
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?} is not created"), groupname));
     }
     signal_groups.erase(it);
 }
@@ -171,7 +173,7 @@ void Group::GroupSendGVariant(const std::string &groupname,
     }
     catch (const std::out_of_range &)
     {
-        throw Signals::Exception("Not a registered signal: " + signal_name);
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Not a registered signal: {}"), signal_name));
     }
 
     GVariant *param = glib2::Value::TupleWrap(signal_data);
@@ -180,11 +182,11 @@ void Group::GroupSendGVariant(const std::string &groupname,
     std::string param_type(g_variant_get_type_string(param));
     if (exp_type != param_type)
     {
-        std::ostringstream err;
-        err << "Invalid data type for '" << signal_name << "' "
-            << "Expected '" << exp_type << "' "
-            << "but received '" << param_type << "'";
-        throw Signals::Exception(err.str());
+        throw Signals::Exception(fmt::format(
+            FMT_COMPILE("Invalid data type for {:?} - Expected {:?} but received {:?}"),
+            signal_name,
+            exp_type,
+            param_type));
     }
 
     auto emitter = get_group_emitter(groupname, true);
@@ -218,7 +220,7 @@ Signals::Emit::Ptr Group::get_group_emitter(const std::string &groupname,
     }
     catch (const std::out_of_range &)
     {
-        throw Signals::Exception("Group name '" + groupname + "' is not created");
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?} is not created"), groupname));
     }
 }
 

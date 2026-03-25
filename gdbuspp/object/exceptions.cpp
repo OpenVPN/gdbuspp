@@ -16,8 +16,9 @@
  */
 
 #include <memory>
-#include <sstream>
 #include <string>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 #include <glib.h>
 
 #include "base.hpp"
@@ -25,13 +26,9 @@
 #include "path.hpp"
 
 /**
- *  This namespace is only used for holding library internal data.
- *
- *  The intention is to avoid hiding information useful while debugging,
- *  but at the same time keep it in a separate namespace indicating it
- *  is not to be directly exposed to the users of the library.
+ * Local anonymous namespace
  */
-namespace _private::exception {
+namespace {
 
 /**
  *  Compose a string based on details referring to a DBus::Object
@@ -46,16 +43,12 @@ static std::string compose_object_descr(const DBus::Object::Path &path,
                                         const std::string &interface,
                                         const std::string &info)
 {
-    std::ostringstream ret;
-    ret << "DBus::Object('" << path << "', '" << interface << "'";
-    if (!info.empty())
-    {
-        ret << ", " << info;
-    }
-    ret << ")";
-    return ret.str();
+    return fmt::format(FMT_COMPILE("DBus::Object({:?}, {:?}{})"),
+                       std::string(path),
+                       interface,
+                       (!info.empty() ? ", " + info : ""));
 }
-} // namespace _private::exception
+} // namespace
 
 
 namespace DBus {
@@ -65,7 +58,7 @@ Object::Exception::Exception(const Object::Path &path,
                              const std::string &errmsg,
                              GError *gliberr,
                              const std::string &object_info)
-    : DBus::Exception(_private::exception::compose_object_descr(
+    : DBus::Exception(compose_object_descr(
                           path,
                           interface,
                           object_info),
@@ -79,7 +72,7 @@ Object::Exception::Exception(const std::shared_ptr<Object::Base> obj,
                              const std::string &errmsg,
                              GError *gliberr,
                              const std::string &object_info)
-    : DBus::Exception(_private::exception::compose_object_descr(
+    : DBus::Exception(compose_object_descr(
                           obj->GetPath(), obj->GetInterface(), object_info),
                       errmsg,
                       gliberr)
@@ -91,7 +84,7 @@ Object::Exception::Exception(const Object::Base *obj,
                              const std::string &errmsg,
                              GError *gliberr,
                              const std::string &object_info)
-    : DBus::Exception(_private::exception::compose_object_descr(
+    : DBus::Exception(compose_object_descr(
                           obj->GetPath(), obj->GetInterface(), object_info),
                       errmsg,
                       gliberr)
@@ -101,7 +94,7 @@ Object::Exception::Exception(const Object::Base *obj,
 
 Object::Exception::Exception(const std::string &errmsg,
                              GError *gliberr)
-    : DBus::Exception(std::string("DBus::Object()"),
+    : DBus::Exception("DBus::Object()",
                       errmsg,
                       gliberr)
 {
@@ -119,7 +112,10 @@ Object::Property::Exception::Exception(const std::shared_ptr<Object::Base> objec
                                        const std::string &property,
                                        const std::string &errmsg,
                                        GError *gliberr)
-    : Object::Exception(object, errmsg, gliberr, "property='" + property + "'")
+    : Object::Exception(object,
+                        errmsg,
+                        gliberr,
+                        fmt::format(FMT_COMPILE("property={:?}"), property))
 {
 }
 
@@ -128,7 +124,7 @@ Object::Property::Exception::Exception(const Object::Base *object,
                                        const std::string &property,
                                        const std::string &errmsg,
                                        GError *gliberr)
-    : Object::Exception(object, errmsg, gliberr, "property='" + property + "'")
+    : Object::Exception(object, errmsg, gliberr, fmt::format("property={:?}", property))
 {
 }
 

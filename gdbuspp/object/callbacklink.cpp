@@ -15,7 +15,8 @@
  */
 
 #include <string>
-#include <sstream>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 
 #include "callbacklink.hpp"
 #include "path.hpp"
@@ -25,13 +26,9 @@ namespace Object {
 
 
 /**
- *  This namespace is only used for holding library internal data.
- *
- *  The intention is to avoid hiding information useful while debugging,
- *  but at the same time keep it in a separate namespace indicating it
- *  is not to be directly exposed to the users of the library.
+ * Local anonymous functions
  */
-namespace _private {
+namespace {
 
 /**
  *  Helper function which extracts information from a Request object
@@ -40,13 +37,11 @@ namespace _private {
  * @param req            AsyncProcess::Request::UPtr to the object
  * @return std::string   Formatted request details
  */
-static inline std::string compose_errorclass(AsyncProcess::Request::UPtr &req)
+std::string compose_errorclass(AsyncProcess::Request::UPtr &req)
 {
-    std::stringstream s;
-    s << "Object::CallbackLink{Request=" << req << "}";
-    return s.str();
+    return fmt::format(FMT_COMPILE("Object::CallbackLink{{Request={}}}"), req);
 }
-} // namespace _private
+} // namespace
 
 
 
@@ -60,9 +55,11 @@ CallbackLink::Exception::Exception(const std::string &sender,
                                    const Object::Path &path,
                                    const std::string &interf,
                                    const std::string &errm)
-    : DBus::Exception("Object::CallbackLink(sender=" + sender
-                          + ", path=" + path
-                          + ", interface=" + interf,
+    : DBus::Exception(fmt::format(
+                          FMT_COMPILE("Object::CallbackLink(sender={}, path={}, interface={}"),
+                          sender,
+                          path,
+                          interf),
                       errm,
                       nullptr)
 {
@@ -71,7 +68,7 @@ CallbackLink::Exception::Exception(const std::string &sender,
 
 CallbackLink::Exception::Exception(AsyncProcess::Request::UPtr &req,
                                    const std::string &errm)
-    : DBus::Exception(_private::compose_errorclass(req), errm, nullptr)
+    : DBus::Exception(compose_errorclass(req), errm, nullptr)
 {
 }
 

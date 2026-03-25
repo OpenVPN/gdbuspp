@@ -163,20 +163,16 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
     if (!opts.check_type.empty() && opts.check_value.size() > 0)
     {
         bool error = false;
-        std::string type(g_variant_get_type_string(event->params));
-        if (type != "(" + opts.check_type + ")")
-        {
-            fmt::println(stderr,
-                         "        Received unexpected data type:  {:?}, expected {:?}",
-                         type,
-                         opts.check_type);
 
-            error = true;
-        };
+        if (!opts.check_type.empty())
+        {
+            error = !Tests::Utils::check_data_type(fmt::format("({})", opts.check_type), event->params);
+        }
 
 
         uint32_t idx = 0;
         std::vector<std::string> values = Tests::Utils::convert_from_gvariant(event->params);
+        std::string type = glib2::DataType::Extract(event->params);
         for (const auto &v : values)
         {
             if (opts.verbose)

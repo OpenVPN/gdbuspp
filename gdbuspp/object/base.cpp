@@ -20,8 +20,6 @@
  *         available through the D-Bus service
  */
 
-
-#include <sstream>
 #include <string>
 #include <fmt/compile.h>
 #include <fmt/format.h>
@@ -88,7 +86,9 @@ void Object::Base::AddPropertyBySpec(const std::string &name,
     auto set_readonly_cb{
         [](const DBus::Object::Property::BySpec &prop, GVariant *v) -> Object::Property::Update::Ptr
         {
-            throw Object::Exception("Property '" + prop.GetName() + "' is read-only");
+            throw Object::Exception(fmt::format(
+                FMT_COMPILE("Property {:?} is read only)"),
+                prop.GetName()));
         }};
 
     Property::BySpec::Ptr prop = Property::BySpec::Create(interface_,
@@ -152,15 +152,19 @@ void Object::Base::RegisterSignals(const Signals::Group::Ptr signal_group)
 
 const std::string Object::Base::GenerateIntrospection() const
 {
-    std::ostringstream xml;
-    xml << "<node name='" << object_path_ << "'>"
-        << "  <interface name='" << interface_ << "'>"
-        << methods->GenerateIntrospection()
-        << properties->GenerateIntrospection()
-        << (signals ? signals->GenerateIntrospection() : "")
-        << "  </interface>"
-        << "</node>";
-    return std::string(xml.str());
+    return fmt::format(FMT_COMPILE(
+                           "<node name={:?}>\n"
+                           "  <interface name={:?}>\n"
+                           "{}\n"
+                           "{}\n"
+                           "{}\n"
+                           "  </interface>\n"
+                           "</node>"),
+                       std::string(object_path_),
+                       interface_,
+                       methods->GenerateIntrospection(),
+                       properties->GenerateIntrospection(),
+                       (signals ? signals->GenerateIntrospection() : ""));
 }
 
 

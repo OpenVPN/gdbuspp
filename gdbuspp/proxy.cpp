@@ -16,7 +16,7 @@
 
 #include <functional>
 #include <string>
-#include <sstream>
+#include <fmt/compile.h>
 #include <fmt/format.h>
 #include <glib.h>
 #include <gio/gio.h>
@@ -208,27 +208,23 @@ class Proxy
         GUnixFDList *caller_fdlist = g_unix_fd_list_new();
         if (!caller_fdlist)
         {
-            std::ostringstream erm;
-            erm << "Failed allocating file descriptor list for "
-                << "'" << method << "'";
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
                                          method,
-                                         erm.str());
+                                         fmt::format(FMT_COMPILE("Failed allocating file descriptor list for '{}'"),
+                                                     method));
         }
 
         GError *error = nullptr;
         if (g_unix_fd_list_append(caller_fdlist, fd, &error) < 0)
         {
-            std::ostringstream erm;
-            erm << "Failed preparing file descriptor for "
-                << "'" << method << "'";
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
                                          method,
-                                         erm.str(),
+                                         fmt::format(FMT_COMPILE("Failed preparing file descriptor for '{}'"),
+                                                     method),
                                          error);
         }
         return do_call_with_fdlist(method, params, caller_fdlist);
@@ -371,14 +367,12 @@ class Proxy
             return_fd = g_unix_fd_list_get(ret_fd, 0, &error);
             if (return_fd < 0 || error)
             {
-                std::ostringstream erm;
-                erm << "Error retrieving file descriptor from "
-                    << "'" + method + "'";
                 throw DBus::Proxy::Exception(destination,
                                              object_path,
                                              interface,
                                              method,
-                                             erm.str(),
+                                             fmt::format(FMT_COMPILE("Error retrieving file descriptor from '{}'"),
+                                                         method),
                                              error);
             }
             glib2::Utils::unref_fdlist(ret_fd);
@@ -467,18 +461,15 @@ const std::string Exception::compose_error(const std::string &destination,
                                            const std::string &interface,
                                            const std::string &method) const
 {
-    std::ostringstream err;
-    std::ostringstream method_info{};
-    if (!method.empty())
-    {
-        method_info << "', '" << method;
-    }
-    err << "Proxy::Client("
-        << "'" << destination << "', "
-        << "'" << path << "', "
-        << "'" << interface << method_info.str()
-        << "')";
-    return err.str();
+    std::string method_detail = (method.empty()
+                                     ? ""
+                                     : fmt::format(FMT_COMPILE(", '{}'"),
+                                                   method));
+    return fmt::format(FMT_COMPILE("Proxy::Client('{}', '{}', '{}'{})"),
+                       destination,
+                       path,
+                       interface,
+                       method_detail);
 }
 
 
@@ -510,9 +501,8 @@ Client::Client(Connection::Ptr conn, const std::string &dest, uint8_t timeout)
         auto srvqry = Proxy::Utils::DBusServiceQuery::Create(connection);
         if (!srvqry->CheckServiceAvail(destination, timeout))
         {
-            throw DBus::Proxy::Exception("Service '"
-                                         + destination
-                                         + "' cannot be reached");
+            throw DBus::Proxy::Exception(
+                fmt::format(FMT_COMPILE("Service '{}' cannot be reached"), destination));
         }
     }
 }
@@ -589,7 +579,7 @@ GVariant *Client::GetPropertyGVariant(const Object::Path &object_path,
                      destination,
                      object_path,
                      "org.freedesktop.DBus.Properties",
-                     "Get(" + property_name + ")");
+                     fmt::format(FMT_COMPILE("Get({})"), property_name));
 
     // The Get method needs the property interface scope of the property
     // and the property name
@@ -624,7 +614,7 @@ void Client::SetPropertyGVariant(const Object::Path &object_path,
                      destination,
                      object_path,
                      "org.freedesktop.DBus.Properties",
-                     "Set(" + property_name + ")");
+                     fmt::format(FMT_COMPILE("Set({})"), property_name));
 
     // The Set method needs the property interface scope of the property
     // and the property name

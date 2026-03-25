@@ -246,9 +246,7 @@ class PropertyTests : public DBus::Object::Base
 
     const bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
-        std::ostringstream ar;
-        ar << request;
-        Log(__func__, "Authorization request approved: " + ar.str());
+        Log(__func__, fmt::format("Authorization request approved: {}", request));
         return true;
     }
 
@@ -451,11 +449,9 @@ class PropertyTests : public DBus::Object::Base
         std::vector<key_value> dataset;
         for (int i = 0; i < 10; i++)
         {
-            std::ostringstream str;
-            str << "Element #" << i;
-            dataset.push_back({(i + 1),        // .key
-                               str.str(),      // .value
-                               (i % 2 == 0)}); // .even
+            dataset.push_back({(i + 1),                       // .key
+                               fmt::format("Element #{}", i), // .value
+                               (i % 2 == 0)});                // .even
         }
 
         // Add the complete array/vector of key_value elements.  The
@@ -475,7 +471,7 @@ class PropertyTests : public DBus::Object::Base
 
     void Log(const std::string &func, const std::string &msg) const
     {
-        log->Log("PropertyTests::" + func, msg);
+        log->Log(fmt::format("PropertyTests::{}", func), msg);
     }
 
 
@@ -664,9 +660,7 @@ class MethodTests : public DBus::Object::Base
 
     const bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
-        std::ostringstream ar;
-        ar << request;
-        Log(__func__, "Authorization request approved: " + ar.str());
+        Log(__func__, fmt::format("Authorization request approved: {}", request));
         return true;
     }
 
@@ -678,7 +672,7 @@ class MethodTests : public DBus::Object::Base
 
     void Log(const std::string &func, const std::string &msg) const
     {
-        log->Log("MethodTests::" + func, msg);
+        log->Log(fmt::format("MethodTests::{}", func), msg);
     }
 
 
@@ -760,7 +754,7 @@ class MethodTests : public DBus::Object::Base
         {
             fd = open(fname.c_str(), O_RDONLY);
             args->SendFD(fd);
-            Log(__func__, "File '" + fname + "' opened, fd=" + std::to_string(fd));
+            Log(__func__, fmt::format("File {:?} opened, fd={}", fname, fd));
         }
         catch (const DBus::AsyncProcess::Exception &excp)
         {
@@ -791,14 +785,14 @@ class MethodTests : public DBus::Object::Base
             glib2::Builder::Add<uint32_t>(bld, fileinfo.st_gid);
             glib2::Builder::Add<uint64_t>(bld, fileinfo.st_size);
             ret = glib2::Builder::Finish(bld);
-            Log(__func__, "fstat(" + std::to_string(fd) + "') successful");
+            Log(__func__, fmt::format("fstat({}) successful", fd));
         }
         else
         {
-            Log(__func__, "fstat(" + std::to_string(fd) + "') failed!");
-            throw DBus::Object::Exception(this,
-                                          "fstat() call failed: "
-                                              + std::string(std::strerror(errno)));
+            Log(__func__, fmt::format("fstat({}) failed!", fd));
+            throw DBus::Object::Exception(
+                this,
+                fmt::format("fstat() call failed: {}", std::strerror(errno)));
         }
 
         args->SetMethodReturn(ret);
@@ -918,9 +912,8 @@ class MainHandler : public DBus::Object::Base
 
     const bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
-        std::ostringstream ar;
-        ar << request;
-        log->Log("SimpleHandler::Authorize", "Authorization request approved: " + ar.str());
+        log->Log("SimpleHandler::Authorize",
+                 fmt::format("Authorization request approved: {}", request));
         return true;
     }
 

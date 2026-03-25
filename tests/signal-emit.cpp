@@ -14,6 +14,7 @@
 
 #include <limits>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <getopt.h>
 #include <fmt/printf.h>

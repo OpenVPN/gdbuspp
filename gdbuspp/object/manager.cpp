@@ -16,6 +16,8 @@
 #include <string>
 #include <map>
 #include <mutex>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 #include <gio/gio.h>
 
 #include "../async-process.hpp"
@@ -56,8 +58,9 @@ Manager::Exception::Exception(const std::string &errmsg, GError *gliberr)
 Manager::Exception::Exception(const Object::Base::Ptr obj,
                               const std::string &errmsg,
                               GError *gliberr)
-    : DBus::Exception("ObjectManager[path=" + obj->GetPath()
-                          + ", interface=" + obj->GetInterface() + "]",
+    : DBus::Exception(fmt::format(FMT_COMPILE("ObjectManager[path={}, interface{}]"),
+                                  obj->GetPath(),
+                                  obj->GetInterface()),
                       errmsg,
                       gliberr)
 {
@@ -152,9 +155,9 @@ void Manager::RemoveObject(const Object::Path &path)
     }
     catch (const std::out_of_range &)
     {
-        throw Manager::Exception("RemoveObject: "
-                                 "Object path not found: "
-                                 + path);
+        throw Manager::Exception(fmt::format(
+            FMT_COMPILE("RemoveObject: Object path not found: {}"),
+            path));
     }
 }
 
@@ -169,9 +172,9 @@ void Manager::AttachRemoveCallback(const Object::Path &path,
     }
     catch (const std::out_of_range &)
     {
-        throw Manager::Exception("AttachRemoveCallback: "
-                                 "Object path not found: "
-                                 + path);
+        throw Manager::Exception(fmt::format(
+            FMT_COMPILE("AttachRemoveCallback: Object path not found: {}"),
+            path));
     }
 }
 
@@ -206,15 +209,17 @@ void Manager::_destructObjectCallback(const Object::Path &path)
     const auto path_it = path_index.find(path);
     if (path_index.end() == path_it)
     {
-        throw Manager::Exception("DestructObject: Object path not found: " + path);
+        throw Manager::Exception(fmt::format(
+            FMT_COMPILE("DestructObject: Object path not found: {}"), std::string(path)));
     }
 
     const auto obj_it = object_map.find(path_it->second);
     if (object_map.end() == obj_it)
     {
-        throw Manager::Exception("DestructObject: Object index "
-                                 + std::to_string(path_it->second)
-                                 + " not found for path: " + path);
+        throw Manager::Exception(fmt::format(
+            FMT_COMPILE("DestructObject: Object index {} not found for path {}"),
+            path_it->second,
+            std::string(path)));
     }
     object_map.erase(obj_it);
     path_index.erase(path_it);

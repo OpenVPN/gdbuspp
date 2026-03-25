@@ -16,6 +16,8 @@
  */
 
 #include <string>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 #include <glib.h>
 #include <gio/gio.h>
 
@@ -27,15 +29,16 @@ namespace Utils {
 
 Exception::Exception(const std::string &err,
                      GError *gliberr)
-    : DBus::Exception(std::string("glib2::Utils::" + std::string(__func__)),
+    : DBus::Exception(fmt::format(FMT_COMPILE("glib2::Utils::{}"), __func__),
                       err,
                       gliberr) {};
 
 Exception::Exception(const std::string &callfunc,
                      const std::string &err,
                      GError *gliberr)
-    : DBus::Exception(std::string("glib2::Utils::" + std::string(__func__)
-                                  + " [" + callfunc + "]"),
+    : DBus::Exception(fmt::format(FMT_COMPILE("glib2::Utils::{} [{}]"),
+                                  __func__,
+                                  callfunc),
                       err,
                       gliberr) {};
 
@@ -82,24 +85,22 @@ void checkParams(const char *func,
 
     if (format != typestr || (container && num > 0 && num != nchildren))
     {
-        std::ostringstream err;
-        err << "Incorrect parameter format: "
-            << (params ? typestr : "<null>")
-            << ", expected " << format;
+        std::string details;
         if (nchildren > 0 && num > 0)
         {
-            err << " (elements expected: " << std::to_string(num);
-            if (params)
-            {
-                err << ", received: " << std::to_string(nchildren);
-            }
-            else
-            {
-                err << ", received none";
-            }
-            err << ")";
+            details = fmt::format(
+                FMT_COMPILE(" (elements expected: {}, received: {})"),
+                num,
+                (params ? std::to_string(nchildren) : "none"),
+                (params ? std::to_string(nchildren) : ""));
         }
-        throw glib2::Utils::Exception(func, err.str());
+
+        throw glib2::Utils::Exception(func,
+                                      fmt::format(
+                                          FMT_COMPILE("Incorrect parameter format: {}, expected {}{}"),
+                                          (params ? typestr : "<null>"),
+                                          format,
+                                          details));
     }
 }
 

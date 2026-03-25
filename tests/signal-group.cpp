@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 #include <getopt.h>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -274,7 +276,11 @@ int test_signal_group(int argc, char **argv)
                 catch (const DBus::Signals::Exception &excp)
                 {
                     std::string err(excp.what());
-                    const std::string expect_error("Invalid data type for 'Debug' Expected '(tsss)' but received '(s)'");
+                    const std::string expect_error(fmt::format(
+                        FMT_COMPILE("Invalid data type for {:?} - Expected {:?} but received {:?}"),
+                        "Debug",
+                        "(tsss)",
+                        "(s)"));
                     if (err.find(expect_error) != std::string::npos)
                     {
                         if (!opts.quiet)
@@ -285,7 +291,8 @@ int test_signal_group(int argc, char **argv)
                     else
                     {
                         throw DBus::Exception("signal-group-test",
-                                              "log->Invalid() threw unexpected exception:" + err);
+                                              fmt::format("log->Invalid() threw unexpected exception: {}",
+                                                          err));
                     }
                 }
             }
