@@ -122,6 +122,14 @@ class ResultLog
 
 
     /**
+     *  Adds a human readable dump of a GVariant object
+     *
+     * @param prefix   Prefix text before the dump
+     * @param data     GVariant object to dump
+     */
+    void AddGVariantDump(const std::string &prefix, GVariant *data);
+
+    /**
      *   Print the final test report summary.
      *
      *  This will print a summary of number of successful and failed tests

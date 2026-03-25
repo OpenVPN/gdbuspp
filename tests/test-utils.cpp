@@ -151,6 +151,13 @@ void ResultLog::AddLogLine(const std::string &line)
 }
 
 
+void ResultLog::AddGVariantDump(const std::string &prefix, GVariant *data)
+{
+    AddLogLine(fmt::format(FMT_COMPILE("{} type: {}"), prefix, glib2::DataType::Extract(data)));
+    AddLogLine(fmt::format(FMT_COMPILE("{} data: {}"), prefix, glib2::Utils::DumpToString(data)));
+}
+
+
 void ResultLog::RunFunctionTest(const std::string &descr,
                                 DBus::Proxy::Client::Ptr proxy,
                                 std::function<bool()> &&test_func,
