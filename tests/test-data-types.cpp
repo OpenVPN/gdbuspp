@@ -14,6 +14,7 @@
  */
 
 #include <algorithm>
+#include <functional>
 #include <string>
 #include <sstream>
 #include <fmt/printf.h>
@@ -226,8 +227,7 @@ TestResult compare_vector(const std::string &msg,
 }
 
 
-template <typename FUNC>
-inline int run_test(FUNC &&testfunc)
+int run_test(std::function<TestResult()> &&testfunc)
 {
     TestResult test = testfunc();
     fmt::println("{}: {}",
