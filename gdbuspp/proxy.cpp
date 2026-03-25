@@ -204,6 +204,16 @@ class Proxy
                          GVariant *params,
                          int &fd)
     {
+        if (fd < 0)
+        {
+            throw DBus::Proxy::Exception(destination,
+                                         object_path,
+                                         interface,
+                                         method,
+                                         "Invalid file descriptor (< 0)");
+        }
+
+
         // File descriptor passed on by the caller
         GUnixFDList *caller_fdlist = g_unix_fd_list_new();
         if (!caller_fdlist)
