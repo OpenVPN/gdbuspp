@@ -303,10 +303,7 @@ int test_proxy_client(int argc, char **argv)
             GVariant *res = prx->Call(options.preset, options.method, data);
             log.AddGVariantDump("GVariant response", res);
 
-            if (!Tests::Utils::log_data_type_value_check(log,
-                                                         options.check_type,
-                                                         options.check_response,
-                                                         res))
+            if (!log.CheckDataTypeValue(options.check_type, options.check_response, res))
             {
                 if (options.quiet)
                 {
@@ -468,10 +465,7 @@ int test_proxy_client(int argc, char **argv)
             log.AddGVariantDump("GVariant response", res);
             log.AddLogLine(fmt::format("Get Property {}", fetch_content(prx, options.preset, options.property, res)));
 
-            if (!Tests::Utils::log_data_type_value_check(log,
-                                                         options.check_type,
-                                                         options.check_response,
-                                                         res))
+            if (!log.CheckDataTypeValue(options.check_type, options.check_response, res))
             {
                 if (options.quiet)
                 {

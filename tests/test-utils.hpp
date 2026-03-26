@@ -120,7 +120,6 @@ class ResultLog
      */
     void AddLogLine(const std::string &line);
 
-
     /**
      *  Adds a human readable dump of a GVariant object
      *
@@ -128,6 +127,19 @@ class ResultLog
      * @param data     GVariant object to dump
      */
     void AddGVariantDump(const std::string &prefix, GVariant *data);
+
+    /**
+     *  Checks a GVariant object's data type and values against an
+     *  expected type and content.
+     *
+     * @param type   std::string with the D-Bus data type specification
+     * @param value  std::string with the expected glib2::Utils::DumpToString() result
+     * @param data   GVariant object to check
+     * @return bool Returns true on a correct match.
+     */
+    bool CheckDataTypeValue(const std::string &type,
+                            const std::string &value,
+                            GVariant *data);
 
     /**
      *   Print the final test report summary.
@@ -189,22 +201,7 @@ bool check_data_type(const std::string &expect_type, GVariant *data);
  */
 bool check_data_value(const std::string &expect_value, GVariant *data);
 
-/**
- *  Test and log the data type and value of a GVariant object.
- *  This calls check_data_type() and check_data_value() under the hood.
- *  See those functions for details on the expected format of the type and
- *  value arguments.
- *
- * @param log    ResultLog object where the results are logged
- * @param type   std::string with the expected data type string
- * @param value  std::string with the expected data value
- * @param data   GVariant * to object to validate
- * @returns On successful validation, true is returned. Otherwise false
- */
-bool log_data_type_value_check(ResultLog &log,
-                               const std::string &type,
-                               const std::string &value,
-                               GVariant *data);
+
 /**
  *  Helper function to generate GVariant object of specific types where the
  *  value is passed to this function as a std::string.

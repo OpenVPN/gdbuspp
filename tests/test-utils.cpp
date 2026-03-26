@@ -157,6 +157,37 @@ void ResultLog::AddGVariantDump(const std::string &prefix, GVariant *data)
 }
 
 
+bool ResultLog::CheckDataTypeValue(const std::string &type,
+                                   const std::string &value,
+                                   GVariant *data)
+{
+    bool ret = true;
+    if (!type.empty())
+    {
+        bool r = check_data_type(type, data);
+        AddLogLine(fmt::format(
+            FMT_COMPILE("Checking expected data type: {}"), (r ? "Pass" : "Fail")));
+        if (!r)
+        {
+            AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), type));
+            ret = false;
+        }
+    }
+    if (!value.empty())
+    {
+        bool r = check_data_value(value, data);
+        AddLogLine(fmt::format(
+            FMT_COMPILE("Checking expected data value: {}"), (r ? "Pass" : "Fail")));
+        if (!r)
+        {
+            AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), value));
+            ret = false;
+        }
+    }
+    return ret;
+}
+
+
 void ResultLog::RunFunctionTest(const std::string &descr,
                                 DBus::Proxy::Client::Ptr proxy,
                                 std::function<bool()> &&test_func,
@@ -341,37 +372,6 @@ bool check_data_value(const std::string &expect_value, GVariant *data)
     return ret;
 }
 
-
-bool log_data_type_value_check(ResultLog &log,
-                               const std::string &type,
-                               const std::string &value,
-                               GVariant *data)
-{
-    bool ret = true;
-    if (!type.empty())
-    {
-        bool r = check_data_type(type, data);
-        log.AddLogLine(fmt::format(
-            FMT_COMPILE("Checking expected data type: {}"), (r ? "Pass" : "Fail")));
-        if (!r)
-        {
-            log.AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), type));
-            ret = false;
-        }
-    }
-    if (!value.empty())
-    {
-        bool r = check_data_value(value, data);
-        log.AddLogLine(fmt::format(
-            FMT_COMPILE("Checking expected data value: {}"), (r ? "Pass" : "Fail")));
-        if (!r)
-        {
-            log.AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), value));
-            ret = false;
-        }
-    }
-    return ret;
-}
 
 
 /**
