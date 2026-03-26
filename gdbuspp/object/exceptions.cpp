@@ -44,7 +44,7 @@ static std::string compose_object_descr(const DBus::Object::Path &path,
                                         const std::string &info)
 {
     return fmt::format(FMT_COMPILE("DBus::Object({:?}, {:?}{})"),
-                       std::string(path),
+                       path,
                        interface,
                        (!info.empty() ? ", " + info : ""));
 }

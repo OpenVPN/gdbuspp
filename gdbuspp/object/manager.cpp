@@ -210,7 +210,7 @@ void Manager::_destructObjectCallback(const Object::Path &path)
     if (path_index.end() == path_it)
     {
         throw Manager::Exception(fmt::format(
-            FMT_COMPILE("DestructObject: Object path not found: {}"), std::string(path)));
+            FMT_COMPILE("DestructObject: Object path not found: {}"), path));
     }
 
     const auto obj_it = object_map.find(path_it->second);
@@ -219,7 +219,7 @@ void Manager::_destructObjectCallback(const Object::Path &path)
         throw Manager::Exception(fmt::format(
             FMT_COMPILE("DestructObject: Object index {} not found for path {}"),
             path_it->second,
-            std::string(path)));
+            path));
     }
     object_map.erase(obj_it);
     path_index.erase(path_it);

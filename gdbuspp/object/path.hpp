@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <fmt/ostream.h>
 
 #include "exceptions.hpp"
 
@@ -63,3 +64,8 @@ class Path : public std::string
 };
 
 } // namespace DBus::Object
+
+template <>
+struct fmt::formatter<DBus::Object::Path> : ostream_formatter
+{
+};

@@ -160,7 +160,7 @@ const std::string Object::Base::GenerateIntrospection() const
                            "{}\n"
                            "  </interface>\n"
                            "</node>"),
-                       std::string(object_path_),
+                       object_path_,
                        interface_,
                        methods->GenerateIntrospection(),
                        properties->GenerateIntrospection(),
