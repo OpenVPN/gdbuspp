@@ -398,9 +398,9 @@ void Callback::Execute(AsyncProcess::Request::UPtr &req)
 
 #ifdef GDBUSPP_INTERNAL_DEBUG
     GVariant *result = method_args->GetReturnArgs();
-    GDBUSPP_LOG("Callback::Execute (return) - "
-                << req << " - Result: "
-                << (result ? glib2::Utils::DumpToString(result) : "(n/a)"));
+    GDBUSPP_LOG("Callback::Execute (return) - {} - Result: {}",
+                req,
+                glib2::Utils::DumpToString(result));
 #endif
 
     method_args->PrepareResponse(req);

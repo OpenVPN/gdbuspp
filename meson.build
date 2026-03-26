@@ -75,6 +75,7 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/credentials/exceptions.cpp',
                 'gdbuspp/credentials/query.cpp',
                 'gdbuspp/exceptions.cpp',
+                'gdbuspp/features/debug-log.cpp',
                 'gdbuspp/features/idle-detect.cpp',
                 'gdbuspp/mainloop.cpp',
                 'gdbuspp/object/base.cpp',

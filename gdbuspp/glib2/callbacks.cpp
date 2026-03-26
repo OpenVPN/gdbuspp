@@ -41,7 +41,7 @@ void _int_callback_name_acquired(GDBusConnection *conn,
 {
     DBus::Service *service = static_cast<DBus::Service *>(this_ptr);
     service->BusNameAcquired(std::string(name));
-    GDBUSPP_LOG("Service registered:" << name);
+    GDBUSPP_LOG("Service registered: {}", name);
     service->RunIdleDetector(true);
 }
 
@@ -82,8 +82,9 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
             //  Authorize this request before starting to process the request
             auto azreq = Authz::Request::Create(req);
             bool authzres = req->object->Authorize(azreq);
-            GDBUSPP_LOG("ProcessPool (Authorizaion): "
-                        << req << " Result: " << (authzres ? "Allow" : "Deny"));
+            GDBUSPP_LOG("ProcessPool (Authorizaion): {} Result: {}",
+                        req,
+                        (authzres ? "Allow" : "Deny"));
             if (!authzres)
             {
                 // Authz failed; stop the request and return an error
@@ -97,7 +98,7 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
             // will handle setting the D-Bus response.
             if (Object::Operation::METHOD_CALL == req->request_type)
             {
-                GDBUSPP_LOG("ProcessPool - Request: " << req);
+                GDBUSPP_LOG("ProcessPool - Request: {}", req);
                 req->object->MethodCall(req);
             }
         }
@@ -125,7 +126,7 @@ void _int_pool_processpool_cb(void *req_ptr, void *pool_data)
             // TODO:  Extend this to include ReqType::GETPROP once that
             //        path is used here.  ReqType::SETPROP will probably
             //        not benefit much from going the async-route.
-            GDBUSPP_LOG("ProcessPool - Process Pool Method Call FAILED: " << excp.what())
+            GDBUSPP_LOG("ProcessPool - Process Pool Method Call FAILED: {}", excp.what());
             if (Object::Operation::METHOD_CALL == req->request_type)
             {
                 GError *dbuserr = g_dbus_error_new_for_dbus_error(req->error_domain.c_str(),
@@ -183,7 +184,7 @@ void _int_dbusobject_callback_method_call(GDBusConnection *conn,
     try
     {
         AsyncProcess::Request::UPtr req = cbl->NewObjectOperation(conn, sender, obj_path, intf_name);
-        GDBUSPP_LOG("Method Callback (Queuing): " << req);
+        GDBUSPP_LOG("Method Callback (Queuing): {}", req);
         req->MethodCall(meth_name, params, invoc);
         cbl->QueueOperation(req);
 
@@ -196,7 +197,7 @@ void _int_dbusobject_callback_method_call(GDBusConnection *conn,
     }
     catch (const DBus::Exception &excp)
     {
-        GDBUSPP_LOG("Method Callback (Queuing FAILED): " << excp.what());
+        GDBUSPP_LOG("Method Callback (Queuing FAILED): {}", excp.what());
         excp.SetDBusError(invoc);
     }
 }
@@ -242,8 +243,9 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         auto azreq = Authz::Request::Create(req);
 
         bool authzres = cbl->object->Authorize(azreq);
-        GDBUSPP_LOG("Get Property Callback (Authorizaion): "
-                    << req << " Result: " << (authzres ? "Allow" : "Deny"));
+        GDBUSPP_LOG("Get Property Callback (Authorizaion): {} Result: {}",
+                    req,
+                    (authzres ? "Allow" : "Deny"));
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
@@ -255,7 +257,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         // if not return an error
         if (!cbl->object->PropertyExists(property_name))
         {
-            GDBUSPP_LOG("Get Property Callback FAIL:" << cbl->object);
+            GDBUSPP_LOG("Get Property Callback FAIL: {}", cbl->object);
             throw Object::Property::Exception(cbl->object, "property_name", "Property not found");
         }
 
@@ -263,39 +265,31 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         GVariant *value = cbl->object->GetProperty(property_name);
         if (nullptr == value)
         {
-            GDBUSPP_LOG("GetProperty('" << property_name << "') "
-                                        << "returned nullptr: "
-                                        << cbl->object);
+            GDBUSPP_LOG("GetProperty({:?}) returned nullptr: {}", property_name, cbl->object);
             throw Object::Property::Exception(cbl->object,
                                               property_name,
                                               "NULL/nullptr value is not allowed");
         }
-        GDBUSPP_LOG("Get Property Callback (Return): "
-                    << req
-                    << " - Value: " << glib2::Utils::DumpToString(value));
+        GDBUSPP_LOG("Get Property Callback (Return): {} - Value: {}",
+                    req,
+                    glib2::Utils::DumpToString(value));
         return value;
     }
     catch (const Object::Property::Exception &excp)
     {
-        GDBUSPP_LOG("Get Property Callback FAIL:"
-                    << " -- Property:" << property_name
-                    << " -- ERROR: " << excp.what());
+        GDBUSPP_LOG("Get Property Callback FAIL -- Property: {:?} -- ERROR: {}", property_name, excp.what());
         excp.SetDBusErrorProperty(error);
         return nullptr;
     }
     catch (const Authz::Exception &excp)
     {
-        GDBUSPP_LOG("Get Property Authorization FAIL:"
-                    << " -- Property:" << property_name
-                    << " -- ERROR: " << excp.what());
+        GDBUSPP_LOG("Get Property Authorization FAIL -- Property: {} -- ERROR: {}", property_name, excp.what());
         excp.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_ACCESS_DENIED);
         return nullptr;
     }
     catch (const DBus::Exception &excp)
     {
-        GDBUSPP_LOG("Get Property Callback FAIL (DBus::Exception):"
-                    << " -- Property:" << property_name
-                    << " -- ERROR: " << excp.what());
+        GDBUSPP_LOG("Get Property Callback FAIL (DBus::Exception) -- Property: {:?} -- ERROR: {}", property_name, excp.what());
         excp.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED);
         return nullptr;
     }
@@ -340,8 +334,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         req->SetProperty(property_name, value);
         auto azreq = Authz::Request::Create(req);
         bool authzres = cbl->object->Authorize(azreq);
-        GDBUSPP_LOG("Set Property Callback (Authorizaion): "
-                    << req << " Result: " << (authzres ? "Allow" : "Deny"));
+        GDBUSPP_LOG("Set Property Callback (Authorizaion): {} Result: {}", req, (authzres ? "Allow" : "Deny"));
         if (!authzres)
         {
             // Authz failed; stop the request and return an error
@@ -356,13 +349,13 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
         if (cbl->object->PropertyExists(property_name))
         {
             updated_vals = cbl->object->SetProperty(property_name, value);
-            GDBUSPP_LOG("Set Property Callback (Return): "
-                        << req
-                        << " - New value: " << glib2::Utils::DumpToString(value));
+            GDBUSPP_LOG("Set Property Callback (Return): {} - New value: {}",
+                        req,
+                        glib2::Utils::DumpToString(value));
         }
         else
         {
-            GDBUSPP_LOG("Set Property Callback FAIL:" << cbl->object);
+            GDBUSPP_LOG("Set Property Callback FAIL: {}", cbl->object);
             throw Object::Property::Exception(cbl->object,
                                               property_name,
                                               "Property not found");
@@ -384,7 +377,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
                                           &local_err);
             if (local_err)
             {
-                GDBUSPP_LOG("Set Property Callback FAIL:" << cbl->object);
+                GDBUSPP_LOG("Set Property Callback FAIL: {}", cbl->object);
                 throw Object::Property::Exception(cbl->object,
                                                   property_name,
                                                   "Failed signalign new property value",
@@ -399,25 +392,25 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
     }
     catch (const Object::Exception &err)
     {
-        GDBUSPP_LOG("Set Property Callback FAIL:"
-                    << " -- Property:" << property_name
-                    << " -- ERROR: " << err.what());
+        GDBUSPP_LOG("Set Property Callback FAIL -- Property: {} -- ERROR: {}",
+                    property_name,
+                    err.what());
         err.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED);
         return false;
     }
     catch (const Authz::Exception &err)
     {
-        GDBUSPP_LOG("Set Property Authorization FAIL:"
-                    << " -- Property:" << property_name
-                    << " -- ERROR: " << err.what());
+        GDBUSPP_LOG("Set Property Authorization FAIL -- Property: {} -- ERROR: ",
+                    property_name,
+                    err.what());
         err.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_ACCESS_DENIED);
         return false;
     }
     catch (const DBus::Exception &err)
     {
-        GDBUSPP_LOG("Set Property Callback FAIL (DBus::Exception):"
-                    << " -- Property:" << property_name
-                    << " -- ERROR: " << err.what());
+        GDBUSPP_LOG("Set Property Callback FAIL (DBus::Exception) -- Property: {} -- ERROR: {}",
+                    property_name,
+                    err.what());
         err.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED);
         return false;
     }
@@ -438,7 +431,7 @@ void _int_dbusobject_callback_destruct(void *this_ptr)
     Object::Manager::Ptr om = cbl->manager.lock();
     if (om)
     {
-        GDBUSPP_LOG("D-Bus Object Desctruct: " << cbl->object);
+        GDBUSPP_LOG("D-Bus Object Desctruct: {}", cbl->object);
         om->IdleActivityUpdate();
         om->_destructObjectCallback(cbl->object->GetPath());
         // NOTE: cbl is no longer valid after this call
@@ -486,14 +479,13 @@ void _int_dbus_connection_signal_handler(GDBusConnection *conn,
     const char *busname = sigsub->target->GetBusName();
     if (busname && strcmp(sender, busname) != 0)
     {
-        GDBUSPP_LOG("SIGNAL MISMATCH:" << sigsub->target << std::endl
-                                       << ", sender=" << sender);
+        GDBUSPP_LOG("SIGNAL MISMATCH: {}\n\tsender={}", sigsub->target, sender);
         // This subscription does not expect this sender
         return;
     }
 
     auto event = Signals::Event::Create(sender, obj_path, intf_name, sign_name, params);
-    GDBUSPP_LOG("Signal Callback:" << event);
+    GDBUSPP_LOG("Signal Callback: {}", event);
     sigsub->callback(event);
 }
 

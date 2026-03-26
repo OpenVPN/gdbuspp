@@ -261,13 +261,13 @@ class Proxy
      */
     GVariant *do_call(const std::string &method, GVariant *params)
     {
-        GDBUSPP_LOG("Proxy::Client::Call("
-                    << "'" << destination << "', "
-                    << "'" << object_path << "', "
-                    << "'" << interface << "', "
-                    << "'" << method << "', "
-                    << "params=" << glib2::Utils::DumpToString(params)
-                    << ")");
+        GDBUSPP_LOG("Proxy::Client::Call({:?}, {:?}, {:?}, {:?}, params={})",
+                    destination,
+                    object_path,
+                    interface,
+                    method,
+                    glib2::Utils::DumpToString(params));
+
         GError *err = nullptr;
         GVariant *ret = g_dbus_proxy_call_sync(proxy,
                                                method.c_str(),
@@ -295,13 +295,12 @@ class Proxy
      */
     void do_call_no_response(const std::string &method, GVariant *params)
     {
-        GDBUSPP_LOG("Proxy::Client::Call("
-                    << "'" << destination << "', "
-                    << "'" << object_path << "', "
-                    << "'" << interface << "', "
-                    << "'" << method << "', "
-                    << "params=" << glib2::Utils::DumpToString(params)
-                    << ") [NO RESPONSE CALL]");
+        GDBUSPP_LOG("Proxy::Client::Call({:?}, {:?}, {:?}, {:?}, params={}) [ NO RESPONSE CALL]",
+                    destination,
+                    object_path,
+                    interface,
+                    method,
+                    glib2::Utils::DumpToString(params));
 
         g_dbus_proxy_call(proxy,
                           method.c_str(),
@@ -350,15 +349,13 @@ class Proxy
                                          "D-Bus connection does not support file descriptor passing");
         }
 
-        GDBUSPP_LOG("Proxy::Client::"
-                    << (caller_fdlist ? "SendFD" : "GetFD")
-                    << "("
-                    << "'" << destination << "', "
-                    << "'" << object_path << "', "
-                    << "'" << interface << "', "
-                    << "'" << method << "', "
-                    << "params=" << glib2::Utils::DumpToString(params)
-                    << ") ");
+        GDBUSPP_LOG("Proxy::Client::{}({:?}, {:?}, {:?}, {:?}, params={})",
+                    (caller_fdlist ? "SendFD" : "GetFD"),
+                    destination,
+                    object_path,
+                    interface,
+                    method,
+                    glib2::Utils::DumpToString(params));
 
         GUnixFDList *ret_fd = nullptr;
         GError *error = nullptr;
@@ -409,13 +406,12 @@ class Proxy
     {
         if (!res || error)
         {
-            GDBUSPP_LOG("Proxy::Client call result ("
-                        << "'" << destination << "', "
-                        << "'" << object_path << "', "
-                        << "'" << interface << "', "
-                        << "'" << method << "'"
-                        << ") ERROR:"
-                        << (error ? error->message : "(n/a)"));
+            GDBUSPP_LOG("Proxy::Client call result ({:?}, {:?}, {:?}, {:?}) ERROR: {}",
+                        destination,
+                        object_path,
+                        interface,
+                        method,
+                        (error ? error->message : "(n/a)"));
             if (res)
             {
                 g_variant_unref(res);
@@ -429,14 +425,12 @@ class Proxy
                                          err,
                                          error);
         }
-        GDBUSPP_LOG("Proxy::Client call result ("
-                    << "'" << destination << "', "
-                    << "'" << object_path << "', "
-                    << "'" << interface << "', "
-                    << "'" << method << "'"
-                    << ") "
-                    << "Result: "
-                    << glib2::Utils::DumpToString(res));
+        GDBUSPP_LOG("Proxy::Client call result ({:?}, {:?}, {:?}, {:?}) Result: {}",
+                    destination,
+                    object_path,
+                    interface,
+                    method,
+                    glib2::Utils::DumpToString(res));
     }
 };
 

@@ -19,14 +19,22 @@
 
 #ifdef GDBUSPP_INTERNAL_DEBUG
 
-#include <iostream>
+#include <string_view>
+#include <fmt/compile.h>
+#include <fmt/format.h>
 
-#define GDBUSPP_LOG(msg) std::cerr << "[GDBus++ DEBUG (pid:" << getpid() << ") "                     \
-                                   << "{" << __FILE__ << ":" << __LINE__ << " " << __func__ << "}] " \
-                                   << msg << std::endl;
+namespace GDBusPP::Debug {
+
+void debug_log(std::string_view msg,
+               std::string_view file,
+               int line,
+               std::string_view func);
+}
+
+#define GDBUSPP_LOG(fmt_str, ...) ::GDBusPP::Debug::debug_log(fmt::format(FMT_COMPILE(fmt_str), ##__VA_ARGS__), __FILE__, __LINE__, __func__)
 
 #else
 
-#define GDBUSPP_LOG(msg)
+#define GDBUSPP_LOG(msg, ...)
 
 #endif
