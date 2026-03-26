@@ -100,7 +100,7 @@ gdbuspp_lib = both_libraries(
         dependencies: [
                 glib2_deps
         ],
-        soversion: '3',
+        soversion: '4',
         install: true
 )
 
