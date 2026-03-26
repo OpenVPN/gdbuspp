@@ -15,7 +15,6 @@
 
 #include <exception>
 #include <limits>
-#include <sstream>
 #include <string>
 #include <getopt.h>
 #include <fmt/compile.h>
@@ -375,40 +374,6 @@ bool log_data_type_value_check(ResultLog &log,
 }
 
 
-bool log_data_type_value_check(std::ostringstream &log,
-                               const std::string &type,
-                               const std::string &value,
-                               GVariant *data)
-{
-    bool ret = true;
-    if (!type.empty())
-    {
-        bool r = check_data_type(type, data);
-        log << "Checking expected data type: "
-            << (r ? "Pass" : "Fail");
-        if (!r)
-        {
-            log << "   Expected: " << type;
-            ret = false;
-        }
-        log << std::endl;
-    }
-    if (!value.empty())
-    {
-        bool r = check_data_value(value, data);
-        log << "Checking expected data value: "
-            << (r ? "Pass" : "Fail");
-        if (!r)
-        {
-            log << "   Expected: " << value;
-            ret = false;
-        }
-        log << std::endl;
-    }
-    return ret;
-}
-
-
 /**
  *   A stou implementation missing in C++, based on stoul()
  */
@@ -660,71 +625,6 @@ GVariant *generate_gvariant(ResultLog &log,
 
         log.AddGVariantDump("GVariant data", data);
         log.AddLogLine("-------------------------\n");
-    }
-    return data;
-}
-
-
-GVariant *generate_gvariant(std::ostringstream &log,
-                            const std::string &data_type,
-                            const std::vector<std::string> &data_values,
-                            bool wrap_single_value)
-{
-    GVariant *data = nullptr;
-    if (data_values.size() > 0)
-    {
-        if (data_type.empty())
-        {
-            throw Tests::Utils::Exception(__func__, "data values requires data types");
-        }
-
-        if (data_type[0] != 'a' && data_type.length() != data_values.size())
-        {
-            throw Tests::Utils::Exception(__func__, "data type string does not contain enough field to describe all data values");
-        }
-
-        log << "-------------------------" << std::endl;
-        log << "Data values:" << std::endl;
-        if (!wrap_single_value && data_values.size() == 1)
-        {
-            data = convert_to_gvariant(data_type, data_values[0]);
-        }
-        else if (data_type[0] == 'a')
-        {
-            if (data_type.length() > 2)
-            {
-                throw Tests::Utils::Exception(__func__, "only arrays with a single data type is supported");
-            }
-
-            log << "   " << data_type << " [";
-            GVariantBuilder *bld = glib2::Builder::Create(data_type.c_str());
-            for (const auto &v : data_values)
-            {
-                glib2::Builder::Add(bld, convert_to_gvariant(data_type.substr(1, 1), v));
-                log << "'" << v << "',";
-            }
-            log << "]" << std::endl;
-            data = glib2::Builder::Finish(bld);
-        }
-        else
-        {
-            GVariantBuilder *bld = glib2::Builder::EmptyTuple();
-            uint32_t pos = 0;
-            for (const auto &v : data_values)
-            {
-                std::string type = data_type.substr(pos, 1);
-                glib2::Builder::Add(bld, convert_to_gvariant(type, v));
-                log << "   " << type
-                    << " [" << v << "]" << std::endl;
-                ++pos;
-            }
-            log << std::endl;
-            data = glib2::Builder::Finish(bld);
-        }
-
-        dump_gvariant(log, "GVariant data", data);
-        log << "-------------------------" << std::endl
-            << std::endl;
     }
     return data;
 }

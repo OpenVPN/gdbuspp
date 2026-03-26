@@ -205,12 +205,6 @@ bool log_data_type_value_check(ResultLog &log,
                                const std::string &type,
                                const std::string &value,
                                GVariant *data);
-
-bool log_data_type_value_check(std::ostringstream &log,
-                               const std::string &type,
-                               const std::string &value,
-                               GVariant *data);
-
 /**
  *  Helper function to generate GVariant object of specific types where the
  *  value is passed to this function as a std::string.
@@ -265,11 +259,6 @@ std::vector<std::string> convert_from_gvariant(GVariant *values);
  * @return GVariant* with all the data values converted in proper D-Bus values
  */
 GVariant *generate_gvariant(ResultLog &log,
-                            const std::string &data_type,
-                            const std::vector<std::string> &data_values,
-                            bool wrap_single_value);
-
-GVariant *generate_gvariant(std::ostringstream &log,
                             const std::string &data_type,
                             const std::vector<std::string> &data_values,
                             bool wrap_single_value);
