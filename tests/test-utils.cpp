@@ -188,6 +188,46 @@ bool ResultLog::CheckDataTypeValue(const std::string &type,
 }
 
 
+void ResultLog::CheckGVariantDataType(const std::string &msg,
+                                      GVariant *value,
+                                      const std::string &expect)
+{
+    running_test = true;
+    std::string result_msg = fmt::format(FMT_COMPILE("{} - Expects '{}'"), msg, expect);
+    if (nullptr == value)
+    {
+        AddLogLine("GVariant *value == nullptr");
+        TestResult testres = TestResult(false, true, 0, 0);
+        log_result(testres, nullptr, result_msg);
+        return;
+    }
+
+    // Check if the low-level glib2 data type extraction
+    // matches the expected data type in the GVariant object
+    std::string type_glib2 = std::string(g_variant_get_type_string(value));
+    bool pass_glib2 = type_glib2 == expect;
+    AddLogLine(fmt::format(
+        "{{ g_variant_get_type_string(...) -> {} }}  ",
+        (pass_glib2 ? "Pass"
+                    : fmt::format("FAILED, received: '{}'",
+                                  type_glib2))));
+
+
+    // Same check as above, but use the glib2::DataType::Extract()
+    // function provided by GDBus++
+    std::string type_gdbus = glib2::DataType::Extract(value);
+    bool pass_gdbus = type_gdbus == expect;
+    AddLogLine(fmt::format(
+        "{{ glib2::DataType::Extract(...) -> {} }}  ",
+        (pass_gdbus ? "Pass"
+                    : fmt::format("FAILED, received: '{}'", type_gdbus))));
+
+    TestResult testres(pass_glib2 && pass_gdbus, true, 0, 0);
+    log_result(testres, nullptr, result_msg);
+    running_test = false;
+}
+
+
 void ResultLog::RunFunctionTest(const std::string &descr,
                                 DBus::Proxy::Client::Ptr proxy,
                                 std::function<bool()> &&test_func,
@@ -279,7 +319,7 @@ void ResultLog::DumpLogs()
 }
 
 
-ResultLog::TestResult ResultLog::run_test(bool expected, std::function<bool()> &&test_func)
+struct ResultLog::TestResult ResultLog::run_test(bool expected, std::function<bool()> &&test_func)
 {
     time_t start, end;
     time(&start);
@@ -338,6 +378,19 @@ void ResultLog::log_result(ResultLog::TestResult &result,
     {
         ++failed;
     }
+}
+
+
+void ResultLog::log_data_type_check_native(bool result,
+                                           const std::string &type_descr,
+                                           const std::string &expect_type)
+{
+    TestResult res(result, true, 0, 0);
+    log_result(res,
+               nullptr,
+               fmt::format(FMT_COMPILE("glib2::DataType::DBus<{}>() - Expects: '{}'"),
+                           type_descr,
+                           expect_type));
 }
 
 

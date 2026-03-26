@@ -142,6 +142,42 @@ class ResultLog
                             GVariant *data);
 
     /**
+     *  Test for the glib2::DataType::DBus<T>() function
+     *
+     *  This is used to check if the mapping between
+     *  C++ data types matches the expected D-Bus data type
+     *
+     * @tparam T           C++ data type of a value
+     * @param type_descr   String describing the type test case
+     * @param value        C++ variable carrying the data to test
+     * @param expect_type  String with the expected D-Bus data type encoding
+     */
+    template <typename T>
+    void CheckNativeDataType(const std::string &type_descr,
+                             T &value,
+                             const std::string &expect_type)
+    {
+        running_test = true;
+        bool res = glib2::DataType::DBus<T>() == expect_type;
+        log_data_type_check_native(res, type_descr, expect_type);
+        running_test = false;
+    }
+
+    /**
+     *  Test for the glib2::Value::Create() function
+     *
+     *  This will test if a C++ value passed to glib2::Value::Create()
+     *  creates the expected GVariant object
+     *
+     * @param msg     String describing the test case
+     * @param value   GVariant object with the value to check
+     * @param expect  String with the expected D-Bus data type encoding
+     */
+    void CheckGVariantDataType(const std::string &msg,
+                               GVariant *value,
+                               const std::string &expect);
+
+    /**
      *   Print the final test report summary.
      *
      *  This will print a summary of number of successful and failed tests
@@ -176,6 +212,10 @@ class ResultLog
     void log_result(TestResult &result,
                     DBus::Proxy::Client::Ptr proxy,
                     const std::string &msg);
+
+    void log_data_type_check_native(bool result,
+                                    const std::string &type_descr,
+                                    const std::string &expect_type);
 };
 
 
