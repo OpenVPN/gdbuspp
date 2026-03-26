@@ -20,7 +20,6 @@
 
 #include <functional>
 #include <memory>
-#include <sstream>
 
 #include "../async-process.hpp"
 #include "exceptions.hpp"

@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <string>
-#include <sstream>
 #include <utility>
 #include <fmt/compile.h>
 #include <fmt/format.h>

@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <limits>
+#include <sstream>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
