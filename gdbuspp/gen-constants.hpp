@@ -68,9 +68,11 @@
  *                         constant appended with the input service name.
  */
 template <size_t sz>
-constexpr auto GenServiceName(const char (&name)[sz])
+inline constexpr auto GenServiceName(const char (&name)[sz])
 {
-    return Constants::Base::BUSNAME.data() + std::string(name, sz - 1);
+    std::string result{Constants::Base::BUSNAME};
+    result.append(name, sz - 1);
+    return result;
 }
 
 /**
@@ -88,9 +90,11 @@ constexpr auto GenServiceName(const char (&name)[sz])
  *                         constant appended with the input object path.
  */
 template <size_t sz>
-constexpr auto GenPath(const char (&object_path)[sz])
+inline constexpr auto GenPath(const char (&object_path)[sz])
 {
-    return Constants::Base::ROOT_PATH.data() + std::string(object_path, sz - 1);
+    std::string result{Constants::Base::ROOT_PATH};
+    result.append(object_path, sz - 1);
+    return result;
 }
 
 
@@ -104,7 +108,9 @@ constexpr auto GenPath(const char (&object_path)[sz])
  *                         constant appended with the input interface name.
  */
 template <size_t sz>
-constexpr auto GenInterface(const char (&interface)[sz])
+inline constexpr auto GenInterface(const char (&interface)[sz])
 {
-    return Constants::Base::INTERFACE.data() + std::string(interface, sz - 1);
+    std::string result{Constants::Base::INTERFACE};
+    result.append(interface, sz - 1);
+    return result;
 }

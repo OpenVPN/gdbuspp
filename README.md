@@ -8,7 +8,7 @@ GDBus++ :: glib2 D-Bus C++ interface
 ====================================
 
 This library provides a simpler C++ based interface to implement D-Bus into
-applications in a more C++ approach, based on the C++17 standard.
+applications in a more C++ approach, based on the C++20 standard.
 
 How to build
 ------------

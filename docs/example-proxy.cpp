@@ -14,7 +14,7 @@
  *
  *         To compile this program:
  *
- *  $ c++ -std=c++17 $(pkg-config gdbuspp glib-2.0 gio-2.0 gio-unix-2.0 --cflags --libs) -o example-proxy example-proxy.cpp
+ *  $ c++ -std=c++20 $(pkg-config gdbuspp glib-2.0 gio-2.0 gio-unix-2.0 --cflags --libs) -o example-proxy example-proxy.cpp
  *
  */
 
