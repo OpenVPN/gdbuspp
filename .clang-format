@@ -7,8 +7,15 @@ BasedOnStyle: Microsoft
 ColumnLimit: 0
 SortIncludes: Never
 BreakBeforeBinaryOperators: All
+
+# clang-format < 23
 BinPackArguments: False
-BinPackParameters: False
+BinPackParameters: OnePerLine
+
+# clang-format >= 23
+#PackArguments:
+#  BinPack: OnePerLine
+
 AllowShortLambdasOnASingleLine: None
 IndentCaseBlocks: true
 BraceWrapping:
