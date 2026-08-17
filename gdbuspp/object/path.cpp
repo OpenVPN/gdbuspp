@@ -42,7 +42,7 @@ Path::Path()
 }
 
 
-const std::string Path::process_str(const char *str) const
+std::string Path::process_str(const char *str)
 {
     if (!str)
     {

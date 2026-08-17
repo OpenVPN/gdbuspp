@@ -60,7 +60,7 @@ class Path : public std::string
      * @return const std::string of a valid D-Bus path to be stored in the object
      * @throws DBus::Object::Exception() on invalid D-Bus object path strings
      */
-    const std::string process_str(const char *str) const;
+    static std::string process_str(const char *str);
 };
 
 } // namespace DBus::Object

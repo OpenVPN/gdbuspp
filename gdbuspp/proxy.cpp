@@ -460,10 +460,10 @@ Exception::Exception(const std::string &destination,
 {
 }
 
-const std::string Exception::compose_error(const std::string &destination,
-                                           const DBus::Object::Path &path,
-                                           const std::string &interface,
-                                           const std::string &method) const
+std::string Exception::compose_error(const std::string &destination,
+                                     const DBus::Object::Path &path,
+                                     const std::string &interface,
+                                     const std::string &method)
 {
     std::string method_detail = (method.empty()
                                      ? ""

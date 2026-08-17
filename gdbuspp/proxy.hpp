@@ -42,10 +42,10 @@ class Exception : public DBus::Exception
               GError *gliberr = nullptr);
 
   private:
-    const std::string compose_error(const std::string &destination,
-                                    const DBus::Object::Path &path,
-                                    const std::string &interface,
-                                    const std::string &method) const;
+    static std::string compose_error(const std::string &destination,
+                                     const DBus::Object::Path &path,
+                                     const std::string &interface,
+                                     const std::string &method);
 };
 
 
