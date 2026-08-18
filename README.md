@@ -540,6 +540,56 @@ project.  All the test programs are indirectly used when running
   Similar to `fd-receive-read.cpp`, but here the D-Bus method
   caller will send a file descriptor to the D-Bus service.
 
+Source forge hosting and contribution
+-------------------------------------
+
+The GDBus++ project is primarily hosted on codeberg.org and the
+[Radicle Network](https://radicle.dev/).  Other source forges are
+only source code mirrors, where the content is pushed by the
+project maintainer(s) to ensure authenticity.
+
+Bug reports can be reported either via [Codeberg](https://codeberg.org/OpenVPN/gdbuspp/issues/)
+or using the Radicle Network (via `rad issue` or the
+[Radicle Desktop](https://radicle.network/desktop)).
+
+Merge/Pull requests and patches should be submitted via the
+Radicle Network or the openvpn-devel@lists.sourceforge.net
+mailing list.  This is to ensure the contributions are
+distributed and not preserved in a centralised service, which
+might disappear or end up unsuitable as a hosting environment at
+some point.  Both the mailing list and the Radicle Network are
+fully distributed.
+
+See the Radicle [Quick-Start Guide](https://radicle.dev/guides/quick-start)
+on how to install and get Radicle working.  To clone this project
+using Radicle:
+
+```sh
+$ rad clone rad:z2Tpg8xVSDgTpoU4Q5FN1aPGqf6mG
+```
+
+More information about `rad clone` can be found in the
+[Cloning a repository](https://radicle.dev/guides/quick-start#cloning-a-repository)
+section.
+
+Also see the [Your first patch](https://radicle.dev/guides/quick-start#your-first-patch)
+section on how to submit patches (i.e., merge/pull requests) via the
+Radicle Network.
+
+For filing bug reports via the Radicle Network, use the
+[Radicle Desktop](https://radicle.network/desktop)) or see the
+[Your first issue](https://radicle.dev/guides/quick-start#your-first-issue)
+section in the quick-start guide.
+
+
+### Primary hosting sites:
+
+- Codeberg: https://codeberg.org/OpenVPN/gdbuspp/
+- Radicle Network: [`rad:z2Tpg8xVSDgTpoU4Q5FN1aPGqf6mG`](https://radicle.network/nodes/bndcrepos.radicle.garden/rad:z2Tpg8xVSDgTpoU4Q5FN1aPGqf6mG)
+
+### Current mirrors:
+- GitHub: https://github.com/OpenVPN/gdbuspp/
+- GitLab: https://gitlab.com/openvpn/gdbuspp/
 
 License
 -------
