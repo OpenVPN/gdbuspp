@@ -21,7 +21,7 @@ to compile and install the GDBus++ library and header files.
       $ cd _builddir
       $ meson compile
       $ meson test
-      $ meson install
+      $ sudo meson install
       $ sudo ldconfig
 
 To see the configuration options available:
@@ -54,14 +54,14 @@ The code excerpts used below can be found in
 This contains the class and declarations used to connect to the D-Bus on
 the running system.
 
-To create a connection to the session D-Bus:
+To create a connection to the session bus:
 ```C++
-  auto connection = DBus::Connection::Create(DBus::BusType::Session);
+  auto connection = DBus::Connection::Create(DBus::BusType::SESSION);
 ```
 
-To create a connection to the system D-Bus:
+To create a connection to the system bus:
 ```C++
-  auto connection = DBus::Connection::Create(DBus::BusType::System);
+  auto connection = DBus::Connection::Create(DBus::BusType::SYSTEM);
 ```
 
 No other bus connections are currently supported.  The `Create()` method
@@ -74,11 +74,14 @@ on the D-Bus on the system.  This is a class which your own
 implementation must extend.  The key elements for a service are:
 
 ```C++
+#include <gdbuspp/connection.hpp>
+#include <gdbuspp/service.hpp>
+
 class MyService : public DBus::Service
 {
   public:
     MyService(DBus::Connection::Ptr connection)
-        : DBus::Service(con, "net.example.myservice")
+        : DBus::Service(connection, "net.example.myservice")
     {
     }
 
@@ -95,7 +98,7 @@ class MyService : public DBus::Service
 ```
 
 In the `main()` function of your program, you initialize the service
-like this; this example uses the Session Bus:
+like this; this example uses the session bus:
 
 ```C++
   auto connection = DBus::Connection::Create(DBus::BusType::SESSION);
@@ -117,10 +120,13 @@ in these cases require overriding the data type if the D-Bus interface
 expects an object path.
 
 ```C++
+#include <gdbuspp/connection.hpp>
+#include <gdbuspp/object/base.hpp>
+
 class MyObject : public DBus::Object::Base
 {
 public:
-  MyObject()
+  MyObject(DBus::Connection::Ptr connection)
       : DBus::Object::Base("/example/myobject",
                             "net.example.myinterface")
   {
@@ -150,7 +156,8 @@ To add D-Bus methods, use the `DBus::Object::Base::AddMethod()` method,
 where you define a callback function and the arguments it will receive
 and return.  This must be setup during the initialization of the object.
 ```C++
-  MyObject()
+  // ...
+  MyObject(DBus::Connection::Ptr connection)
       : DBus::Object::Base("/example/myobject",
                             "net.example.myinterface")
   {
@@ -202,7 +209,8 @@ node /example/myobject {
 To add D-Bus properties (directly accessible variables), also set up via
 the constructor:
 ```C++
-  MyObject()
+  // ...
+  MyObject(DBus::Connection::Ptr connection)
       : DBus::Object::Base("/example/myobject",
                             "net.example.myinterface")
   {
@@ -238,7 +246,7 @@ node /example/myobject {
 
 There are more ways to add more complex data types as well, by using the
 `AddPropertyBySpec()` method instead of the `AddProperty()`.  Please see
-the example code for more details how do make use of that.
+the example code for more details how to make use of that.
 
 ##### Adding D-Bus object signals - via `DBus::Signals::Group`
 The `Group` class in `DBus::Signals` is used to create an object sending
@@ -246,6 +254,9 @@ various types of D-Bus signals from a `DBus::Object::Base` based object.
 
 This is done by creating your own "signal object":
 ```C++
+#include <gdbuspp/connection.hpp>
+#include <gdbuspp/signals/group.hpp>
+
 class MySignalGroup : public DBus::Signals::Group
 {
   public:
@@ -279,12 +290,12 @@ constructor:
   {
     // ...
     my_signals = DBus::Signals::Group::Create<MySignalGroup>(connection);
-    my_signals->AddTarget("")
+    my_signals->AddTarget("");
     RegisterSignals(my_signals);
   }
 
   private:
-    MySignals::Ptr signals = nullptr;
+    MySignals::Ptr my_signals = nullptr;
 
 ```
 The `RegisterSignals()` call will add the signal details to the D-Bus
@@ -301,24 +312,24 @@ node /example/myobject {
 };
 ```
 
-The any of the code inside the `MyObject` object can now call
-`my_signals->MySignal("message");` to send the `MySignal` D-Bus signal.
-Since the `AddTarget()` used `""` as the destination target, this will be
-be sent to any application listening to the `MySignal signal on the session
-bus.
+The code inside the `MyObject` object can now call `my_signals->MySignal("message")`
+to send the `MySignal` D-Bus signal.  Since the `AddTarget()` used `""` as
+the destination target, this will be sent to any application listening to
+the `MySignal` signal on the session bus.  The alternative is to pass a unique
+or well-known bus name to the `AddTarget()` method, where only the provided bus
+names will receive the signal.
 
 ##### D-Bus method arguments - via `DBus::Object::Method::Arguments`
-A smart-pointer to an `Arguments` object will be returned when
-calling the `DBus::Object::Base::AddMethod()` method.  This object
-is used to add input and output arguments to a D-Bus method you
-declare, as well as preparing for passing file descriptors via this
-D-Bus method call.
+A smart-pointer to an `Arguments` object will be returned when calling the
+`DBus::Object::Base::AddMethod()` method.  This object is used to add input
+and output arguments to a D-Bus method you declare, as well as preparing for
+passing file descriptors via this D-Bus method call.
 
-In addition, this object is also passed to the D-Bus method callback
-as the only argument.  This must be used to extract the arguments
-passed to the D-Bus method by the proxy client, as well as the response
-this method should return back to the caller.  This happens currently
-via glib2's `GVariant` objects, which are generic value containers.
+In addition, this object is also passed to the D-Bus method callback as the
+only argument.  This must be used to extract the arguments passed to the
+D-Bus method by the proxy client, as well as the response this method
+should return back to the caller.  This currently happens via glib2's
+`GVariant` objects, which are generic value containers.
 
 To retrieve the arguments passed to the callback function:
 ```C++
@@ -360,8 +371,11 @@ object in the D-Bus service the application is providing.  The second call
 will remove the object from the service.
 
 ```C++
-  auto my_new_object = object_manager->CreateObject<MY_CLASS>(MY_CLASS_CONSTRUCTOR_ARGUMENTS)
-  object_manager->RemoveObject(DBus::Object::Path &object_path)
+  // Create a new object on the bus
+  auto my_new_object = object_manager->CreateObject<MY_CLASS>(MY_CLASS_CONSTRUCTOR_ARGUMENTS);
+
+  // Remove the object from the bus
+  object_manager->RemoveObject(DBus::Object::Path &object_path);
 ```
 
 The D-Bus path this new object will use comes from the
@@ -391,7 +405,7 @@ A `DBus::Service` implementation wanting to provide access to the
 ```
 
 See the [tests/simple-service.cpp](tests/simple-service.cpp) for a more
-thorough implementation how to use this functionality.
+thorough implementation of how to use this functionality.
 
 #### `DBus::Proxy::Client`
 This is the main class used to connect to a D-Bus service.  This can
@@ -418,6 +432,10 @@ g_variant_unref(response);
 This will call the `MethodWithArgs` D-Bus method with the required
 arguments and extract the result from the response.
 
+The `GVariant *arguments` object will be consumed and freed by the
+`Proxy::Client::Call()` method.  The `arguments` object should not be
+freed additionally.
+
 To retrieve a D-Bus object property:
 ```C++
 std::string my_property = proxy->GetProperty<std::string>(preset, "my_property");
@@ -430,7 +448,7 @@ proxy->SetProperty(preset, "my_property", new_property_value);
 ```
 
 See the [example-proxy.cpp](docs/example-proxy.cpp) and
-[example-proxy2.cpp](docs/example-proxy2.cpp) for the a full example of
+[example-proxy2.cpp](docs/example-proxy2.cpp) for a full example of
 the code snippets above.
 
 #### `DBus::MainLoop`
@@ -450,10 +468,10 @@ auto mainloop = DBus::MainLoop::Create();
 mainloop->Run();
 ```
 
-The advantage of using the `DBus::Service` provided main loop, is that
+The advantage of using the `DBus::Service` provided main loop is that
 the service itself can more easily shut itself down, by calling the
 `DBus::Service::Stop()` method.  Alternatively, the `DBus::Service`
-implementation need to get the `DBus::MainLoop::Ptr` object provided via
+implementation needs to get the `DBus::MainLoop::Ptr` object provided via
 its constructor or another approach.
 
 #### `glib2` namespace - various low-level helper functions
@@ -474,7 +492,7 @@ accessible directly.
 
 This namespace also contains the `ExtractVector()` function to convert
 a `GVariant` based array to a C++ `std::vector<>`.  This can only be used
-if all the values in the `GVariant` array is of the same data type.  The
+if all the values in the `GVariant` array is of the same data type.
 
 The `Create<>()` set of functions will convert a C++ variable into a
 `GVariant` object with the appropriate D-Bus data type.
@@ -491,30 +509,30 @@ This namespace contains several functions to retrieve the D-Bus identifier
 for various C++ data types.
 
 
-Examples code
--------------
+Example code
+------------
 
 Several test programs and a few example programs are shipped in this
-project.  All the test programs are indirectly used when running
-`meson test` and is expected to always work.
+project.  All the test programs (excluding examples) are run via
+`meson test` and are expected to always work.
 
 * [example-service.cpp](docs/example-service.cpp)
   A very simple D-Bus service.  All the service example code excerpts
-  in this file comes from this example.
+  in this file come from this example.
 
 * [example-proxy.cpp](docs/example-proxy.cpp)
   A very simple D-Bus client proxy, accessing a D-Bus object provided
   by [example-service.cpp](docs/example-service.cpp).  All the client proxy
-  examples comes in this README from this example code.
+  examples come in this README from this example code.
 
 * [example-proxy2.cpp](docs/example-proxy2.cpp)
   An alternative `example-proxy.cpp` implementation, implementing the proxy
-  as an object which is used directly from the `main()` function.  This also
+  as an object which is used directly in the `main()` function.  This also
   uses the service implemented in
   [example-service.cpp](docs/example-service.cpp).
 
 * [simple-service.cpp](tests/simple-service.cpp)
-  This implements a simple D-Bus test service using the Session Bus
+  This implements a simple D-Bus test service using the session bus.
 
 * [proxy-client.cpp](tests/proxy-client.cpp)
   This implements a generic client side D-Bus proxy, which has similar
@@ -525,20 +543,20 @@ project.  All the test programs are indirectly used when running
 
 * [signal-emit.cpp](tests/signal-emit.cpp)
   Provides a simple program to send one or more signals with
-  various data types
+  various data types.
 
 * [signal-group.cpp](tests/signal-group.cpp)
-  Similar to `signal-emit.cpp` but gives the possibility to wrap
-  the signal emission of more signals into its own class.
+  Similar to `signal-emit.cpp` but wraps the signal emission
+  of more signals into its own class.
 
 * [fd-receive-read.cpp](tests/fd-receive-read.cpp)
-  An test program for receiving a file descriptor over the D-Bus.
+  A test program for receiving a file descriptor over the D-Bus.
   This requires the D-Bus service to prepare a file descriptor
   intended to be sent back to the caller.
 
 * [fd-send-fstat.cpp](tests/fd-send-fstat.cpp)
-  Similar to `fd-receive-read.cpp`, but here the D-Bus method
-  caller will send a file descriptor to the D-Bus service.
+  Similar to `fd-receive-read.cpp`, but a file descriptor is
+  being sent by the program instead of receiving one.
 
 Source forge hosting and contribution
 -------------------------------------
