@@ -20,7 +20,7 @@
 namespace DBus {
 namespace Object {
 
-const std::string OperationString(const Operation &op)
+std::string OperationString(const Operation &op)
 {
     switch (op)
     {

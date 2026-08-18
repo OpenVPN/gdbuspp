@@ -40,9 +40,9 @@ enum class Operation
  * a readable string
 
  * @param op                   Object::Operation
- * @return const std::string   std::string of Object::Operation
+ * @return std::string   std::string of Object::Operation
  */
-const std::string OperationString(const Operation &op);
+std::string OperationString(const Operation &op);
 
 
 } // namespace Object

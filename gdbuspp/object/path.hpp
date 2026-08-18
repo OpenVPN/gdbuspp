@@ -57,7 +57,7 @@ class Path : public std::string
      *
      * @param str    char* based C string containing the D-Bus path to evaluate
      *
-     * @return const std::string of a valid D-Bus path to be stored in the object
+     * @return std::string of a valid D-Bus path to be stored in the object
      * @throws DBus::Object::Exception() on invalid D-Bus object path strings
      */
     static std::string process_str(const char *str);

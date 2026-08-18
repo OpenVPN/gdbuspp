@@ -344,10 +344,10 @@ class Base : public std::enable_shared_from_this<Base>
      *  This provides the complete introspection XML document needed
      *  by the glib2 API to register a new D-Bus object on the bus.
      *
-     * @return const std::string containing the XML document describing this
+     * @return std::string containing the XML document describing this
      *               object
      */
-    const std::string GenerateIntrospection() const;
+    std::string GenerateIntrospection() const;
 
 
     /**
@@ -364,7 +364,7 @@ class Base : public std::enable_shared_from_this<Base>
      * @returns If the callback returns true, the requested operation is
      *          allowed, otherwise the operation will be rejected.
      */
-    virtual const bool Authorize(const Authz::Request::Ptr request) = 0;
+    virtual bool Authorize(const Authz::Request::Ptr request) = 0;
 
 
     /**
@@ -380,7 +380,7 @@ class Base : public std::enable_shared_from_this<Base>
      *         calling user.  If the return string is empty, a standard error
      *         message (more debug details) will be generated automatically.
      */
-    virtual const std::string AuthorizationRejected(const Authz::Request::Ptr request) const noexcept;
+    virtual std::string AuthorizationRejected(const Authz::Request::Ptr request) const noexcept;
 
 
     /**
@@ -390,7 +390,7 @@ class Base : public std::enable_shared_from_this<Base>
      *
      *  @return bool True if the method exists, otherwise false
      */
-    const bool MethodExists(const std::string &meth_name) const;
+    bool MethodExists(const std::string &meth_name) const;
 
 
     /**
@@ -423,7 +423,7 @@ class Base : public std::enable_shared_from_this<Base>
      *         If this returns false, the idle detector will not shut down
      *         the service as long as this object is available in memory.
      */
-    const bool GetIdleDetectorDisabled() const;
+    bool GetIdleDetectorDisabled() const;
 
 
     /**
@@ -545,12 +545,11 @@ class Base : public std::enable_shared_from_this<Base>
          *  Generates the `<property/>` XML node for this particular
          *  property.
          *
-         * @return const std::string containing the XML fragment to be
+         * @return std::string containing the XML fragment to be
          *         included in a larger introspection document.
          */
-        const std::string GenerateIntrospection() const override
+        std::string GenerateIntrospection() const override
         {
-
             return "<property type='" + std::string(GetDBusType()) + "' "
                    + " name='" + name + "' access='"
                    + (readwrite ? "readwrite" : "read") + "' />";
@@ -560,7 +559,7 @@ class Base : public std::enable_shared_from_this<Base>
         /**
          *  Retrieve the D-Bus property name of this property object.
          *
-         * @return const std::string&
+         * @return std::string
          */
         const std::string &GetName() const noexcept override
         {
@@ -571,7 +570,7 @@ class Base : public std::enable_shared_from_this<Base>
         /**
          *  Retrieve the D-Bus interface this property is bound to
          *
-         * @return const std::string&
+         * @return std::string
          */
         const std::string &GetInterface() const noexcept override
         {

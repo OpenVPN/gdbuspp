@@ -96,9 +96,9 @@ class Request
     /**
      *  Retrieve this object's operation mode as a human readable string
      *
-     * @return const std::string
+     * @return std::string
      */
-    const std::string OperationString() const noexcept;
+    std::string OperationString() const noexcept;
 
     /**
      *  Provide a human readable representation of this Authz::Request object
@@ -149,8 +149,8 @@ class Exception : public DBus::Exception
     Exception(const Authz::Request::Ptr req, const std::string &errmsg);
 
   private:
-    const std::string compose_error(const Request::Ptr req,
-                                    const std::string &errmsg);
+    static std::string compose_error(const Request::Ptr req,
+                                     const std::string &errmsg);
 };
 
 } // namespace Authz

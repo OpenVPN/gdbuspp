@@ -179,7 +179,7 @@ void Manager::AttachRemoveCallback(const Object::Path &path,
 }
 
 
-const std::map<Object::Path, Object::Base::Ptr> Manager::GetAllObjects() const
+std::map<Object::Path, Object::Base::Ptr> Manager::GetAllObjects() const
 {
     // Loop through all object managed by this Object::Manager
     std::map<Object::Path, Object::Base::Ptr> ret{};

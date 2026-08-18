@@ -139,9 +139,9 @@ class Interface
     /**
      *  Generates the XML introspection fragment for this property
      *
-     * @return const std::string containing the XML data
+     * @return std::string containing the XML data
      */
-    virtual const std::string GenerateIntrospection() const = 0;
+    virtual std::string GenerateIntrospection() const = 0;
 
     /**
      *  Retrieve the D-Bus data type this property is declared as
@@ -261,10 +261,10 @@ class BySpec : public Interface
      *  Generates the introspection XML fragment representing this
      *  property
      *
-     * @return const std::string to be consumed by the D-Bus object
+     * @return std::string to be consumed by the D-Bus object
      *         introspection data generator.
      */
-    const std::string GenerateIntrospection() const override;
+    std::string GenerateIntrospection() const override;
 
     /**
      *  Returns a D-Bus data type this property is using
@@ -371,10 +371,10 @@ class Collection
      *  elements based on all the properties being managed by this
      *  collection object
      *
-     * @return const std::string  String containing just the `<property/>`
+     * @return std::string  String containing just the `<property/>`
      *         fragments declaring all known properties.
      */
-    const std::string GenerateIntrospection() const noexcept;
+    std::string GenerateIntrospection() const noexcept;
 
     /**
      *  Retrieve a GVariant representation containing the value of

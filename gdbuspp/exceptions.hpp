@@ -42,7 +42,7 @@ class Exception : public std::exception
      *  Provides the full detailed error message, which includes
      *  C++ class information.  Other exception classes inheriting this
      *  class may add even more details.
-     * @returns char *
+     * @returns const char *
      */
     virtual const char *what() const noexcept;
 

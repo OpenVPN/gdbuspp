@@ -31,8 +31,8 @@ Exception::Exception(const Request::Ptr req, const std::string &errmsg)
 }
 
 
-const std::string Exception::compose_error(const Request::Ptr req,
-                                           const std::string &errmsg)
+std::string Exception::compose_error(const Request::Ptr req,
+                                     const std::string &errmsg)
 {
     if (!errmsg.empty())
     {
@@ -79,10 +79,10 @@ const std::string Exception::compose_error(const Request::Ptr req,
  * @param property   D-Bus property being accessed, related to the request type
  * @return std::string with readable authorization request information
  */
-static inline const std::string extract_authzreq_target(const Object::Operation reqtype,
-                                                        const std::string &interface,
-                                                        const std::string &method,
-                                                        const std::string &property)
+static inline std::string extract_authzreq_target(const Object::Operation reqtype,
+                                                  const std::string &interface,
+                                                  const std::string &method,
+                                                  const std::string &property)
 {
     std::string detail;
     switch (reqtype)
@@ -127,7 +127,7 @@ Authz::Request::Request(const AsyncProcess::Request::UPtr &req)
 }
 
 
-const std::string Authz::Request::OperationString() const noexcept
+std::string Authz::Request::OperationString() const noexcept
 {
     return Object::OperationString(operation);
 }

@@ -39,7 +39,7 @@ namespace {
  *  Composes a string containing the details of a Signals::Target
  *
  * @param target               Signals::Target object to retrieve info from
- * @return const std::string
+ * @return std::string
  */
 static std::string compose_errclass(Target::Ptr target)
 {

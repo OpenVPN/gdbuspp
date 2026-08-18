@@ -52,9 +52,9 @@ using SignalArgList = std::vector<struct SignalArgument>;
  *  SignalArgList
  *
  * @param list  SignalArgList to compose a data type signature for
- * @return const std::string
+ * @return std::string
  */
-const std::string SignalArgSignature(const SignalArgList &list);
+std::string SignalArgSignature(const SignalArgList &list);
 
 
 /**
@@ -172,9 +172,9 @@ class Group
      *  signals.  This is typically not used directly, but called via the
      *  DBus::Object::Base::GenerateIntrospection() method.
      *
-     * @return const std::string containing the XML introspection data
+     * @return std::string containing the XML introspection data
      */
-    const std::string GenerateIntrospection();
+    std::string GenerateIntrospection();
 
 
     /**

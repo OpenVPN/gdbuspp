@@ -98,7 +98,7 @@ class Signal
      * @throws Signals::Exception on programming errors (incorrect data type
      *         or missing SetArguments() call).
      */
-    const bool EmitSignal(GVariant *params) const;
+    bool EmitSignal(GVariant *params) const;
 
 
   private:

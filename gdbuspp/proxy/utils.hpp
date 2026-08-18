@@ -57,7 +57,7 @@ class Query
      *
      * @return true if service is available and responding, otherwise false
      */
-    const bool Ping() const noexcept;
+    bool Ping() const noexcept;
 
     /**
      *  Calls the org.freedesktop.DBus.Introspectable.Introspect method
@@ -65,9 +65,9 @@ class Query
      *
      * @param path    D-Bus::Object::Path to introspect in the service
      *
-     * @return const std::string  XML introspection data
+     * @return std::string  XML introspection data
      */
-    const std::string Introspect(const Object::Path &path) const;
+    std::string Introspect(const Object::Path &path) const;
 
 
     /**
@@ -96,8 +96,8 @@ class Query
      *
      * @return true if the object exists and is reachable, otherwise false
      */
-    const bool CheckObjectExists(const Object::Path &path,
-                                 const std::string interface) const noexcept;
+    bool CheckObjectExists(const Object::Path &path,
+                           const std::string interface) const noexcept;
 
 
     /**
@@ -109,10 +109,10 @@ class Query
      * @param interface           D-Bus object interface holding the 'version'
      *                            property
      *
-     * @return const std::string containing the 'version' property value
+     * @return std::string containing the 'version' property value
      */
-    const std::string ServiceVersion(const Object::Path &path,
-                                     const std::string interface) const;
+    std::string ServiceVersion(const Object::Path &path,
+                               const std::string interface) const;
 
   private:
     Proxy::Client::Ptr proxy{nullptr};
@@ -154,12 +154,12 @@ class DBusServiceQuery
      *
      * @param service          std::string to the service to start
      *
-     * @return const uint32_t  Returns 1 if the service was started, 2 if the
+     * @return uint32_t  Returns 1 if the service was started, 2 if the
      *         service was already running.
      *
      * @throws DBusServiceQuery::Exception on errors
      */
-    const uint32_t StartServiceByName(const std::string &service) const;
+    uint32_t StartServiceByName(const std::string &service) const;
 
     /**
      *  Retrieve the unique bus name for the given service name
@@ -169,9 +169,9 @@ class DBusServiceQuery
      *  https://dbus.freedesktop.org/doc/dbus-specification.html#bus-messages-get-name-owner
      *
      * @param service              D-Bus service name to query for
-     * @return const std::string containing a unqiue bus name of the service
+     * @return std::string containing a unqiue bus name of the service
      */
-    const std::string GetNameOwner(const std::string &service) const;
+    std::string GetNameOwner(const std::string &service) const;
 
 
     /**
@@ -182,7 +182,7 @@ class DBusServiceQuery
      * @param service  std::string with the bus name of the service.
      * @return true if the the service was found enlisted, otherwise false.
      */
-    const bool LookupService(const std::string &service) const;
+    bool LookupService(const std::string &service) const;
 
 
     /**
@@ -194,7 +194,7 @@ class DBusServiceQuery
      * @param service  std::string with the bus name of the service.
      * @return true if the the service was found enlisted, otherwise false.
      */
-    const bool LookupActivatable(const std::string &service) const;
+    bool LookupActivatable(const std::string &service) const;
 
 
     /**
@@ -207,8 +207,8 @@ class DBusServiceQuery
      *                  Defaults to approx. 10 seconds.
      * @return true if the service is available, otherwise false
      */
-    const bool CheckServiceAvail(const std::string &service,
-                                 uint8_t timeout = 10) const noexcept;
+    bool CheckServiceAvail(const std::string &service,
+                           uint8_t timeout = 10) const noexcept;
 
 
   private:

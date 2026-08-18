@@ -26,7 +26,7 @@
 namespace DBus {
 namespace Signals {
 
-const std::string SignalArgSignature(const SignalArgList &list)
+std::string SignalArgSignature(const SignalArgList &list)
 {
     std::string typestr = "(";
     for (const auto &e : list)
@@ -53,7 +53,7 @@ void Group::RegisterSignal(const std::string &signal_name, const SignalArgList &
 };
 
 
-const std::string Group::GenerateIntrospection()
+std::string Group::GenerateIntrospection()
 {
     std::string ret;
 

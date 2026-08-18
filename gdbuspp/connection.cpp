@@ -78,7 +78,7 @@ GDBusConnection *Connection::ConnPtr() const noexcept
 }
 
 
-const std::string Connection::GetUniqueBusName() const
+std::string Connection::GetUniqueBusName() const
 {
     if (!G_IS_DBUS_CONNECTION(dbuscon))
     {
@@ -88,7 +88,7 @@ const std::string Connection::GetUniqueBusName() const
 }
 
 
-const DBus::BusType Connection::GetBusType() const noexcept
+DBus::BusType Connection::GetBusType() const noexcept
 {
     if (!G_IS_DBUS_CONNECTION(dbuscon))
     {
@@ -98,7 +98,7 @@ const DBus::BusType Connection::GetBusType() const noexcept
 }
 
 
-const bool Connection::Check() const
+bool Connection::Check() const
 {
     return dbuscon
            && G_IS_DBUS_CONNECTION(dbuscon)

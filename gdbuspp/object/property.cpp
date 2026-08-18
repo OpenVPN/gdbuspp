@@ -119,7 +119,7 @@ Object::Property::BySpec::BySpec(const std::string &interface_arg,
 }
 
 
-const std::string Object::Property::BySpec::GenerateIntrospection() const
+std::string Object::Property::BySpec::GenerateIntrospection() const
 {
     return std::string("<property") + " type='" + dbustype + "'"
            + " name ='" + name + "' "
@@ -181,7 +181,7 @@ bool Object::Property::Collection::Exists(const std::string &name) const noexcep
     return prop != properties.end();
 }
 
-const std::string Object::Property::Collection::GenerateIntrospection() const noexcept
+std::string Object::Property::Collection::GenerateIntrospection() const noexcept
 {
     if (properties.empty())
     {

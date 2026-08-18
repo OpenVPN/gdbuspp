@@ -150,7 +150,7 @@ void Object::Base::RegisterSignals(const Signals::Group::Ptr signal_group)
 }
 
 
-const std::string Object::Base::GenerateIntrospection() const
+std::string Object::Base::GenerateIntrospection() const
 {
     return fmt::format(FMT_COMPILE(
                            "<node name={:?}>\n"
@@ -168,7 +168,7 @@ const std::string Object::Base::GenerateIntrospection() const
 }
 
 
-const std::string Object::Base::AuthorizationRejected(const Authz::Request::Ptr request) const noexcept
+std::string Object::Base::AuthorizationRejected(const Authz::Request::Ptr request) const noexcept
 {
     // This is intended to be empty; this method is optional
     // The empty string message triggers Authz::Exception to generate the
@@ -177,7 +177,7 @@ const std::string Object::Base::AuthorizationRejected(const Authz::Request::Ptr 
 }
 
 
-const bool Object::Base::MethodExists(const std::string &meth_name) const
+bool Object::Base::MethodExists(const std::string &meth_name) const
 {
     return methods->Exists(meth_name);
 }
@@ -195,7 +195,7 @@ void Object::Base::DisableIdleDetector(const bool disable)
 }
 
 
-const bool Object::Base::GetIdleDetectorDisabled() const
+bool Object::Base::GetIdleDetectorDisabled() const
 {
     return disable_idle_detection;
 }

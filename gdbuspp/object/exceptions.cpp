@@ -37,7 +37,7 @@ namespace {
  * @param interface    std::string with the interface part of the object
  * @param info         std::string which is added when not empty
  *
- * @return const std::string
+ * @return std::string
  */
 static std::string compose_object_descr(const DBus::Object::Path &path,
                                         const std::string &interface,

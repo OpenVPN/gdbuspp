@@ -69,9 +69,9 @@ class SingleSubscription
     /**
      *  Retrieve the signal subscription identifier for this subscription
      *
-     * @return const guint
+     * @return guint
      */
-    const guint GetSignalID() const;
+    guint GetSignalID() const;
 
 
     /**
@@ -82,7 +82,8 @@ class SingleSubscription
      *
      * @returns true on match, otherwise false
      */
-    const bool CheckSignalID(const guint sigid) const;
+    bool CheckSignalID(const guint sigid) const;
+
     Target::Ptr target;
     const std::string signal_name;
     Signals::CallbackFnc callback;

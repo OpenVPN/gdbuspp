@@ -57,7 +57,7 @@ class Query
      *
      * @return Returns an uid_t containing the bus owners UID.
      * @throws DBus::Credentials::Exception on errors     */
-    const uid_t GetUID(const std::string &busname) const;
+    uid_t GetUID(const std::string &busname) const;
 
     /**
      *  Retrieves the bus name callers process ID (PID) of a specific
@@ -69,7 +69,7 @@ class Query
      * @throws DBus::Credentials::Exception on errors
      *
      */
-    const pid_t GetPID(const std::string &busname) const;
+    pid_t GetPID(const std::string &busname) const;
 
     /**
      *  Looks up the unique D-Bus bus name for a given D-Bus service,
@@ -81,7 +81,7 @@ class Query
      * @throws DBus::Credentials::Exception on errors
      *
      */
-    const std::string GetUniqueBusName(const std::string &busname) const;
+    std::string GetUniqueBusName(const std::string &busname) const;
 
 
   private:

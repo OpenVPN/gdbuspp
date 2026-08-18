@@ -32,13 +32,13 @@ void SingleSubscription::SetSignalID(const guint sigid)
 }
 
 
-const guint SingleSubscription::GetSignalID() const
+guint SingleSubscription::GetSignalID() const
 {
     return signal_id;
 }
 
 
-const bool SingleSubscription::CheckSignalID(const guint sigid) const
+bool SingleSubscription::CheckSignalID(const guint sigid) const
 {
     return sigid == signal_id;
 }

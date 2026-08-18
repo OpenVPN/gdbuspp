@@ -125,7 +125,7 @@ class Object : public DBus::Object::Base
     };
 
 
-    const bool Authorize(const DBus::Authz::Request::Ptr req) override
+    bool Authorize(const DBus::Authz::Request::Ptr req) override
     {
         return true;
     }
@@ -245,7 +245,7 @@ class PropertyTests : public DBus::Object::Base
     }
 
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) override
+    bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         Log(__func__, fmt::format("Authorization request approved: {}", request));
         return true;
@@ -659,7 +659,7 @@ class MethodTests : public DBus::Object::Base
         fmt::println("{}  -- ~MethodTests() called", __func__);
     }
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) override
+    bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         Log(__func__, fmt::format("Authorization request approved: {}", request));
         return true;
@@ -862,7 +862,7 @@ class FailingMethodTests : public DBus::Object::Base
         no_send_fd->PassFileDescriptor(DBus::Object::Method::PassFDmode::RECEIVE);
     }
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) override
+    bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         return true;
     }
@@ -911,7 +911,7 @@ class MainHandler : public DBus::Object::Base
     }
 
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) override
+    bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         log->Log("SimpleHandler::Authorize",
                  fmt::format("Authorization request approved: {}", request));

@@ -37,7 +37,7 @@ Query::Ptr Query::Create(Proxy::Client::Ptr proxy)
 }
 
 
-const bool Query::Ping() const noexcept
+bool Query::Ping() const noexcept
 {
     auto target = Proxy::TargetPreset::Create("/", "org.freedesktop.DBus.Peer");
     for (int i = 5; i > 0; --i)
@@ -57,7 +57,7 @@ const bool Query::Ping() const noexcept
 }
 
 
-const std::string Query::Introspect(const Object::Path &path) const
+std::string Query::Introspect(const Object::Path &path) const
 {
     std::string ret;
     for (uint8_t attempts = 3; attempts > 0; attempts--)
@@ -129,8 +129,8 @@ bool Query::LookupObject(const Object::Path &path) const
 }
 
 
-const bool Query::CheckObjectExists(const Object::Path &path,
-                                    const std::string interface) const noexcept
+bool Query::CheckObjectExists(const Object::Path &path,
+                              const std::string interface) const noexcept
 {
     auto target = Proxy::TargetPreset::Create(path,
                                               "org.freedesktop.DBus.Properties");
@@ -166,8 +166,8 @@ const bool Query::CheckObjectExists(const Object::Path &path,
 }
 
 
-const std::string Query::ServiceVersion(const Object::Path &path,
-                                        const std::string interface) const
+std::string Query::ServiceVersion(const Object::Path &path,
+                                  const std::string interface) const
 {
     if (!Ping())
     {
@@ -234,7 +234,7 @@ DBusServiceQuery::Ptr DBusServiceQuery::Create(DBus::Connection::Ptr connection)
 }
 
 
-const uint32_t DBusServiceQuery::StartServiceByName(const std::string &service) const
+uint32_t DBusServiceQuery::StartServiceByName(const std::string &service) const
 {
     try
     {
@@ -256,7 +256,7 @@ const uint32_t DBusServiceQuery::StartServiceByName(const std::string &service) 
 }
 
 
-const std::string DBusServiceQuery::GetNameOwner(const std::string &service) const
+std::string DBusServiceQuery::GetNameOwner(const std::string &service) const
 {
     try
     {
@@ -275,7 +275,7 @@ const std::string DBusServiceQuery::GetNameOwner(const std::string &service) con
 }
 
 
-const bool DBusServiceQuery::LookupService(const std::string &service) const
+bool DBusServiceQuery::LookupService(const std::string &service) const
 {
     try
     {
@@ -301,7 +301,7 @@ const bool DBusServiceQuery::LookupService(const std::string &service) const
 }
 
 
-const bool DBusServiceQuery::LookupActivatable(const std::string &service) const
+bool DBusServiceQuery::LookupActivatable(const std::string &service) const
 {
     GVariant *res = proxy->Call("/",
                                 "org.freedesktop.DBus",
@@ -320,8 +320,8 @@ const bool DBusServiceQuery::LookupActivatable(const std::string &service) const
 }
 
 
-const bool DBusServiceQuery::CheckServiceAvail(const std::string &service,
-                                               uint8_t timeout) const noexcept
+bool DBusServiceQuery::CheckServiceAvail(const std::string &service,
+                                         uint8_t timeout) const noexcept
 {
     // Check if the service is already running
     try

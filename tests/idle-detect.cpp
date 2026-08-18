@@ -39,7 +39,7 @@ class ChildObject : public DBus::Object::Base
     {
     }
 
-    const bool Authorize(const DBus::Authz::Request::Ptr req) override
+    bool Authorize(const DBus::Authz::Request::Ptr req) override
     {
         return true;
     }
@@ -56,7 +56,7 @@ class IdleCheckDisabled : public DBus::Object::Base
         DisableIdleDetector(true);
     }
 
-    const bool Authorize(const DBus::Authz::Request::Ptr req) override
+    bool Authorize(const DBus::Authz::Request::Ptr req) override
     {
         return true;
     }
@@ -84,7 +84,7 @@ class IdleCheckEnabled : public DBus::Object::Base
         DisableIdleDetector(false);
     }
 
-    const bool Authorize(const DBus::Authz::Request::Ptr req) override
+    bool Authorize(const DBus::Authz::Request::Ptr req) override
     {
         return true;
     }

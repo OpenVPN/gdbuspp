@@ -223,10 +223,9 @@ class Manager : public std::enable_shared_from_this<Manager>
      *  Retrieve a std::map<> of all the DBus::Object::Base managed objects
      *  with the registered D-Bus path to the object as the key.
      *
-     * @return const std::map<DBus::Object::Path, Object::Base::Ptr>
+     * @return std::map<DBus::Object::Path, Object::Base::Ptr>
      */
-
-    const std::map<Object::Path, Object::Base::Ptr> GetAllObjects() const;
+    std::map<Object::Path, Object::Base::Ptr> GetAllObjects() const;
 
 
   private:

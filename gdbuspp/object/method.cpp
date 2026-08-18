@@ -72,7 +72,7 @@ class CallbackArguments : public Arguments
      *
      * @return std::string containing the XML framgment
      */
-    const std::string GenerateIntrospection() const;
+    std::string GenerateIntrospection() const;
 
   private:
     CallbackArguments() = default;
@@ -105,9 +105,9 @@ Exception::Exception(const std::string &errm, GError *gliberr)
  *  being provided
  *
  * @param arglist
- * @return const std::string
+ * @return std::string
  */
-static const std::string _arguments_gen_dbus_type(std::vector<struct _method_argument> arglist)
+static std::string _arguments_gen_dbus_type(std::vector<struct _method_argument> arglist)
 {
     std::string ret = "(";
     for (const auto &arg : arglist)
@@ -231,7 +231,7 @@ void Arguments::SendFD(int &fd)
 }
 
 
-const std::string Arguments::GetCallerBusName() const noexcept
+std::string Arguments::GetCallerBusName() const noexcept
 {
     return sender;
 }
@@ -245,13 +245,13 @@ std::string Arguments::str() const
                        PassFDmodeStr());
 }
 
-const bool Arguments::empty() const
+bool Arguments::empty() const
 {
     return input.empty() && output.empty();
 }
 
 
-const std::string Arguments::GenerateIntrospection() const
+std::string Arguments::GenerateIntrospection() const
 {
     std::string ret;
     for (const auto &ia : input)
@@ -350,7 +350,7 @@ GVariant *CallbackArguments::GetReturnArgs() const noexcept
 }
 
 
-const std::string CallbackArguments::GenerateIntrospection() const
+std::string CallbackArguments::GenerateIntrospection() const
 {
     return Arguments::GenerateIntrospection();
 }
@@ -371,7 +371,7 @@ Arguments::Ptr Callback::GetArgsList() const
 }
 
 
-const std::string Callback::GenerateIntrospection() const
+std::string Callback::GenerateIntrospection() const
 {
     if (method_args->empty())
     {
@@ -385,7 +385,7 @@ const std::string Callback::GenerateIntrospection() const
 }
 
 
-const std::string Callback::GetMethodName() const
+std::string Callback::GetMethodName() const
 {
     return method_name;
 }
@@ -434,7 +434,7 @@ Arguments::Ptr Collection::AddMethod(const std::string &method_name,
 }
 
 
-const std::string Collection::GenerateIntrospection() const
+std::string Collection::GenerateIntrospection() const
 {
     std::string xml;
     for (const auto &meth : methods)
@@ -445,7 +445,7 @@ const std::string Collection::GenerateIntrospection() const
 }
 
 
-const bool Collection::Exists(const std::string &method_name) const
+bool Collection::Exists(const std::string &method_name) const
 {
     const auto it = std::find_if(methods.begin(),
                                  methods.end(),

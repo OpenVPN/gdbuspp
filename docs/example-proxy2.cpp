@@ -53,10 +53,10 @@ class MyServiceProxy
      *
      * @param string1
      * @param string2
-     * @return const std::string
+     * @return std::string
      */
-    const std::string MethodWithArgs(const std::string &string1,
-                                     const std::string &string2)
+    std::string MethodWithArgs(const std::string &string1,
+                               const std::string &string2)
     {
         // Create the "argument pack" containing of 2 strings -> (ss)
         GVariantBuilder *args_builder = glib2::Builder::Create("(ss)");

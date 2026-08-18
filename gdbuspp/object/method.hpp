@@ -125,7 +125,7 @@ class Arguments
      * @returns true if no input or output arguments has been declared;
      *          otherwise false.
      */
-    const bool empty() const;
+    bool empty() const;
 
 
     //
@@ -190,9 +190,9 @@ class Arguments
     /**
      *  Retrieve the unique bus name of the caller of this method
      *
-     * @return const std::string containing the caller's unique bus name
+     * @return std::string containing the caller's unique bus name
      */
-    const std::string GetCallerBusName() const noexcept;
+    std::string GetCallerBusName() const noexcept;
 
 
     /**
@@ -242,7 +242,7 @@ class Arguments
      *
      * @return std::string containing the XML framgment
      */
-    const std::string GenerateIntrospection() const;
+    std::string GenerateIntrospection() const;
 
 
     /**
@@ -258,9 +258,9 @@ class Arguments
     /**
      *  Provide a readable string of the Object::Method::PassFDmode value
      *
-     * @return const std::string representation of PassFDmode
+     * @return std::string representation of PassFDmode
      */
-    const std::string PassFDmodeStr() const
+    std::string PassFDmodeStr() const
     {
         switch (pass_fd_mode)
         {
@@ -327,14 +327,14 @@ class Callback
      *
      * @return std::string
      */
-    const std::string GenerateIntrospection() const;
+    std::string GenerateIntrospection() const;
 
     /**
      *  Retrieve the D-Bus method name this callback is declared with
      *
-     * @return const std::string
+     * @return std::string
      */
-    const std::string GetMethodName() const;
+    std::string GetMethodName() const;
 
     /**
      *  Execute this callback method with all the needed arguments
@@ -411,9 +411,9 @@ class Collection
      *  declared D-Bus methods and their arguments in this collection
      *  object
      *
-     * @return const std::string
+     * @return std::string
      */
-    const std::string GenerateIntrospection() const;
+    std::string GenerateIntrospection() const;
 
     /**
      *  Check if a method is declared or not
@@ -422,7 +422,7 @@ class Collection
      *
      * @return true if method is declared, otherwise false
      */
-    const bool Exists(const std::string &method_name) const;
+    bool Exists(const std::string &method_name) const;
 
     /**
      *  Execute the D-Bus method based on the information provided in the

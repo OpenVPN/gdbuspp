@@ -100,7 +100,7 @@ class MyObject : public DBus::Object::Base
     }
 
 
-    const bool Authorize(const DBus::Authz::Request::Ptr request) override
+    bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         // code to authorize a D-Bus proxy client accessing this object
 

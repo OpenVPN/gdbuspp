@@ -68,7 +68,7 @@ const char *Signal::GetDBusType() const
 }
 
 
-const bool Signal::EmitSignal(GVariant *params) const
+bool Signal::EmitSignal(GVariant *params) const
 {
     // Retrieve the D-Bus data type of the GVariant value container
     // and the data type this signal is declared as; to verify it is

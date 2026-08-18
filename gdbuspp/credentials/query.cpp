@@ -30,7 +30,7 @@ Credentials::Query::Query(DBus::Connection::Ptr dbuscon)
 }
 
 
-const uid_t Credentials::Query::GetUID(const std::string &busname) const
+uid_t Credentials::Query::GetUID(const std::string &busname) const
 {
     try
     {
@@ -50,7 +50,7 @@ const uid_t Credentials::Query::GetUID(const std::string &busname) const
 }
 
 
-const pid_t Credentials::Query::GetPID(const std::string &busname) const
+pid_t Credentials::Query::GetPID(const std::string &busname) const
 {
     try
     {
@@ -70,7 +70,7 @@ const pid_t Credentials::Query::GetPID(const std::string &busname) const
 }
 
 
-const std::string Credentials::Query::GetUniqueBusName(const std::string &busname) const
+std::string Credentials::Query::GetUniqueBusName(const std::string &busname) const
 {
     try
     {
