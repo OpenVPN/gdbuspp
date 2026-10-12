@@ -18,6 +18,8 @@
 #include <memory>
 #include <thread>
 #include <unistd.h>
+
+#include <fmt/chrono.h>
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
