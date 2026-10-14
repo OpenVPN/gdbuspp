@@ -476,7 +476,7 @@ GVariant *convert_to_gvariant(const std::string &type, const std::string &value)
     catch (const std::out_of_range &)
     {
         throw Tests::Utils::Exception(__func__,
-                                      fmt::format(FMT_COMPILE("Type {:?} with value {:?} exceeds the range for the data type"),
+                                      fmt::format(FMT_COMPILE("Type {} with value {} exceeds the range for the data type"),
                                                   type,
                                                   value));
     }
@@ -658,7 +658,7 @@ GVariant *generate_gvariant(ResultLog &log,
             {
                 glib2::Builder::Add(bld, convert_to_gvariant(data_type.substr(1, 1), v));
             }
-            log.AddLogLine(fmt::format(FMT_COMPILE("   [{:?}]"), fmt::join(data_values, ", ")));
+            log.AddLogLine(fmt::format(FMT_COMPILE("   [{}]"), fmt::join(data_values, ", ")));
             data = glib2::Builder::Finish(bld);
         }
         else
@@ -671,7 +671,7 @@ GVariant *generate_gvariant(ResultLog &log,
                 glib2::Builder::Add(bld, convert_to_gvariant(type, v));
                 ++pos;
             }
-            log.AddLogLine(fmt::format(FMT_COMPILE("   [{:?}]"), fmt::join(data_values, ", ")));
+            log.AddLogLine(fmt::format(FMT_COMPILE("   [{}]"), fmt::join(data_values, ", ")));
 
             data = glib2::Builder::Finish(bld);
         }
