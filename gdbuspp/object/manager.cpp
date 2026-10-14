@@ -58,7 +58,7 @@ Manager::Exception::Exception(const std::string &errmsg, GError *gliberr)
 Manager::Exception::Exception(const Object::Base::Ptr obj,
                               const std::string &errmsg,
                               GError *gliberr)
-    : DBus::Exception(fmt::format(FMT_COMPILE("ObjectManager[path={}, interface{}]"),
+    : DBus::Exception(fmt::format(FMT_COMPILE("ObjectManager[path={}, interface={}]"),
                                   obj->GetPath(),
                                   obj->GetInterface()),
                       errmsg,

@@ -66,14 +66,14 @@ std::string Group::GenerateIntrospection()
         {
             type_elem.append(spec.type);
             introsp.append(fmt::format(
-                FMT_COMPILE("      <arg name={:?} type={:?}/>\n"),
+                FMT_COMPILE("      <arg name=\"{}\" type=\"{}\"/>\n"),
                 spec.name,
                 spec.type));
         }
 
         type_cache[sig_name] = fmt::format(FMT_COMPILE("({})"), type_elem);
         ret.append(fmt::format(
-            FMT_COMPILE("    <signal name={:?}>\n{}    </signal>\n"),
+            FMT_COMPILE("    <signal name=\"{}\">\n{}    </signal>\n"),
             sig_name,
             introsp));
     }

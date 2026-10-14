@@ -153,8 +153,8 @@ void Object::Base::RegisterSignals(const Signals::Group::Ptr signal_group)
 std::string Object::Base::GenerateIntrospection() const
 {
     return fmt::format(FMT_COMPILE(
-                           "<node name={:?}>\n"
-                           "  <interface name={:?}>\n"
+                           "<node name=\"{}\">\n"
+                           "  <interface name=\"{}\">\n"
                            "{}\n"
                            "{}\n"
                            "{}\n"

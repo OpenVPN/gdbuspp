@@ -257,14 +257,14 @@ std::string Arguments::GenerateIntrospection() const
     for (const auto &ia : input)
     {
         ret.append(fmt::format(
-            FMT_COMPILE(" <arg type={:?} name={:?} direction=\"in\"/>\n"),
+            FMT_COMPILE(" <arg type=\"{}\" name=\"{}\" direction=\"in\"/>\n"),
             ia.dbustype,
             ia.name));
     }
     for (const auto &oa : output)
     {
         ret.append(fmt::format(
-            FMT_COMPILE(" <arg type={:?} name={:?} direction=\"out\"/>\n"),
+            FMT_COMPILE(" <arg type=\"{}\" name=\"{}\" direction=\"out\"/>\n"),
             oa.dbustype,
             oa.name));
     }
@@ -375,11 +375,11 @@ std::string Callback::GenerateIntrospection() const
 {
     if (method_args->empty())
     {
-        return fmt::format(FMT_COMPILE("<method name={:?}/>"), method_name);
+        return fmt::format(FMT_COMPILE("<method name=\"{}\"/>"), method_name);
     }
 
     return fmt::format(
-        FMT_COMPILE("<method name={:?}>\n{}\n,</method>\n"),
+        FMT_COMPILE("<method name=\"{}\">\n{}\n,</method>\n"),
         method_name,
         method_args->GenerateIntrospection());
 }
