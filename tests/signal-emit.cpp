@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <getopt.h>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
@@ -135,7 +136,7 @@ int test_signal_emit(int argc, char **argv)
         }
         catch (const Tests::Utils::Exception &excp)
         {
-            fmt::println(stderr, "** ERROR ** {}", excp.what());
+            fmt::print(stderr, FMT_COMPILE("** ERROR ** {}\n"), excp.what());
             return 2;
         }
 
@@ -164,7 +165,7 @@ int test_signal_emit(int argc, char **argv)
     catch (const DBus::Exception &excp)
     {
         log.DumpLogs();
-        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
 }

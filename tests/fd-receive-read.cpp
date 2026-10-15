@@ -22,6 +22,7 @@
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
@@ -136,7 +137,7 @@ int test_fd_receive_read(int argc, char **argv)
         g_variant_unref(r);
         if (!opts.quiet)
         {
-            fmt::print("Success: {}\nBuffer size: \n",
+            fmt::print(FMT_COMPILE("Success: {}\nBuffer size: {}\n"),
                        res,
                        opts.bufsize);
         }
@@ -162,7 +163,7 @@ int test_fd_receive_read(int argc, char **argv)
             if (s < 0)
             {
                 throw DBus::Exception("main()",
-                                      fmt::format("Failed reading from file descriptor: {} ({})",
+                                      fmt::format(FMT_COMPILE("Failed reading from file descriptor: {} ({})"),
                                                   strerror(errno),
                                                   errno));
             }
@@ -170,7 +171,7 @@ int test_fd_receive_read(int argc, char **argv)
             {
                 if (!opts.quiet)
                 {
-                    fmt::println("Read {} bytes", s);
+                    fmt::print(FMT_COMPILE("Read {} bytes\n"), s);
                 }
                 outstr.write(buf, s);
             }
@@ -185,7 +186,7 @@ int test_fd_receive_read(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
     return 0;

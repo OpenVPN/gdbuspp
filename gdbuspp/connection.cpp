@@ -14,8 +14,11 @@
 
 #include <string>
 #include <glib.h>
-#include <fmt/printf.h>
 #include <gio/gio.h>
+
+#include <fmt/compile.h>
+#include <fmt/format.h>
+#include <fmt/printf.h>
 
 #include "connection.hpp"
 
@@ -67,7 +70,7 @@ Connection::~Connection() noexcept
     }
     catch (const Connection::Exception &err)
     {
-        fmt::println("{}", err.what());
+        fmt::print(FMT_COMPILE("{}\n"), err.what());
     }
 }
 

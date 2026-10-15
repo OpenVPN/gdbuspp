@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <fmt/compile.h>
 #include <fmt/format.h>
 #include <fmt/printf.h>
 #include <string>
@@ -93,17 +94,17 @@ std::string AsyncProcess::Request::str() const
     switch (request_type)
     {
     case Object::Operation::METHOD_CALL:
-        op = fmt::format(", method={}", method);
+        op = fmt::format(FMT_COMPILE(", method={}"), method);
         break;
     case Object::Operation::PROPERTY_SET:
     case Object::Operation::PROPERTY_GET:
-        op = fmt::format(", property={}", property);
+        op = fmt::format(FMT_COMPILE(", property={}"), property);
         break;
     case Object::Operation::NONE:
         break;
     }
 
-    return fmt::format("{{AsyncPool::Request {}: Type={}{}}}",
+    return fmt::format(FMT_COMPILE("{{AsyncPool::Request {}: Type={}{}}}"),
                        object,
                        Object::OperationString(request_type),
                        op);
@@ -141,7 +142,7 @@ void AsyncProcess::Pool::PushCallback(Request::UPtr &req)
     void *ptr = req.release();
     if (!ptr)
     {
-        fmt::println(stderr, "ctx.release() returned nullptr");
+        fmt::print(stderr, "ctx.release() returned nullptr\n");
         return;
     }
 
@@ -153,17 +154,17 @@ void AsyncProcess::Pool::PushCallback(Request::UPtr &req)
         if (err)
         {
             fmt::print(stderr,
-                       "** ERROR ** AsyncProcess::Pool::PushCallback: {}\n"
-                       "         ** {}\n",
+                       FMT_COMPILE("** ERROR ** AsyncProcess::Pool::PushCallback: {}\n"
+                                   "         ** {}\n"),
                        err->message,
                        req);
         }
         else
         {
-            fmt::println(stderr,
-                         "** ERROR **  AsyncProcess::Pool::PushCallback: "
-                         "Failed calling g_thread_pool_push() {{{}}}",
-                         req);
+            fmt::print(stderr,
+                       FMT_COMPILE("** ERROR **  AsyncProcess::Pool::PushCallback: "
+                                   "Failed calling g_thread_pool_push() {{{}}}\n"),
+                       req);
         }
     }
 }

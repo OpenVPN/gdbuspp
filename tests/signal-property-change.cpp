@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <getopt.h>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
@@ -83,9 +84,9 @@ class Options : protected Tests::Utils::OptionParser
             case 'X':
                 if (!chk_property_name.empty())
                 {
-                    fmt::println(stderr,
-                                 "{}: Cannot use -X again without haven passed -x first",
-                                 argv[0]);
+                    fmt::print(stderr,
+                               FMT_COMPILE("{}: Cannot use -X again without haven passed -x first\n"),
+                               argv[0]);
                     exit(1);
                 }
                 chk_property_name = std::string(optarg);
@@ -93,9 +94,9 @@ class Options : protected Tests::Utils::OptionParser
             case 'x':
                 if (chk_property_name.empty())
                 {
-                    fmt::println(stderr,
-                                 "{}: Cannot use -x before haven passed -X first",
-                                 argv[0]);
+                    fmt::print(stderr,
+                               FMT_COMPILE("{}: Cannot use -x before haven passed -X first\n"),
+                               argv[0]);
                     exit(1);
                 }
                 check_properties[chk_property_name] = std::string(optarg);
@@ -118,13 +119,13 @@ class Options : protected Tests::Utils::OptionParser
 
         if (!chk_property_name.empty())
         {
-            fmt::println("{}: Missing -x argument after -X", argv[0]);
+            fmt::print(FMT_COMPILE("{}: Missing -x argument after -X\n"), argv[0]);
             exit(1);
         }
 
         if (verbose && quiet)
         {
-            fmt::println("{}:  --verbose and --quiet cannot be combined", argv[0]);
+            fmt::print(FMT_COMPILE("{}:  --verbose and --quiet cannot be combined\n"), argv[0]);
             exit(1);
         }
 
@@ -162,18 +163,18 @@ class ParsePropertiesChanged
 
     void Dump() const
     {
-        fmt::print("\n **   PropertiesChanged:\n"
-                   "\tinterface:  {}\n"
-                   "\tproperties:\n",
+        fmt::print(FMT_COMPILE("\n **   PropertiesChanged:\n"
+                               "\tinterface:  {}\n"
+                               "\tproperties:\n"),
                    interface);
         for (const auto &[name, value] : changed)
         {
-            fmt::println("\t    - {}: {}", name, value);
+            fmt::print(FMT_COMPILE("\t    - {}: {}\n"), name, value);
         }
-        fmt::println("\tinvalidated:");
+        fmt::print("\tinvalidated:\n");
         for (const auto &name : invalidated)
         {
-            fmt::println("\t    - {}", name);
+            fmt::print(FMT_COMPILE("\t    - {}\n"), name);
         }
     }
 
@@ -207,7 +208,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 {
     if (!opts.quiet)
     {
-        fmt::println("{{{}}} {}", signal_count, event);
+        fmt::print(FMT_COMPILE("{{{}}} {}\n"), signal_count, event);
         if (opts.verbose)
         {
             Tests::Utils::ResultLog evdata(true);
@@ -219,7 +220,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
     if (opts.verbose)
     {
         prop_chg.Dump();
-        fmt::println("----------------");
+        fmt::print("----------------\n");
     }
 
     // Check the content of the signal
@@ -238,7 +239,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 
         if (opts.check_count > 0 && opts.check_count == signal_count)
         {
-            fmt::println("Received the expected {} signals", signal_count);
+            fmt::print(FMT_COMPILE("Received the expected {} signals\n"), signal_count);
             mainloop->Stop();
         }
     }
@@ -264,11 +265,11 @@ int test_signal_property_change(int argc, char **argv)
 
         if (!opts.quiet)
         {
-            fmt::println("This process' unique D-Bus name: {}", dbuscon->GetUniqueBusName());
+            fmt::print(FMT_COMPILE("This process' unique D-Bus name: {}\n"), dbuscon->GetUniqueBusName());
         }
         if (opts.verbose)
         {
-            fmt::println("Watching for: {}", opts.target);
+            fmt::print(FMT_COMPILE("Watching for: {}\n"), opts.target);
         }
         mainloop->Run();
 
@@ -276,15 +277,15 @@ int test_signal_property_change(int argc, char **argv)
 
         if (signal_errors > 0)
         {
-            fmt::println("Signal test result: FAIL.  {} errors occurred",
-                         signal_errors);
+            fmt::print(FMT_COMPILE("Signal test result: FAIL.  {} errors occurred\n"),
+                       signal_errors);
             return 2;
         }
         return 0;
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
 }

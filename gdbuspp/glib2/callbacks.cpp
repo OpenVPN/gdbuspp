@@ -13,6 +13,7 @@
  *         by the glib2 gdbus APIs
  */
 
+#include <fmt/compile.h>
 #include <fmt/format.h>
 #include <glib.h>
 #include <gio/gio.h>
@@ -226,7 +227,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
                 obj_path,
                 intf_name,
                 property_name);
-            fmt::println(stderr, "{}", errm);
+            fmt::print(stderr, FMT_COMPILE("{}\n"), errm);
             throw Object::Exception(errm);
         }
 
@@ -318,7 +319,7 @@ gboolean _int_dbusobject_callback_set_property(GDBusConnection *conn,
                 intf_name,
                 property_name);
 
-            fmt::println(stderr, "{}", errm);
+            fmt::print(stderr, FMT_COMPILE("{}\n"), errm);
             throw Object::Exception(errm);
         }
 
@@ -465,7 +466,7 @@ void _int_dbus_connection_signal_handler(GDBusConnection *conn,
             obj_path,
             intf_name,
             sign_name);
-        fmt::println(stderr, "{}", errm);
+        fmt::print(stderr, FMT_COMPILE("{}\n"), errm);
 
         throw Signals::Exception(errm);
     }

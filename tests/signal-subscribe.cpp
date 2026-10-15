@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <getopt.h>
+#include <fmt/compile.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -105,26 +106,26 @@ class Options : protected Tests::Utils::OptionParser
 
         if (signal_name.empty() && !check_type.empty())
         {
-            fmt::println(stderr,
-                         "{}:  ** ERROR ** --expect-type requires --signal-name",
-                         argv[0]);
+            fmt::print(stderr,
+                       FMT_COMPILE("{}:  ** ERROR ** --expect-type requires --signal-name\n"),
+                       argv[0]);
             exit(1);
         }
 
         if (check_type.length() != check_value.size())
         {
-            fmt::println(stderr,
-                         "{}: ** ERROR ** Too few or too many --expect-value "
-                         "arguments compared to type described by --expect-type",
-                         argv[0]);
+            fmt::print(stderr,
+                       FMT_COMPILE("{}: ** ERROR ** Too few or too many --expect-value "
+                                   "arguments compared to type described by --expect-type\n"),
+                       argv[0]);
             exit(1);
         }
 
         if (verbose && quiet)
         {
-            fmt::println(stderr,
-                         ": --verbose and --quiet cannot be combined",
-                         argv[0]);
+            fmt::print(stderr,
+                       FMT_COMPILE("{}: --verbose and --quiet cannot be combined\n"),
+                       argv[0]);
             exit(1);
         }
 
@@ -150,7 +151,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 {
     if (!opts.quiet)
     {
-        fmt::println("{{{}}} {}", signal_count, event);
+        fmt::print(FMT_COMPILE("{{{}}} {}\n"), signal_count, event);
         if (opts.verbose)
         {
             Tests::Utils::ResultLog evdata(true);
@@ -165,7 +166,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 
         if (!opts.check_type.empty())
         {
-            error = !Tests::Utils::check_data_type(fmt::format("({})", opts.check_type), event->params);
+            error = !Tests::Utils::check_data_type(fmt::format(FMT_COMPILE("({})"), opts.check_type), event->params);
         }
 
 
@@ -176,27 +177,27 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
         {
             if (opts.verbose)
             {
-                fmt::println("           type={}, value='{}'\n",
-                             type[idx + 1],
-                             v);
+                fmt::print(FMT_COMPILE("           type={}, value='{}'\n\n"),
+                           type[idx + 1],
+                           v);
             }
             if (idx < opts.check_value.size())
             {
                 if (v != opts.check_value[idx])
                 {
-                    fmt::println("       Received unexpected data value: [{}] - received '{}', expected '{}'",
-                                 idx,
-                                 v,
-                                 opts.check_value[idx]);
+                    fmt::print(FMT_COMPILE("       Received unexpected data value: [{}] - received '{}', expected '{}'\n"),
+                               idx,
+                               v,
+                               opts.check_value[idx]);
                     error = true;
                 }
                 ++idx;
             }
             else
             {
-                fmt::println("       Received unexpected additional data value: [{}] - received '{}'",
-                             idx,
-                             v);
+                fmt::print(FMT_COMPILE("       Received unexpected additional data value: [{}] - received '{}'\n"),
+                           idx,
+                           v);
                 error = true;
             }
         }
@@ -207,7 +208,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
 
         if (opts.check_count > 0 && opts.check_count == signal_count)
         {
-            fmt::println("Received the expected {} signals", signal_count);
+            fmt::print(FMT_COMPILE("Received the expected {} signals\n"), signal_count);
             mainloop->Stop();
         }
     }
@@ -231,21 +232,21 @@ int test_signal_subscribe(int argc, char **argv)
                               signal_handler(mainloop, opts, event);
                           });
 
-        fmt::println("This process' unique D-Bus name: {}", dbuscon->GetUniqueBusName());
+        fmt::print(FMT_COMPILE("This process' unique D-Bus name: {}\n"), dbuscon->GetUniqueBusName());
         mainloop->Run();
 
         sigmgr->Unsubscribe(opts.target, opts.signal_name);
 
         if (signal_errors > 0)
         {
-            fmt::println("Signal test result: FAIL.  {} errors occured", signal_errors);
+            fmt::print(FMT_COMPILE("Signal test result: FAIL.  {} errors occured\n"), signal_errors);
             return 2;
         }
         return 0;
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
 }

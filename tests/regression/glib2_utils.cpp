@@ -16,6 +16,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 #include <glib.h>
 #include "../../gdbuspp/glib2/utils.hpp"
@@ -138,7 +139,7 @@ int main()
     catch (const DBus::Exception &excp)
     {
         log.DumpLogs();
-        fmt::print("\nEXCEPTION:\n     {}\n", excp.what());
+        fmt::print(FMT_COMPILE("\nEXCEPTION:\n     {}\n"), excp.what());
         return 2;
     }
 }

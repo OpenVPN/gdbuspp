@@ -42,7 +42,7 @@ const char *Exception::what() const noexcept
 
 void OptionParser::help(const std::string &argv0, struct option options[])
 {
-    fmt::print("Usage: {} <options>\n\nOptions:\n", argv0);
+    fmt::print(FMT_COMPILE("Usage: {} <options>\n\nOptions:\n"), argv0);
 
     int idx = 0;
     bool done = false;
@@ -51,19 +51,19 @@ void OptionParser::help(const std::string &argv0, struct option options[])
         const struct option *opt = &options[idx];
         if (opt->name)
         {
-            fmt::print("{}",
+            fmt::print(FMT_COMPILE("{}"),
                        (opt->val > 0
-                            ? fmt::format("  -{:c} |", opt->val)
+                            ? fmt::format(FMT_COMPILE("  -{:c} |"), opt->val)
                             : "       "));
 
 
-            fmt::println(" --{}{}",
-                         opt->name,
-                         (opt->has_arg == required_argument
-                              ? " <arg>"
-                              : (opt->has_arg == optional_argument
-                                     ? " [arg]"
-                                     : "")));
+            fmt::print(FMT_COMPILE(" --{}{}\n"),
+                       opt->name,
+                       (opt->has_arg == required_argument
+                            ? " <arg>"
+                            : (opt->has_arg == optional_argument
+                                   ? " [arg]"
+                                   : "")));
             ++idx;
         }
         else
@@ -71,7 +71,7 @@ void OptionParser::help(const std::string &argv0, struct option options[])
             done = true;
         }
     }
-    fmt::println("");
+    fmt::print("\n");
 }
 
 
@@ -165,8 +165,7 @@ bool ResultLog::CheckDataTypeValue(const std::string &type,
     if (!type.empty())
     {
         bool r = check_data_type(type, data);
-        AddLogLine(fmt::format(
-            FMT_COMPILE("Checking expected data type: {}"), (r ? "Pass" : "Fail")));
+        AddLogLine(fmt::format(FMT_COMPILE("Checking expected data type: {}"), (r ? "Pass" : "Fail")));
         if (!r)
         {
             AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), type));
@@ -176,8 +175,7 @@ bool ResultLog::CheckDataTypeValue(const std::string &type,
     if (!value.empty())
     {
         bool r = check_data_value(value, data);
-        AddLogLine(fmt::format(
-            FMT_COMPILE("Checking expected data value: {}"), (r ? "Pass" : "Fail")));
+        AddLogLine(fmt::format(FMT_COMPILE("Checking expected data value: {}"), (r ? "Pass" : "Fail")));
         if (!r)
         {
             AddLogLine(fmt::format(FMT_COMPILE("   Expected: {}"), value));
@@ -207,9 +205,9 @@ void ResultLog::CheckGVariantDataType(const std::string &msg,
     std::string type_glib2 = std::string(g_variant_get_type_string(value));
     bool pass_glib2 = type_glib2 == expect;
     AddLogLine(fmt::format(
-        "{{ g_variant_get_type_string(...) -> {} }}  ",
+        FMT_COMPILE("{{ g_variant_get_type_string(...) -> {} }}  "),
         (pass_glib2 ? "Pass"
-                    : fmt::format("FAILED, received: '{}'",
+                    : fmt::format(FMT_COMPILE("FAILED, received: '{}'"),
                                   type_glib2))));
 
 
@@ -218,9 +216,9 @@ void ResultLog::CheckGVariantDataType(const std::string &msg,
     std::string type_gdbus = glib2::DataType::Extract(value);
     bool pass_gdbus = type_gdbus == expect;
     AddLogLine(fmt::format(
-        "{{ glib2::DataType::Extract(...) -> {} }}  ",
+        FMT_COMPILE("{{ glib2::DataType::Extract(...) -> {} }}  "),
         (pass_gdbus ? "Pass"
-                    : fmt::format("FAILED, received: '{}'", type_gdbus))));
+                    : fmt::format(FMT_COMPILE("FAILED, received: '{}'"), type_gdbus))));
 
     TestResult testres(pass_glib2 && pass_gdbus, true, 0, 0);
     log_result(testres, nullptr, result_msg);
@@ -553,7 +551,7 @@ std::string parse_gvariant_to_string(GVariant *value)
         ret = glib2::Value::Get<std::string>(value);
         break;
     default:
-        ret = fmt::format("<UNKNOWN D-BUS DATA TYPE: {}>", type);
+        ret = fmt::format(FMT_COMPILE("<UNKNOWN D-BUS DATA TYPE: {}>"), type);
         break;
     }
     return ret;
@@ -607,7 +605,7 @@ std::vector<std::string> convert_from_gvariant(GVariant *values)
         default:
             {
                 throw Tests::Utils::Exception("Tests::Utils::convert_from_gvariant",
-                                              fmt::format("D-Bus data type '{}' has not been implemented.",
+                                              fmt::format(FMT_COMPILE("D-Bus data type '{}' has not been implemented."),
                                                           type[pos + 1]));
             }
         }

@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include <fmt/chrono.h>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
@@ -115,28 +116,28 @@ void time_execution(const std::string &descr,
 {
     auto start = std::chrono::system_clock::now();
     bool exception = false;
-    fmt::println("::: {}:    start={}", descr, start);
+    fmt::print(FMT_COMPILE("::: {}:    start={}\n"), descr, start);
     try
     {
         testfunc();
     }
     catch (const std::exception &excp)
     {
-        fmt::println("\n::: {}: EXCEPTION ## {}", descr, excp.what());
+        fmt::print(FMT_COMPILE("\n::: {}: EXCEPTION ## {}\n"), descr, excp.what());
         exception = true;
     }
     auto end = std::chrono::system_clock::now();
-    fmt::println("::: {}:      end={}", descr, end);
+    fmt::print(FMT_COMPILE("::: {}:      end={}\n"), descr, end);
 
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    fmt::print("::: {}: duration={}s, ", descr, duration.count());
+    fmt::print(FMT_COMPILE("::: {}: duration={}s, "), descr, duration.count());
     if (deviation == 0)
     {
-        fmt::print("expected={}s", runtime_sec);
+        fmt::print(FMT_COMPILE("expected={}s"), runtime_sec);
     }
     else
     {
-        fmt::print("expected {}s to {}s",
+        fmt::print(FMT_COMPILE("expected {}s to {}s"),
                    runtime_sec - deviation,
                    runtime_sec + deviation);
     }
@@ -151,7 +152,7 @@ void time_execution(const std::string &descr,
     {
         ++failed;
     }
-    fmt::println(" ==> result={}", (!exception && runtime_pass ? "Pass" : "FAILED"));
+    fmt::print(FMT_COMPILE(" ==> result={}\n"), (!exception && runtime_pass ? "Pass" : "FAILED"));
 }
 
 
@@ -330,9 +331,9 @@ int test_idle_detect(int argc, char **argv)
     }
 
     // Summarize the test results
-    fmt::print(">> Passed tests: {}\n"
-               ">> Failed tests: {}\n"
-               ">> OVERALL TEST RESULT: {}\n",
+    fmt::print(FMT_COMPILE(">> Passed tests: {}\n"
+                           ">> Failed tests: {}\n"
+                           ">> OVERALL TEST RESULT: {}\n"),
                success,
                failed,
                (success > 0 && failed == 0 ? "PASS" : "FAIL"));

@@ -152,19 +152,19 @@ int test_proxy_utils(int argc, char **argv)
     bool errors = false;
     if (options.destination.empty())
     {
-        fmt::println(stderr, "** ERROR **  Missing --destination");
+        fmt::print(stderr, "** ERROR **  Missing --destination\n");
         errors = true;
     }
 
     if (options.object_path.empty())
     {
-        fmt::println(stderr, "** ERROR **  Missing --object-path");
+        fmt::print(stderr, "** ERROR **  Missing --object-path\n");
         errors = true;
     }
 
     if (options.object_interface.empty())
     {
-        fmt::println(stderr, "** ERROR **  Missing --object-interface");
+        fmt::print(stderr, "** ERROR **  Missing --object-interface\n");
         errors = true;
     }
 
@@ -213,7 +213,7 @@ int test_proxy_utils(int argc, char **argv)
 
         // Run Utils::Query::CheckObjectExists() tests
         testlogger.RunFunctionTest(
-            fmt::format("query->CheckObjectExists('{}', '{}')", path, interface),
+            fmt::format(FMT_COMPILE("query->CheckObjectExists('{}', '{}')"), path, interface),
             proxy,
             [&query, &path, &interface]() -> bool
             {
@@ -222,7 +222,7 @@ int test_proxy_utils(int argc, char **argv)
             true);
 
         testlogger.RunFunctionTest(
-            fmt::format("query->CheckObjectExists('{}', '{}')", incorrect_path, interface),
+            fmt::format(FMT_COMPILE("query->CheckObjectExists('{}', '{}')"), incorrect_path, interface),
             proxy,
             [&query, &incorrect_path, &interface]() -> bool
             {
@@ -232,7 +232,7 @@ int test_proxy_utils(int argc, char **argv)
 
 
         testlogger.RunFunctionTest(
-            fmt::format("query->CheckObjectExists('{}', '{}')", path, incorrect_interface),
+            fmt::format(FMT_COMPILE("query->CheckObjectExists('{}', '{}')"), path, incorrect_interface),
             proxy,
             [&query, &path, &incorrect_interface]() -> bool
             {
@@ -241,7 +241,7 @@ int test_proxy_utils(int argc, char **argv)
             false);
 
         testlogger.RunFunctionTest(
-            fmt::format("query->CheckObjectExists('{}', '{}')", incorrect_path, incorrect_interface),
+            fmt::format(FMT_COMPILE("query->CheckObjectExists('{}', '{}')"), incorrect_path, incorrect_interface),
             proxy,
             [&query, &incorrect_path, &incorrect_interface]() -> bool
             {
@@ -251,7 +251,7 @@ int test_proxy_utils(int argc, char **argv)
 
         // Run Utils::Query::ServiceVersion() tests
         testlogger.RunFunctionTest(
-            fmt::format("query->ServiceVersion('{}', '{}')", path, interface),
+            fmt::format(FMT_COMPILE("query->ServiceVersion('{}', '{}')"), path, interface),
             proxy,
             [&query, &path, &interface]() -> bool
             {
@@ -260,7 +260,7 @@ int test_proxy_utils(int argc, char **argv)
             true);
 
         testlogger.RunExceptionTest(
-            fmt::format("query->ServiceVersion('{}', '{}')", incorrect_path, incorrect_interface),
+            fmt::format(FMT_COMPILE("query->ServiceVersion('{}', '{}')"), incorrect_path, incorrect_interface),
             proxy,
             [query, incorrect_path, incorrect_interface]()
             {
@@ -279,7 +279,7 @@ int test_proxy_utils(int argc, char **argv)
             g_variant_unref(res);
 
             testlogger.RunFunctionTest(
-                fmt::format("query->Introspect('{}')", path),
+                fmt::format(FMT_COMPILE("query->Introspect('{}')"), path),
                 proxy,
                 [&query, &path, &chk_value]() -> bool
                 {
@@ -288,7 +288,7 @@ int test_proxy_utils(int argc, char **argv)
                 true);
 
             testlogger.RunFunctionTest(
-                fmt::format("query->Introspect('{}')", incorrect_path),
+                fmt::format(FMT_COMPILE("query->Introspect('{}')"), incorrect_path),
                 proxy,
                 [&query, &incorrect_path, &chk_value]() -> bool
                 {
@@ -313,7 +313,7 @@ int test_proxy_utils(int argc, char **argv)
                         bool r = service_qry->StartServiceByName(srv) == 2;
                         if (r)
                         {
-                            testlogger.AddLogLine(fmt::format("            [lambda]      >>   Started service: {}", srv));
+                            testlogger.AddLogLine(fmt::format(FMT_COMPILE("            [lambda]      >>   Started service: {}"), srv));
                             started_srv = srv;
                             return true;
                         }
@@ -339,7 +339,7 @@ int test_proxy_utils(int argc, char **argv)
                  "The name is not activatable"});
 
             testlogger.RunFunctionTest(
-                fmt::format("service_qry->CheckServiceAvail({}) == true", started_srv),
+                fmt::format(FMT_COMPILE("service_qry->CheckServiceAvail({}) == true"), started_srv),
                 nullptr,
                 [&service_qry, &started_srv]() -> bool
                 {
@@ -362,7 +362,7 @@ int test_proxy_utils(int argc, char **argv)
             std::string chk_busname = creds->GetUniqueBusName(options.destination);
 
             testlogger.RunFunctionTest(
-                fmt::format("service_qry->GetNameOwner({})", options.destination),
+                fmt::format(FMT_COMPILE("service_qry->GetNameOwner({})"), options.destination),
                 nullptr,
                 [&service_qry, &options, &chk_busname]() -> bool
                 {
@@ -436,8 +436,8 @@ int test_proxy_utils(int argc, char **argv)
     catch (const DBus::Exception &excp)
     {
         testlogger.DumpLogs();
-        fmt::print(stderr, "** EXCEPTION **  {}\n"
-                           "** EXCEPTION ** RawError: {}\n",
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"
+                                       "** EXCEPTION ** RawError: {}\n"),
                    excp.what(),
                    excp.GetRawError());
         return 2;

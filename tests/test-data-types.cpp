@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -58,7 +59,7 @@ void test_dictionary(Tests::Utils::ResultLog &testlog, DBus::Proxy::Client::Ptr 
                                 try
                                 {
                                     auto wrong_type = glib2::Dict::Lookup<int>(dict, "key");
-                                    testlog.AddLogLine(fmt::format("Retrieved unexpected value: '{}'", wrong_type));
+                                    testlog.AddLogLine(fmt::format(FMT_COMPILE("Retrieved unexpected value: '{}'"), wrong_type));
                                     return false;
                                 }
                                 catch (const glib2::Utils::Exception &excp)
@@ -77,7 +78,7 @@ void test_dictionary(Tests::Utils::ResultLog &testlog, DBus::Proxy::Client::Ptr 
                                 try
                                 {
                                     auto non_exist = glib2::Dict::Lookup<std::string>(dict, "no-such-key");
-                                    testlog.AddLogLine(fmt::format("Retrieved key which should not exist, value: '{}", non_exist));
+                                    testlog.AddLogLine(fmt::format(FMT_COMPILE("Retrieved key which should not exist, value: '{}'"), non_exist));
                                     return false;
                                 }
                                 catch (const glib2::Utils::Exception &excp)
@@ -102,12 +103,12 @@ void test_dictionary(Tests::Utils::ResultLog &testlog, DBus::Proxy::Client::Ptr 
                                 }
 
                                 testlog.AddLogLine(fmt::format(
-                                    "--------------------------------\n"
-                                    "              name = '{}'\n"
-                                    "               key = '{}'\n"
-                                    "           numbers = {}\n"
-                                    "              bool = {}\n"
-                                    "         --------------------------------",
+                                    FMT_COMPILE("--------------------------------\n"
+                                                "              name = '{}'\n"
+                                                "               key = '{}'\n"
+                                                "           numbers = {}\n"
+                                                "              bool = {}\n"
+                                                "         --------------------------------"),
                                     name,
                                     key,
                                     numbers,
@@ -156,7 +157,7 @@ bool compare_vector(Tests::Utils::ResultLog &testlog,
 
 {
     std::string result = fmt::format(
-        "{} - Vector size: {}",
+        FMT_COMPILE("{} - Vector size: {}"),
         msg,
         (vect1.size() == vect2.size() ? "Pass" : "Different - FAILED"));
     if (vect1.size() != vect2.size())
@@ -178,9 +179,9 @@ bool compare_vector(Tests::Utils::ResultLog &testlog,
                                                   vect2.end());
         result.append("Differs - FAILED");
         testlog.AddLogLine(result);
-        testlog.AddLogLine(fmt::format("Content vector 1: '{}'",
+        testlog.AddLogLine(fmt::format(FMT_COMPILE("Content vector 1: '{}'"),
                                        fmt_iterator_value(vect1_it)));
-        testlog.AddLogLine(fmt::format("Content vector 2: '{}'",
+        testlog.AddLogLine(fmt::format(FMT_COMPILE("Content vector 2: '{}'"),
                                        fmt_iterator_value(vect2_it)));
 
         return false;
@@ -546,7 +547,7 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                                                    if (val != data[array_counter])
                                                                    {
                                                                        throw std::runtime_error(
-                                                                           fmt::format("Unxpected data: '{}' != '{}'",
+                                                                           fmt::format(FMT_COMPILE("Unxpected data: '{}' != '{}'"),
                                                                                        val,
                                                                                        data[array_counter]));
                                                                    }

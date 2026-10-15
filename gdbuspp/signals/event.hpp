@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <glib.h>
+#include <fmt/compile.h>
 #include <fmt/ostream.h>
 
 #include "../object/path.hpp"
@@ -63,7 +64,7 @@ class Event
     std::string str() const
     {
         std::string signal_data = fmt::format(
-            "sender={}, path={}, interface={}, signal_name={}",
+            FMT_COMPILE("sender={}, path={}, interface={}, signal_name={}"),
             sender,
             object_path,
             object_interface,
@@ -72,10 +73,10 @@ class Event
         if (params)
         {
             signal_data.append(
-                fmt::format(", parameter_type={}",
+                fmt::format(FMT_COMPILE(", parameter_type={}"),
                             glib2::DataType::Extract(params)));
         }
-        return fmt::format("Signal::Event({})", signal_data);
+        return fmt::format(FMT_COMPILE("Signal::Event({})"), signal_data);
     }
 
 

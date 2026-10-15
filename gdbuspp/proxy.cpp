@@ -647,7 +647,7 @@ void Client::SetPropertyGVariant(const TargetPreset::Ptr preset,
 
 std::string Client::str() const
 {
-    return fmt::format("Proxy({}, '{}')", connection, destination);
+    return fmt::format(FMT_COMPILE("Proxy({}, '{}')"), connection, destination);
 }
 
 

@@ -124,7 +124,7 @@ Object::Property::Exception::Exception(const Object::Base *object,
                                        const std::string &property,
                                        const std::string &errmsg,
                                        GError *gliberr)
-    : Object::Exception(object, errmsg, gliberr, fmt::format("property='{}'", property))
+    : Object::Exception(object, errmsg, gliberr, fmt::format(FMT_COMPILE("property='{}'"), property))
 {
 }
 
