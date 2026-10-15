@@ -203,7 +203,7 @@ bool Object::Base::GetIdleDetectorDisabled() const
 
 std::string Object::Base::str() const
 {
-    return fmt::format("Object(path={}, interface={})",
+    return fmt::format(FMT_COMPILE("Object(path={}, interface={})"),
                        object_path_,
                        interface_);
 }

@@ -19,6 +19,7 @@
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
+#include <fmt/compile.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -208,13 +209,13 @@ int test_proxy_client(int argc, char **argv)
     bool errors = false;
     if (options.destination.empty())
     {
-        fmt::println(stderr, "** ERROR **  Missing --destination");
+        fmt::print(stderr, "** ERROR **  Missing --destination\n");
         errors = true;
     }
 
     if (options.object_path.empty())
     {
-        fmt::println("** ERROR **  Missing --object-path");
+        fmt::print("** ERROR **  Missing --object-path\n");
         errors = true;
     }
     if (errors)
@@ -233,7 +234,7 @@ int test_proxy_client(int argc, char **argv)
         {
             auto prx = Proxy::Client::Create(conn, options.destination);
             auto prxqry = Proxy::Utils::Query::Create(prx);
-            fmt::println("{}", prxqry->Introspect(options.object_path));
+            fmt::print(FMT_COMPILE("{}\n"), prxqry->Introspect(options.object_path));
             return 0;
         }
 
@@ -245,7 +246,7 @@ int test_proxy_client(int argc, char **argv)
             {
                 if (!options.quiet)
                 {
-                    fmt::println("Found object at {}", options.object_path);
+                    fmt::print(FMT_COMPILE("Found object at {}\n"), options.object_path);
                 }
                 return 0;
             }
@@ -253,7 +254,7 @@ int test_proxy_client(int argc, char **argv)
             {
                 if (!options.quiet)
                 {
-                    fmt::println("Object {} not found", options.object_path);
+                    fmt::print(FMT_COMPILE("Object {} not found\n"), options.object_path);
                 }
                 return 2;
             }
@@ -271,33 +272,33 @@ int test_proxy_client(int argc, char **argv)
         }
         catch (const Tests::Utils::Exception &excp)
         {
-            fmt::println(stderr, "** ERROR ** {}", excp.what());
+            fmt::print(stderr, FMT_COMPILE("** ERROR ** {}\n"), excp.what());
             return 2;
         }
 
 
         auto prx = Proxy::Client::Create(conn, options.destination);
-        log.AddLogLine(fmt::format("Connected to: {}", prx));
+        log.AddLogLine(fmt::format(FMT_COMPILE("Connected to: {}"), prx));
 
         // Check the Proxy::Client::GetDestination() method
         if (prx->GetDestination() != options.destination)
         {
             log.AddLogLine(fmt::format(
-                "** ERROR ** Proxy::Client::GetDestination() did not return {}",
+                FMT_COMPILE("** ERROR ** Proxy::Client::GetDestination() did not return {}"),
                 options.destination));
             throw DBus::Exception("Proxy::Client::GetDestination()",
-                                  fmt::format("Unexpected result: {}", prx->GetDestination()));
+                                  fmt::format(FMT_COMPILE("Unexpected result: {}"), prx->GetDestination()));
         }
         if (!options.method.empty())
         {
             if (options.object_interface.empty())
             {
-                fmt::println(stderr, "** ERROR **   --interface is missing");
+                fmt::print(stderr, "** ERROR **   --interface is missing\n");
                 return 2;
             }
 
             log.AddLogLine(fmt::format(
-                "Method call: {}, method={}",
+                FMT_COMPILE("Method call: {}, method={}"),
                 options.preset,
                 options.method));
             GVariant *res = prx->Call(options.preset, options.method, data);
@@ -307,7 +308,7 @@ int test_proxy_client(int argc, char **argv)
             {
                 if (options.quiet)
                 {
-                    fmt::println("UNEXPECTED RESULT");
+                    fmt::print("UNEXPECTED RESULT\n");
                     log.DumpLogs();
                     return 3;
                 }
@@ -319,13 +320,13 @@ int test_proxy_client(int argc, char **argv)
         {
             if (options.object_interface.empty())
             {
-                fmt::println(stderr, "** ERROR **   --interface is missing");
+                fmt::print(stderr, "** ERROR **   --interface is missing\n");
                 errors = true;
             }
 
             if (options.property.empty())
             {
-                fmt::println(stderr, "** ERROR **  The property name cannot be empty");
+                fmt::print(stderr, "** ERROR **  The property name cannot be empty\n");
                 errors = true;
             }
             if (errors)
@@ -352,7 +353,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<bool>: \n";
                         for (const auto &e : prx->GetPropertyArray<bool>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] {}\n", idx, static_cast<bool>(e)));
+                            ret.append(fmt::format(FMT_COMPILE("  [{}] {}\n"), idx, static_cast<bool>(e)));
                             idx++;
                         }
                         break;
@@ -361,7 +362,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<int32_t>: \n";
                         for (const auto &e : prx->GetPropertyArray<int32_t>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            ret.append(fmt::format(FMT_COMPILE("  [{}] {}\n"), idx, e));
                             idx++;
                         }
                         break;
@@ -370,7 +371,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<DBus::Object::Path>: \n";
                         for (const auto &e : prx->GetPropertyArray<DBus::Object::Path>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] '{}'\n", idx, e));
+                            ret.append(fmt::format(FMT_COMPILE("  [{}] '{}'\n"), idx, e));
                             idx++;
                         }
                         break;
@@ -379,7 +380,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<string>: \n";
                         for (const auto &e : prx->GetPropertyArray<std::string>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] '{}'\n", idx, e));
+                            ret.append(fmt::format(FMT_COMPILE("  [{}] '{}'\n"), idx, e));
                             idx++;
                         }
                         break;
@@ -388,7 +389,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<uint64_t>: \n";
                         for (const auto &e : prx->GetPropertyArray<uint64_t>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            ret.append(fmt::format(FMT_COMPILE("  [{}] {}\n"), idx, e));
                             idx++;
                         }
                         break;
@@ -397,7 +398,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<uint32_t>: \n";
                         for (const auto &e : prx->GetPropertyArray<uint32_t>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            ret.append(fmt::format(FMT_COMPILE("  [{}] {}\n"), idx, e));
                             idx++;
                         }
                         break;
@@ -406,7 +407,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<int64_t>: \n";
                         for (const auto &e : prx->GetPropertyArray<uint64_t>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] {}\n", idx, e));
+                            ret.append(fmt::format(FMT_COMPILE("  [{}] {}\n"), idx, e));
                             idx++;
                         }
                         break;
@@ -421,31 +422,31 @@ int test_proxy_client(int argc, char **argv)
                     switch (data_type[0])
                     {
                     case 'b':
-                        ret = fmt::format("<bool>:  {}", prx->GetProperty<bool>(tgt, property));
+                        ret = fmt::format(FMT_COMPILE("<bool>:  {}"),prx->GetProperty<bool>(tgt, property));
                         break;
 
                     case 'i':
-                        ret = fmt::format("<int32_t>:  {}", prx->GetProperty<int32_t>(tgt, property));
+                        ret = fmt::format(FMT_COMPILE("<int32_t>:  {}"),prx->GetProperty<int32_t>(tgt, property));
                         break;
 
                     case 'o':
-                        ret = fmt::format("<DBus::Object::Path>:  '{}'", prx->GetProperty<DBus::Object::Path>(tgt, property));
+                        ret = fmt::format(FMT_COMPILE("<DBus::Object::Path>:  '{}'"),prx->GetProperty<DBus::Object::Path>(tgt, property));
                         break;
 
                     case 's':
-                        ret = fmt::format("<std::string>:  '{}'", prx->GetProperty<std::string>(tgt, property));
+                        ret = fmt::format(FMT_COMPILE("<std::string>:  '{}'"),prx->GetProperty<std::string>(tgt, property));
                         break;
 
                     case 't':
-                        ret = fmt::format("<uint64_t>:  {}", prx->GetProperty<uint64_t>(tgt, property));
+                        ret = fmt::format(FMT_COMPILE("<uint64_t>:  {}"),prx->GetProperty<uint64_t>(tgt, property));
                         break;
 
                     case 'u':
-                        ret = fmt::format("<uint32_t>:  {}", prx->GetProperty<uint32_t>(tgt, property));
+                        ret = fmt::format(FMT_COMPILE("<uint32_t>:  {}"),prx->GetProperty<uint32_t>(tgt, property));
                         break;
 
                     case 'x':
-                        ret = fmt::format("<int64_t>:  {}", prx->GetProperty<int64_t>(tgt, property));
+                        ret = fmt::format(FMT_COMPILE("<int64_t>:  {}"),prx->GetProperty<int64_t>(tgt, property));
                         break;
 
                     default:
@@ -457,19 +458,19 @@ int test_proxy_client(int argc, char **argv)
             };
 
             log.AddLogLine(fmt::format(
-                "Get Property: {}, property={}",
+                FMT_COMPILE("Get Property: {}, property={}"),
                 options.preset,
                 options.property));
 
             GVariant *res = prx->GetPropertyGVariant(options.preset, options.property);
             log.AddGVariantDump("GVariant response", res);
-            log.AddLogLine(fmt::format("Get Property {}", fetch_content(prx, options.preset, options.property, res)));
+            log.AddLogLine(fmt::format(FMT_COMPILE("Get Property {}"), fetch_content(prx, options.preset, options.property, res)));
 
             if (!log.CheckDataTypeValue(options.check_type, options.check_response, res))
             {
                 if (options.quiet)
                 {
-                    fmt::println(stderr, "UNEXPECTED RESULT");
+                    fmt::print(stderr, "UNEXPECTED RESULT\n");
                     log.DumpLogs();
                     return 3;
                 }
@@ -481,29 +482,29 @@ int test_proxy_client(int argc, char **argv)
         {
             if (options.object_interface.empty())
             {
-                fmt::println(stderr, "** ERROR **   --interface is missing");
+                fmt::print(stderr, "** ERROR **   --interface is missing\n");
                 errors = true;
             }
             if (options.property.empty())
             {
-                fmt::println(stderr, "** ERROR **  The property name cannot be empty");
+                fmt::print(stderr, "** ERROR **  The property name cannot be empty\n");
                 errors = true;
             }
             if (ProxyOpts::PropertyMode::SET == options.property_mode && !data)
             {
-                fmt::println(stderr, "** ERROR **  Missing new data value (--data-type, --data-value)");
+                fmt::print(stderr, "** ERROR **  Missing new data value (--data-type, --data-value)\n");
                 errors = true;
             }
             else if (ProxyOpts::PropertyMode::SET_ANY == options.property_mode && !options.prop_val.has_value())
             {
-                fmt::println(stderr, "** ERROR **  Missing property value to --property-set-*");
+                fmt::print(stderr, "** ERROR **  Missing property value to --property-set-*\n");
             }
             if (errors)
             {
                 return 2;
             }
 
-            log.AddLogLine(fmt::format("Set Property: {}, property={}", options.preset, options.property));
+            log.AddLogLine(fmt::format(FMT_COMPILE("Set Property: {}, property={}"), options.preset, options.property));
             if (ProxyOpts::PropertyMode::SET == options.property_mode)
             {
                 prx->SetPropertyGVariant(options.preset, options.property, data);
@@ -530,7 +531,7 @@ int test_proxy_client(int argc, char **argv)
         }
         else
         {
-            fmt::println(stderr, "No operation provided: --introspect, --method, --property-get, --property-set");
+            fmt::print(stderr, "No operation provided: --introspect, --method, --property-get, --property-set\n");
             return 1;
         }
 
@@ -543,7 +544,7 @@ int test_proxy_client(int argc, char **argv)
     catch (const DBus::Exception &excp)
     {
         log.DumpLogs();
-        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
     return 0;

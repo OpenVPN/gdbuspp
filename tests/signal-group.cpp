@@ -285,13 +285,13 @@ int test_signal_group(int argc, char **argv)
                     {
                         if (!opts.quiet)
                         {
-                            fmt::println("log->Invalid() test passed");
+                            fmt::print("log->Invalid() test passed\n");
                         }
                     }
                     else
                     {
                         throw DBus::Exception("signal-group-test",
-                                              fmt::format("log->Invalid() threw unexpected exception: {}",
+                                              fmt::format(FMT_COMPILE("log->Invalid() threw unexpected exception: {}"),
                                                           err));
                     }
                 }
@@ -301,7 +301,7 @@ int test_signal_group(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
 }

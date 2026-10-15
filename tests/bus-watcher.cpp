@@ -14,6 +14,7 @@
  */
 
 #include <future>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 
 
@@ -38,7 +39,7 @@ int buswatch_test(int argc, char **argv)
         watcher.SetNameDisappearedHandler(
             [&](const std::string &bus_name)
             {
-                fmt::println("Bus name disappeared: {}", bus_name);
+                fmt::print(FMT_COMPILE("Bus name disappeared: {}\n"), bus_name);
                 loop->Stop();
             });
 
@@ -48,29 +49,29 @@ int buswatch_test(int argc, char **argv)
                                              loop->Run();
                                          });
 
-        fmt::println("Waiting for bus name {} to appear ...", busname);
+        fmt::print(FMT_COMPILE("Waiting for bus name {} to appear ...\n"), busname);
 
         if (!watcher.WaitFor(10s))
         {
             loop->Stop();
             async_mainloop.get();
 
-            fmt::println(stderr, "Timeout waiting for {} to appear!", busname);
+            fmt::print(stderr, FMT_COMPILE("Timeout waiting for {} to appear!\n"), busname);
             return 1;
         }
 
-        fmt::println("{} appeared!", busname);
+        fmt::print(FMT_COMPILE("{} appeared!\n"), busname);
 
         async_mainloop.get();
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println("EXCEPTION (DBus): {}", excp.what());
+        fmt::print(FMT_COMPILE("EXCEPTION (DBus): {}\n"), excp.what());
         return 9;
     }
     catch (const std::exception &excp)
     {
-        fmt::println("EXCEPTION: {}", excp.what());
+        fmt::print(FMT_COMPILE("EXCEPTION: {}\n"), excp.what());
         return 8;
     }
     return 0;

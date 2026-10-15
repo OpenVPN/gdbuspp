@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <getopt.h>
+#include <fmt/compile.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -134,7 +135,7 @@ int test_signal_signal(int argc, char **argv)
     auto testsig = Signals::Signal::Create<TestSignal>(sig_emit);
     for (uint32_t i = 0; i < opts.repeat_send; ++i)
     {
-        testsig->Send(fmt::format("Test Signal {}", i + 1),
+        testsig->Send(fmt::format(FMT_COMPILE("Test Signal {}"), i + 1),
                       (i % 2),
                       101 + i);
     }

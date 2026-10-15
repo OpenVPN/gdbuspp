@@ -15,6 +15,7 @@
 
 #include <string>
 #include <getopt.h>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
@@ -89,7 +90,7 @@ class Options : public Tests::Utils::OptionParser
 
         if (destination.empty())
         {
-            fmt::println(stderr, "Missing destination to check (--destination)");
+            fmt::print(stderr, "Missing destination to check (--destination)\n");
             exit(1);
         }
 
@@ -97,7 +98,7 @@ class Options : public Tests::Utils::OptionParser
         {
             if (!expect_result.empty())
             {
-                fmt::println("Using --expect-result requires one of --get-bus-name, --get-uid or --get-pid");
+                fmt::print("Using --expect-result requires one of --get-bus-name, --get-uid or --get-pid\n");
                 exit(1);
             }
 
@@ -116,7 +117,7 @@ void check_expectations(const std::string &expect, const std::string &result)
     {
         if (expect != result)
         {
-            fmt::println("Unexpected result; expected '{}'", expect);
+            fmt::print(FMT_COMPILE("Unexpected result; expected '{}'\n"), expect);
             exit(3);
         }
         exit(0);
@@ -136,27 +137,27 @@ int test_credential_query(int argc, char **argv)
         if (opts.get_ubusname)
         {
             std::string result = creds->GetUniqueBusName(opts.destination);
-            fmt::println("Unique bus name: '{}'", result);
+            fmt::print(FMT_COMPILE("Unique bus name: '{}'\n"), result);
             check_expectations(opts.expect_result, result);
         }
 
         if (opts.get_uid)
         {
             uid_t result = creds->GetUID(opts.destination);
-            fmt::println("Owning user ID (uid): {}", result);
+            fmt::print(FMT_COMPILE("Owning user ID (uid): {}\n"), result);
             check_expectations(opts.expect_result, std::to_string(result));
         }
 
         if (opts.get_pid)
         {
             pid_t result = creds->GetPID(opts.destination);
-            fmt::println("Owning process ID (pid): {}", result);
+            fmt::print(FMT_COMPILE("Owning process ID (pid): {}\n"), result);
             check_expectations(opts.expect_result, std::to_string(result));
         }
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println(stderr, "** EXCEPTION **  ", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
 

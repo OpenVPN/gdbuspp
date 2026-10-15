@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <glib.h>
+#include <fmt/compile.h>
 #include <fmt/format.h>
 #include <fmt/printf.h>
 
@@ -73,7 +74,7 @@ class Logger : public DBus::Signals::Group
         }
         catch (const DBus::Signals::Exception &excp)
         {
-            fmt::println("EXCEPTION :: SimpleLog: {}", excp.what());
+            fmt::print(FMT_COMPILE("EXCEPTION :: SimpleLog: {}\n"), excp.what());
         }
     }
 };
@@ -112,7 +113,7 @@ class Object : public DBus::Object::Base
         AddMethod("RemoveMe",
                   [this](DBus::Object::Method::Arguments::Ptr args)
                   {
-                      fmt::println("---- REMOVING MYSELF: {}", this->GetPath());
+                      fmt::print(FMT_COMPILE("---- REMOVING MYSELF: {}\n"), this->GetPath());
 
                       this->object_manager->RemoveObject(this->GetPath());
                       args->SetMethodReturn(nullptr);
@@ -121,7 +122,7 @@ class Object : public DBus::Object::Base
 
     virtual ~Object() override
     {
-        fmt::println("---- ~SimpleObject() ... path: {}", my_path);
+        fmt::print(FMT_COMPILE("---- ~SimpleObject() ... path: {}\n"), my_path);
     };
 
 
@@ -241,13 +242,13 @@ class PropertyTests : public DBus::Object::Base
     ~PropertyTests() noexcept override
     {
         Log(__func__, "Removed PropertyTests");
-        fmt::println("{} -- ~PropertyTests() called", __func__);
+        fmt::print(FMT_COMPILE("{} -- ~PropertyTests() called\n"), __func__);
     }
 
 
     bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
-        Log(__func__, fmt::format("Authorization request approved: {}", request));
+        Log(__func__, fmt::format(FMT_COMPILE("Authorization request approved: {}"), request));
         return true;
     }
 
@@ -281,7 +282,7 @@ class PropertyTests : public DBus::Object::Base
 
     GVariant *GetComplexProperty(const DBus::Object::Property::BySpec &property)
     {
-        fmt::println("[Get Complex Property] name={}", property.GetName());
+        fmt::print(FMT_COMPILE("[Get Complex Property] name={}\n"), property.GetName());
 
         GVariantBuilder *bld = glib2::Builder::Create("(bis)");
         glib2::Builder::Add(bld, complex.boolval);
@@ -295,7 +296,7 @@ class PropertyTests : public DBus::Object::Base
 
     GVariant *GetDictionary(const DBus::Object::Property::BySpec &property)
     {
-        fmt::println("[Get Dictionary Property] name={}", property.GetName());
+        fmt::print(FMT_COMPILE("[Get Dictionary Property] name={}\n"), property.GetName());
 
         GVariantDict *dict = glib2::Dict::Create();
         glib2::Dict::Add(dict, "name", std::string("dictionary test"));
@@ -316,12 +317,12 @@ class PropertyTests : public DBus::Object::Base
         complex.intval = glib2::Value::Extract<int>(value, 1);
         complex.stringval = glib2::Value::Extract<std::string>(value, 2);
 
-        fmt::println("[Set Complex Property]"
-                     "name={}, bool={}, int={}, string-2='{}'",
-                     property.GetName(),
-                     complex.boolval,
-                     complex.intval,
-                     complex.stringval);
+        fmt::print(FMT_COMPILE("[Set Complex Property]"
+                               "name={}, bool={}, int={}, string-2='{}'\n"),
+                   property.GetName(),
+                   complex.boolval,
+                   complex.intval,
+                   complex.stringval);
 
         auto upd = property.PrepareUpdate();
         upd->AddValue(complex.boolval);
@@ -392,7 +393,7 @@ class PropertyTests : public DBus::Object::Base
      */
     GVariant *GetMoreComplexProperty(const DBus::Object::Property::BySpec &property)
     {
-        fmt::println("[Get More Complex Property] name={}", property.GetName());
+        fmt::print(FMT_COMPILE("[Get More Complex Property] name={}\n"), property.GetName());
 
         //  Helper lambda function which extracts data from
         //  a single struct key_value into a new GVariant object
@@ -450,9 +451,9 @@ class PropertyTests : public DBus::Object::Base
         std::vector<key_value> dataset;
         for (int i = 0; i < 10; i++)
         {
-            dataset.push_back({(i + 1),                       // .key
-                               fmt::format("Element #{}", i), // .value
-                               (i % 2 == 0)});                // .even
+            dataset.push_back({(i + 1),                                    // .key
+                               fmt::format(FMT_COMPILE("Element #{}"), i), // .value
+                               (i % 2 == 0)});                             // .even
         }
 
         // Add the complete array/vector of key_value elements.  The
@@ -472,7 +473,7 @@ class PropertyTests : public DBus::Object::Base
 
     void Log(const std::string &func, const std::string &msg) const
     {
-        log->Log(fmt::format("PropertyTests::{}", func), msg);
+        log->Log(fmt::format(FMT_COMPILE("PropertyTests::{}"), func), msg);
     }
 
 
@@ -543,7 +544,7 @@ class MethodTests : public DBus::Object::Base
         AddMethod("MethodNoArgs",
                   [](DBus::Object::Method::Arguments::Ptr args)
                   {
-                      fmt::println("[Method call: MethodNoArgs] {}", args);
+                      fmt::print(FMT_COMPILE("[Method call: MethodNoArgs] {}\n"), args);
                       args->SetMethodReturn(nullptr);
                   });
 
@@ -656,12 +657,12 @@ class MethodTests : public DBus::Object::Base
     ~MethodTests() noexcept
     {
         Log(__func__, "Removed MethodTests");
-        fmt::println("{}  -- ~MethodTests() called", __func__);
+        fmt::print(FMT_COMPILE("{}  -- ~MethodTests() called\n"), __func__);
     }
 
     bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
-        Log(__func__, fmt::format("Authorization request approved: {}", request));
+        Log(__func__, fmt::format(FMT_COMPILE("Authorization request approved: {}"), request));
         return true;
     }
 
@@ -673,19 +674,19 @@ class MethodTests : public DBus::Object::Base
 
     void Log(const std::string &func, const std::string &msg) const
     {
-        log->Log(fmt::format("MethodTests::{}", func), msg);
+        log->Log(fmt::format(FMT_COMPILE("MethodTests::{}"), func), msg);
     }
 
 
     void StringLength(DBus::Object::Method::Arguments::Ptr args)
     {
         Log(__func__, "StringLength called");
-        fmt::println("[StringLength call] {}", args);
+        fmt::print(FMT_COMPILE("[StringLength call] {}\n"), args);
 
         GVariant *params = args->GetMethodParameters();
         std::string in = glib2::Value::Extract<std::string>(params, 0);
         size_t l = in.length();
-        fmt::println("Input: '{}'  length: {}", in, l);
+        fmt::print(FMT_COMPILE("Input: '{}'  length: {}\n"), in, l);
 
         args->SetMethodReturn(glib2::Value::Create<int32_t>(l));
     }
@@ -693,7 +694,7 @@ class MethodTests : public DBus::Object::Base
 
     void CreateSimpleObject(DBus::Object::Method::Arguments::Ptr args)
     {
-        fmt::println("[CreateSimpleObject call] {}", args);
+        fmt::print(FMT_COMPILE("[CreateSimpleObject call] {}\n"), args);
 
         GVariant *params = args->GetMethodParameters();
         std::string name = glib2::Value::Extract<std::string>(params, 0);
@@ -710,13 +711,13 @@ class MethodTests : public DBus::Object::Base
                 // how to use this callback
                 auto obj = object_manager->GetObject<Object>(path);
                 removed_objects.push_back(obj->GetPath());
-                fmt::println("AttachRemoveCallback: Removed object {}",
-                             path);
+                fmt::print(FMT_COMPILE("AttachRemoveCallback: Removed object {}\n"),
+                           path);
                 Log("AttachRemoveCallback",
-                    fmt::format("Object removed: {}", path));
+                    fmt::format(FMT_COMPILE("Object removed: {}"), path));
             });
-        fmt::println(">>>> NEW OBJECT: {}", obj->GetPath());
-        Log(__func__, fmt::format("New child object created: {}", obj->str()));
+        fmt::print(FMT_COMPILE(">>>> NEW OBJECT: {}\n"), obj->GetPath());
+        Log(__func__, fmt::format(FMT_COMPILE("New child object created: {}"), obj->str()));
 
         args->SetMethodReturn(glib2::Value::Create(obj->GetPath()));
     }
@@ -724,7 +725,7 @@ class MethodTests : public DBus::Object::Base
 
     void RemoveSimpleObject(DBus::Object::Method::Arguments::Ptr args)
     {
-        fmt::println("[RemoveSimpleObject call] {}", args);
+        fmt::print(FMT_COMPILE("[RemoveSimpleObject call] {}\n"), args);
 
         GVariant *params = args->GetMethodParameters();
         std::string name = glib2::Value::Extract<std::string>(params, 0);
@@ -735,8 +736,8 @@ class MethodTests : public DBus::Object::Base
 
         const std::string path = Constants::GenPath("simple1/childs/") + name;
         object_manager->RemoveObject(path);
-        fmt::println(">>> DELETED OBJECT: {}", path);
-        Log(__func__, fmt::format("Child object removed: {}", path));
+        fmt::print(FMT_COMPILE(">>> DELETED OBJECT: {}\n"), path);
+        Log(__func__, fmt::format(FMT_COMPILE("Child object removed: {}"), path));
 
         args->SetMethodReturn(nullptr);
     }
@@ -745,7 +746,7 @@ class MethodTests : public DBus::Object::Base
 
     void OpenFile(DBus::Object::Method::Arguments::Ptr args)
     {
-        fmt::println("[OpenFile - Read] {}", args);
+        fmt::print(FMT_COMPILE("[OpenFile - Read] {}\n"), args);
 
         GVariant *params = args->GetMethodParameters();
         std::string fname = glib2::Value::Extract<std::string>(params, 0);
@@ -755,12 +756,12 @@ class MethodTests : public DBus::Object::Base
         {
             fd = open(fname.c_str(), O_RDONLY);
             args->SendFD(fd);
-            Log(__func__, fmt::format("File '{}' opened, fd={}", fname, fd));
+            Log(__func__, fmt::format(FMT_COMPILE("File '{}' opened, fd={}"), fname, fd));
         }
         catch (const DBus::AsyncProcess::Exception &excp)
         {
-            Log(__func__, fmt::format("** ERROR **  {}", excp.GetRawError()));
-            fmt::println("** ERROR **  {}", excp.what());
+            Log(__func__, fmt::format(FMT_COMPILE("** ERROR **  {}"), excp.GetRawError()));
+            fmt::print(FMT_COMPILE("** ERROR **  {}\n"), excp.what());
         }
 
         args->SetMethodReturn(glib2::Value::Create(fd > 0));
@@ -769,31 +770,31 @@ class MethodTests : public DBus::Object::Base
 
     void fstatFile(DBus::Object::Method::Arguments::Ptr args)
     {
-        fmt::println("[fstatFile] {}", args);
+        fmt::print(FMT_COMPILE("[fstatFile] {}\n"), args);
 
         int fd = args->ReceiveFD();
         struct stat fileinfo = {};
         GVariant *ret = nullptr;
         if (fstat(fd, &fileinfo) >= 0)
         {
-            fmt::println("fstat() success: "
-                         "uid={}, gid={}, size={}",
-                         fileinfo.st_uid,
-                         fileinfo.st_gid,
-                         fileinfo.st_size);
+            fmt::print(FMT_COMPILE("fstat() success: "
+                                   "uid={}, gid={}, size={}\n"),
+                       fileinfo.st_uid,
+                       fileinfo.st_gid,
+                       fileinfo.st_size);
             auto *bld = glib2::Builder::Create("(uut)");
             glib2::Builder::Add<uint32_t>(bld, fileinfo.st_uid);
             glib2::Builder::Add<uint32_t>(bld, fileinfo.st_gid);
             glib2::Builder::Add<uint64_t>(bld, fileinfo.st_size);
             ret = glib2::Builder::Finish(bld);
-            Log(__func__, fmt::format("fstat({}) successful", fd));
+            Log(__func__, fmt::format(FMT_COMPILE("fstat({}) successful"), fd));
         }
         else
         {
-            Log(__func__, fmt::format("fstat({}) failed!", fd));
+            Log(__func__, fmt::format(FMT_COMPILE("fstat({}) failed!"), fd));
             throw DBus::Object::Exception(
                 this,
-                fmt::format("fstat() call failed: {}", std::strerror(errno)));
+                fmt::format(FMT_COMPILE("fstat() call failed: {}"), std::strerror(errno)));
         }
 
         args->SetMethodReturn(ret);
@@ -902,9 +903,9 @@ class MainHandler : public DBus::Object::Base
         }
         catch (const DBus::Exception &excp)
         {
-            fmt::println(stderr,
-                         "** ERROR **  Failed to send Log signal: {}",
-                         excp.what());
+            fmt::print(stderr,
+                       FMT_COMPILE("** ERROR **  Failed to send Log signal: {}\n"),
+                       excp.what());
         }
 
         fmt::print(stderr, "\nDESTRUCTOR ~SimpleHandler\n");
@@ -914,7 +915,7 @@ class MainHandler : public DBus::Object::Base
     bool Authorize(const DBus::Authz::Request::Ptr request) override
     {
         log->Log("SimpleHandler::Authorize",
-                 fmt::format("Authorization request approved: {}", request));
+                 fmt::format(FMT_COMPILE("Authorization request approved: {}"), request));
         return true;
     }
 
@@ -974,7 +975,7 @@ class Service1 : public DBus::Service
     //  is registered on the D-Bus connection
     void BusNameAcquired(const std::string &busname) override
     {
-        fmt::println("Bus name acquired: {}", busname);
+        fmt::print(FMT_COMPILE("Bus name acquired: {}\n"), busname);
     }
 
     //  This callback method will be called if the D-Bus service for some reason
@@ -982,15 +983,15 @@ class Service1 : public DBus::Service
     //  registration is lost (the D-Bus daemon kicks the service off the D-Bus).
     void BusNameLost(const std::string &busname) override
     {
-        fmt::println("** WARNING ** Bus name lost: {}", busname);
+        fmt::print(FMT_COMPILE("** WARNING ** Bus name lost: {}\n"), busname);
         Stop();
     }
 
 
     void InternalTests(DBus::Object::Manager::Ptr object_mgr, MainHandler::Ptr handler)
     {
-        fmt::println("** Internal tests - "
-                     "DBus::Object::Manager::GetObject() / DBus::Object::Manager::GetAllObjects()");
+        fmt::print("** Internal tests - "
+                   "DBus::Object::Manager::GetObject() / DBus::Object::Manager::GetAllObjects()\n");
 
         std::map<std::string, DBus::Object::Base::Ptr> check;
         check[handler->GetPath()] = handler;
@@ -1029,10 +1030,10 @@ class Service1 : public DBus::Service
         }
         check[r_fmth_tests->GetPath()] = h_fmth_tests;
 
-        fmt::println("   Collected paths:");
+        fmt::print("   Collected paths:\n");
         for (const auto &[p, o] : check)
         {
-            fmt::println("       - {}", p);
+            fmt::print(FMT_COMPILE("       - {}\n"), p);
         }
 
         auto non_existing = object_mgr->GetObject<MainHandler>("/nonexisting/path");
@@ -1042,21 +1043,21 @@ class Service1 : public DBus::Service
                                   "GetObject<>() on non-existing path failed");
         }
 
-        fmt::println("   Validating paths and objects from "
-                     "DBus::Object::Manager::GetAllObjects()");
+        fmt::print("   Validating paths and objects from "
+                   "DBus::Object::Manager::GetAllObjects()\n");
         bool failed = false;
         for (const auto &[obj_path, obj] : object_mgr->GetAllObjects())
         {
-            fmt::print("       - Looking up {} ... ", obj_path);
+            fmt::print(FMT_COMPILE("       - Looking up {} ... "), obj_path);
             try
             {
                 const auto chk = check.at(obj_path);
                 bool failed = !compare_shared_ptr_obj(obj, chk);
-                fmt::println("found, {}", (failed ? "OBJECT MATCH FAILED" : "object match passed"));
+                fmt::print(FMT_COMPILE("found, {}\n"), (failed ? "OBJECT MATCH FAILED" : "object match passed"));
             }
             catch (const std::out_of_range &)
             {
-                fmt::println("NOT FOUND");
+                fmt::print("NOT FOUND\n");
                 failed = true;
             }
         }
@@ -1101,12 +1102,12 @@ int test_simple_service(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println("EXCEPTION (DBus): {}", excp.what());
+        fmt::print(FMT_COMPILE("EXCEPTION (DBus): {}\n"), excp.what());
         return 9;
     }
     catch (const std::exception &excp)
     {
-        fmt::println("EXCEPTION: {}", excp.what());
+        fmt::print(FMT_COMPILE("EXCEPTION: {}\n"), excp.what());
         return 8;
     }
     return 0;

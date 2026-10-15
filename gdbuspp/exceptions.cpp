@@ -14,6 +14,7 @@
 
 
 #include <string>
+#include <fmt/compile.h>
 #include <fmt/format.h>
 #include <gio/gio.h>
 
@@ -32,14 +33,14 @@ Exception::Exception(const std::string &classn,
         if (err)
         {
             g_dbus_error_strip_remote_error(err);
-            std::string ret = fmt::format("{}", err->message);
+            std::string ret = fmt::format(FMT_COMPILE("{}"), err->message);
             g_error_free(err);
             return ret;
         }
         return "";
     };
 
-    std::string errbuf = fmt::format("{}{}", err, add_g_error(gliberr));
+    std::string errbuf = fmt::format(FMT_COMPILE("{}{}"), err, add_g_error(gliberr));
 
     // If the error is prefixed with a glib2 "GDBUs.Error:", it can be
     // split up into an error domain and an error message
@@ -65,7 +66,7 @@ Exception::Exception(const std::string &classn,
         error = tmperror;
     }
 
-    classerr = fmt::format("[{}] {}", classn, errbuf);
+    classerr = fmt::format(FMT_COMPILE("[{}] {}"), classn, errbuf);
 }
 
 

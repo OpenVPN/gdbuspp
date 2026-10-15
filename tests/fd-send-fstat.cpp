@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <fmt/compile.h>
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"
@@ -92,7 +93,7 @@ class Options : public Tests::Utils::OptionParser
 
         if (file.empty())
         {
-            fmt::println(stderr, "Missing file name (--file|-f)");
+            fmt::print(stderr, "Missing file name (--file|-f)\n");
             exit(2);
         }
 
@@ -126,16 +127,16 @@ int test_fd_send_fstat(int argc, char **argv)
         if (!opts.quiet)
         {
             Utils::ResultLog log(true);
-            log.AddGVariantDump(fmt::format("{} results", opts.method), r);
+            log.AddGVariantDump(fmt::format(FMT_COMPILE("{} results"), opts.method), r);
         }
         else
         {
             uid_t uid = glib2::Value::Extract<uint32_t>(r, 0);
             gid_t gid = glib2::Value::Extract<uint32_t>(r, 1);
             uint64_t size = glib2::Value::Extract<uint64_t>(r, 2);
-            fmt::print("export testresult_uid={}\n"
-                       "export testresult_gid={}\n"
-                       "export testresult_size={}\n",
+            fmt::print(FMT_COMPILE("export testresult_uid={}\n"
+                                   "export testresult_gid={}\n"
+                                   "export testresult_size={}\n"),
                        uid,
                        gid,
                        size);
@@ -149,7 +150,7 @@ int test_fd_send_fstat(int argc, char **argv)
     }
     catch (const DBus::Exception &excp)
     {
-        fmt::println(stderr, "** EXCEPTION **  {}", excp.what());
+        fmt::print(stderr, FMT_COMPILE("** EXCEPTION **  {}\n"), excp.what());
         return 2;
     }
     return 0;
