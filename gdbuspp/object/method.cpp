@@ -467,7 +467,7 @@ void Collection::Execute(AsyncProcess::Request::UPtr &req)
                            });
     if (methods.end() == it)
     {
-        throw Method::Exception(fmt::format(FMT_COMPILE("Method {:?} does not exist"), req->method));
+        throw Method::Exception(fmt::format(FMT_COMPILE("Method '{}' does not exist"), req->method));
     }
     it->get()->Execute(req);
 }

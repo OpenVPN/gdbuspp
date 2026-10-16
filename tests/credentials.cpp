@@ -116,7 +116,7 @@ void check_expectations(const std::string &expect, const std::string &result)
     {
         if (expect != result)
         {
-            fmt::println("Unexpected result; expected {:?}", expect);
+            fmt::println("Unexpected result; expected '{}'", expect);
             exit(3);
         }
         exit(0);
@@ -136,7 +136,7 @@ int test_credential_query(int argc, char **argv)
         if (opts.get_ubusname)
         {
             std::string result = creds->GetUniqueBusName(opts.destination);
-            fmt::println("Unique bus name: {:?}", result);
+            fmt::println("Unique bus name: '{}'", result);
             check_expectations(opts.expect_result, result);
         }
 

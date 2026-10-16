@@ -546,7 +546,7 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                                                    if (val != data[array_counter])
                                                                    {
                                                                        throw std::runtime_error(
-                                                                           fmt::format("Unxpected data: {:?} != {:?}",
+                                                                           fmt::format("Unxpected data: '{}' != '{}'",
                                                                                        val,
                                                                                        data[array_counter]));
                                                                    }

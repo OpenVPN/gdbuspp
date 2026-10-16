@@ -87,7 +87,7 @@ void Object::Base::AddPropertyBySpec(const std::string &name,
         [](const DBus::Object::Property::BySpec &prop, GVariant *v) -> Object::Property::Update::Ptr
         {
             throw Object::Exception(fmt::format(
-                FMT_COMPILE("Property {:?} is read only)"),
+                FMT_COMPILE("Property '{}' is read only)"),
                 prop.GetName()));
         }};
 

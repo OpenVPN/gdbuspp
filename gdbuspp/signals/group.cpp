@@ -43,7 +43,7 @@ void Group::RegisterSignal(const std::string &signal_name, const SignalArgList &
     try
     {
         (void)registered_signals.at(signal_name);
-        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?} is already registered"),
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name '{}' is already registered"),
                                              signal_name));
     }
     catch (const std::out_of_range &)
@@ -98,7 +98,7 @@ void Group::GroupCreate(const std::string &groupname)
     try
     {
         (void)signal_groups.at(groupname);
-        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?}"), groupname));
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name '{}'"), groupname));
     }
     catch (const std::out_of_range &)
     {
@@ -118,7 +118,7 @@ void Group::GroupRemove(const std::string &groupname)
     const auto it = signal_groups.find(groupname);
     if (signal_groups.end() == it)
     {
-        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?} is not created"), groupname));
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name '{}' is not created"), groupname));
     }
     signal_groups.erase(it);
 }
@@ -183,7 +183,7 @@ void Group::GroupSendGVariant(const std::string &groupname,
     if (exp_type != param_type)
     {
         throw Signals::Exception(fmt::format(
-            FMT_COMPILE("Invalid data type for {:?} - Expected {:?} but received {:?}"),
+            FMT_COMPILE("Invalid data type for '{}' - Expected '{}' but received '{}'"),
             signal_name,
             exp_type,
             param_type));
@@ -220,7 +220,7 @@ Signals::Emit::Ptr Group::get_group_emitter(const std::string &groupname,
     }
     catch (const std::out_of_range &)
     {
-        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name {:?} is not created"), groupname));
+        throw Signals::Exception(fmt::format(FMT_COMPILE("Group name '{}' is not created"), groupname));
     }
 }
 
