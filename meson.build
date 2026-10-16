@@ -48,7 +48,7 @@ glib2_deps = [
         dependency('gio-unix-2.0'),
         dependency('gthread-2.0'),
         dependency('threads'),
-        dependency('fmt'),
+        dependency('fmt', version: '>= 9.0'),
 ]
 
 #
