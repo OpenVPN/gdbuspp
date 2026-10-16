@@ -79,7 +79,7 @@ std::string Target::str() const
     }
     if (!object_interface.empty())
     {
-        details.push_back(fmt::format(FMT_COMPILE("interface={:?}"), object_interface));
+        details.push_back(fmt::format(FMT_COMPILE("interface='{}'"), object_interface));
     }
 
     return fmt::format(FMT_COMPILE("Signals::Target({})"), fmt::join(details, ", "));

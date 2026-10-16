@@ -317,7 +317,7 @@ class PropertyTests : public DBus::Object::Base
         complex.stringval = glib2::Value::Extract<std::string>(value, 2);
 
         fmt::println("[Set Complex Property]"
-                     "name={}, bool={}, int={}, string-2={:?}",
+                     "name={}, bool={}, int={}, string-2='{}'",
                      property.GetName(),
                      complex.boolval,
                      complex.intval,
@@ -685,7 +685,7 @@ class MethodTests : public DBus::Object::Base
         GVariant *params = args->GetMethodParameters();
         std::string in = glib2::Value::Extract<std::string>(params, 0);
         size_t l = in.length();
-        fmt::println("Input: {:?}  length: {}", in, l);
+        fmt::println("Input: '{}'  length: {}", in, l);
 
         args->SetMethodReturn(glib2::Value::Create<int32_t>(l));
     }
@@ -755,7 +755,7 @@ class MethodTests : public DBus::Object::Base
         {
             fd = open(fname.c_str(), O_RDONLY);
             args->SendFD(fd);
-            Log(__func__, fmt::format("File {:?} opened, fd={}", fname, fd));
+            Log(__func__, fmt::format("File '{}' opened, fd={}", fname, fd));
         }
         catch (const DBus::AsyncProcess::Exception &excp)
         {

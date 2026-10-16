@@ -277,7 +277,7 @@ int test_signal_group(int argc, char **argv)
                 {
                     std::string err(excp.what());
                     const std::string expect_error(fmt::format(
-                        FMT_COMPILE("Invalid data type for {:?} - Expected {:?} but received {:?}"),
+                        FMT_COMPILE("Invalid data type for '{}' - Expected '{}' but received '{}'"),
                         "Debug",
                         "(tsss)",
                         "(s)"));

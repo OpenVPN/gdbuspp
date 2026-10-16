@@ -176,7 +176,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
         {
             if (opts.verbose)
             {
-                fmt::println("           type={}, value={:?}\n",
+                fmt::println("           type={}, value='{}'\n",
                              type[idx + 1],
                              v);
             }
@@ -184,7 +184,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
             {
                 if (v != opts.check_value[idx])
                 {
-                    fmt::println("       Received unexpected data value: [{}] - received {:?}, expected {:?}",
+                    fmt::println("       Received unexpected data value: [{}] - received '{}', expected '{}'",
                                  idx,
                                  v,
                                  opts.check_value[idx]);
@@ -194,7 +194,7 @@ void signal_handler(MainLoop::Ptr mainloop, const Options &opts, Signals::Event:
             }
             else
             {
-                fmt::println("       Received unexpected additional data value: [{}] - received {:?}",
+                fmt::println("       Received unexpected additional data value: [{}] - received '{}'",
                              idx,
                              v);
                 error = true;

@@ -370,7 +370,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<DBus::Object::Path>: \n";
                         for (const auto &e : prx->GetPropertyArray<DBus::Object::Path>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] {:?}\n", idx, e));
+                            ret.append(fmt::format("  [{}] '{}'\n", idx, e));
                             idx++;
                         }
                         break;
@@ -379,7 +379,7 @@ int test_proxy_client(int argc, char **argv)
                         ret = "<string>: \n";
                         for (const auto &e : prx->GetPropertyArray<std::string>(tgt, property))
                         {
-                            ret.append(fmt::format("  [{}] {:?}\n", idx, e));
+                            ret.append(fmt::format("  [{}] '{}'\n", idx, e));
                             idx++;
                         }
                         break;
@@ -429,11 +429,11 @@ int test_proxy_client(int argc, char **argv)
                         break;
 
                     case 'o':
-                        ret = fmt::format("<DBus::Object::Path>:  {:?}", prx->GetProperty<DBus::Object::Path>(tgt, property));
+                        ret = fmt::format("<DBus::Object::Path>:  '{}'", prx->GetProperty<DBus::Object::Path>(tgt, property));
                         break;
 
                     case 's':
-                        ret = fmt::format("<std::string>:  {:?}", prx->GetProperty<std::string>(tgt, property));
+                        ret = fmt::format("<std::string>:  '{}'", prx->GetProperty<std::string>(tgt, property));
                         break;
 
                     case 't':

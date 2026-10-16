@@ -50,11 +50,11 @@ static std::string compose_errclass(Target::Ptr target)
     }
     if (!target->object_path.empty())
     {
-        details.push_back(fmt::format(FMT_COMPILE("object_path={:?}"), std::string(target->object_path)));
+        details.push_back(fmt::format(FMT_COMPILE("object_path='{}'"), std::string(target->object_path)));
     }
     if (!target->object_interface.empty())
     {
-        details.push_back(fmt::format(FMT_COMPILE("interface={:?}"), target->object_interface));
+        details.push_back(fmt::format(FMT_COMPILE("interface='{}'"), target->object_interface));
     }
     return fmt::format(FMT_COMPILE("DBus::Signal::Target({})"), fmt::join(details, ", "));
 }

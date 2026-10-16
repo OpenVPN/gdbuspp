@@ -261,7 +261,7 @@ class Proxy
      */
     GVariant *do_call(const std::string &method, GVariant *params)
     {
-        GDBUSPP_LOG("Proxy::Client::Call({:?}, {:?}, {:?}, {:?}, params={})",
+        GDBUSPP_LOG("Proxy::Client::Call('{}', '{}', '{}', '{}', params={})",
                     destination,
                     object_path,
                     interface,
@@ -295,7 +295,7 @@ class Proxy
      */
     void do_call_no_response(const std::string &method, GVariant *params)
     {
-        GDBUSPP_LOG("Proxy::Client::Call({:?}, {:?}, {:?}, {:?}, params={}) [ NO RESPONSE CALL]",
+        GDBUSPP_LOG("Proxy::Client::Call('{}', '{}', '{}', '{}', params={}) [ NO RESPONSE CALL]",
                     destination,
                     object_path,
                     interface,
@@ -349,7 +349,7 @@ class Proxy
                                          "D-Bus connection does not support file descriptor passing");
         }
 
-        GDBUSPP_LOG("Proxy::Client::{}({:?}, {:?}, {:?}, {:?}, params={})",
+        GDBUSPP_LOG("Proxy::Client::{}('{}', '{}', '{}', '{}', params={})",
                     (caller_fdlist ? "SendFD" : "GetFD"),
                     destination,
                     object_path,
@@ -406,7 +406,7 @@ class Proxy
     {
         if (!res || error)
         {
-            GDBUSPP_LOG("Proxy::Client call result ({:?}, {:?}, {:?}, {:?}) ERROR: {}",
+            GDBUSPP_LOG("Proxy::Client call result ('{}', '{}', '{}', '{}') ERROR: {}",
                         destination,
                         object_path,
                         interface,
@@ -425,7 +425,7 @@ class Proxy
                                          err,
                                          error);
         }
-        GDBUSPP_LOG("Proxy::Client call result ({:?}, {:?}, {:?}, {:?}) Result: {}",
+        GDBUSPP_LOG("Proxy::Client call result ('{}', '{}', '{}', '{}') Result: {}",
                     destination,
                     object_path,
                     interface,

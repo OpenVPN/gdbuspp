@@ -43,7 +43,7 @@ static std::string compose_object_descr(const DBus::Object::Path &path,
                                         const std::string &interface,
                                         const std::string &info)
 {
-    return fmt::format(FMT_COMPILE("DBus::Object({:?}, {:?}{})"),
+    return fmt::format(FMT_COMPILE("DBus::Object('{}', '{}'{})"),
                        path,
                        interface,
                        (!info.empty() ? ", " + info : ""));
@@ -115,7 +115,7 @@ Object::Property::Exception::Exception(const std::shared_ptr<Object::Base> objec
     : Object::Exception(object,
                         errmsg,
                         gliberr,
-                        fmt::format(FMT_COMPILE("property={:?}"), property))
+                        fmt::format(FMT_COMPILE("property='{}'"), property))
 {
 }
 
@@ -124,7 +124,7 @@ Object::Property::Exception::Exception(const Object::Base *object,
                                        const std::string &property,
                                        const std::string &errmsg,
                                        GError *gliberr)
-    : Object::Exception(object, errmsg, gliberr, fmt::format("property={:?}", property))
+    : Object::Exception(object, errmsg, gliberr, fmt::format("property='{}'", property))
 {
 }
 

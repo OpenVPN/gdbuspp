@@ -67,7 +67,7 @@ bool Emit::SendGVariant(const std::string &signal_name, GVariant *params) const
     g_variant_ref_sink(params);
     for (const auto &tgt : targets)
     {
-        GDBUSPP_LOG("Signals::Emit -- {}; signal_name={:?}, params={}",
+        GDBUSPP_LOG("Signals::Emit -- {}; signal_name='{}', params={}",
                     tgt,
                     signal_name,
                     glib2::Utils::DumpToString(params));
@@ -80,7 +80,7 @@ bool Emit::SendGVariant(const std::string &signal_name, GVariant *params) const
                                            &err))
         {
             fmt::print(stderr,
-                       FMT_COMPILE("[GDBus++ Error: {}] Failed to send signal {:?}{}\n"),
+                       FMT_COMPILE("[GDBus++ Error: {}] Failed to send signal '{}'{}\n"),
                        tgt,
                        signal_name,
                        (err ? fmt::format(FMT_COMPILE("  glib2 Error: {}"), err->message) : ""));

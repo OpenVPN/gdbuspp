@@ -109,7 +109,7 @@ Service::~Service() noexcept
     }
     catch (const DBus::Exception &err)
     {
-        fmt::print(FMT_COMPILE("** ERROR **   D-Bus service {:?}: {}\n"),
+        fmt::print(FMT_COMPILE("** ERROR **   D-Bus service '{}': {}\n"),
                    busname,
                    err.what());
     }

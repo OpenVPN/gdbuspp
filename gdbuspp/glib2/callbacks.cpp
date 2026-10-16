@@ -265,7 +265,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
         GVariant *value = cbl->object->GetProperty(property_name);
         if (nullptr == value)
         {
-            GDBUSPP_LOG("GetProperty({:?}) returned nullptr: {}", property_name, cbl->object);
+            GDBUSPP_LOG("GetProperty('{}') returned nullptr: {}", property_name, cbl->object);
             throw Object::Property::Exception(cbl->object,
                                               property_name,
                                               "NULL/nullptr value is not allowed");
@@ -277,7 +277,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
     }
     catch (const Object::Property::Exception &excp)
     {
-        GDBUSPP_LOG("Get Property Callback FAIL -- Property: {:?} -- ERROR: {}", property_name, excp.what());
+        GDBUSPP_LOG("Get Property Callback FAIL -- Property: '{}' -- ERROR: {}", property_name, excp.what());
         excp.SetDBusErrorProperty(error);
         return nullptr;
     }
@@ -289,7 +289,7 @@ GVariant *_int_dbusobject_callback_get_property(GDBusConnection *conn,
     }
     catch (const DBus::Exception &excp)
     {
-        GDBUSPP_LOG("Get Property Callback FAIL (DBus::Exception) -- Property: {:?} -- ERROR: {}", property_name, excp.what());
+        GDBUSPP_LOG("Get Property Callback FAIL (DBus::Exception) -- Property: '{}' -- ERROR: {}", property_name, excp.what());
         excp.SetDBusError(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED);
         return nullptr;
     }
