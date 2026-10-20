@@ -64,11 +64,13 @@
  *
  * @tparam sz              Size of the input string, deduced at compile time
  * @param  name            String containing the service name to append
- * @return constexpr auto  Returns a constant (string) with the BUSNAME
+ * @return std::string     Returns a constant (string) with the BUSNAME
  *                         constant appended with the input service name.
+ *
+ *  TODO: Change to constexpr auto when switching to C++23
  */
 template <size_t sz>
-inline constexpr auto GenServiceName(const char (&name)[sz])
+inline auto GenServiceName(const char (&name)[sz])
 {
     std::string result{Constants::Base::BUSNAME};
     result.append(name, sz - 1);
@@ -86,11 +88,13 @@ inline constexpr auto GenServiceName(const char (&name)[sz])
  *
  * @tparam sz              Size of the input string, deduced at compile time
  * @param  object_path     String containing the service name to append
- * @return constexpr auto  Returns a constant (std::string) with the ROOT_PATH
+ * @return std::string     Returns a constant (std::string) with the ROOT_PATH
  *                         constant appended with the input object path.
+ *
+ *  TODO: Change to constexpr auto when switching to C++23
  */
 template <size_t sz>
-inline constexpr auto GenPath(const char (&object_path)[sz])
+inline auto GenPath(const char (&object_path)[sz])
 {
     std::string result{Constants::Base::ROOT_PATH};
     result.append(object_path, sz - 1);
@@ -104,11 +108,13 @@ inline constexpr auto GenPath(const char (&object_path)[sz])
  *
  * @tparam sz              Size of the input string, deduced at compile time
  * @param  interface       String containing the service interface to append
- * @return constexpr auto  Returns a constant (string) with the INTERFACE
+ * @return std::string     Returns a constant (string) with the INTERFACE
  *                         constant appended with the input interface name.
+ *
+ *  TODO: Change to constexpr auto when switching to C++23
  */
 template <size_t sz>
-inline constexpr auto GenInterface(const char (&interface)[sz])
+inline auto GenInterface(const char (&interface)[sz])
 {
     std::string result{Constants::Base::INTERFACE};
     result.append(interface, sz - 1);
