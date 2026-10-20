@@ -271,7 +271,7 @@ namespace Value {
  *  the "mv" data type is not the same as "v", it would break
  *  the D-Bus contract when a return value is expected to be "v"
  *
- *  By explicilty setting the variant_wrap argument to false,
+ *  By explicitly setting the variant_wrap argument to false,
  *  the wrapping into a variant container ("v") is skipped.  This
  *  is useful when this output is to put into a glib2::Builder based
  *  object or similar targets which already can receive a "v"
@@ -909,7 +909,7 @@ inline GVariant *Extract<GVariant *>(GVariant *v, int elm) noexcept
 
 
 /**
- *  Retrive the GVariant object from a container
+ *  Retrieve the GVariant object from a container
  *
  *  This method is a convenience wrapper around g_variant_get_child_value(),
  *  to provide a more unified glib2::Value API.
@@ -1284,7 +1284,7 @@ std::vector<T> LookupVector(GVariant *dict, const std::string &key)
  * @param extractor  Function to be called for each element.  Function declaration
  *                   MUST be: `void(const std::string &key, GVariant *value)`
  * @throws glib2::Utils::Exception when `*dict` is not of the `a{sv}` data type.
- *         The excpetions from the extractor function will be implicitly forwarded.
+ *         The exceptions from the extractor function will be implicitly forwarded.
  */
 void IterateDictionary(GVariant *dict, std::function<void(const std::string &key, GVariant *value)> extractor);
 
