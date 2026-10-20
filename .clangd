@@ -5,3 +5,11 @@
 
 Diagnostics:
   UnusedIncludes: None
+
+---
+If:
+  PathMatch:
+    - .*gen-constants\.hpp
+Diagnostics:
+  Suppress:
+    - undeclared_var_use
