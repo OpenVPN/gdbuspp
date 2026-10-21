@@ -15,7 +15,7 @@
 
 #include <regex>
 #include <fmt/format.h>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 
 #include "../object/path.hpp"
 #include "utils.hpp"

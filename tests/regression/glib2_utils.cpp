@@ -16,7 +16,7 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include <fmt/compile.h>
+#include "../../gdbuspp/features/fmt-compat.hpp"
 #include <fmt/printf.h>
 #include <glib.h>
 #include "../../gdbuspp/glib2/utils.hpp"

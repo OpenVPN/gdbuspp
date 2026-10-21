@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "../async-process.hpp"
+#include "../features/fmt-compat.hpp"
 #include "exceptions.hpp"
 
 

@@ -22,7 +22,7 @@
 #include <random>
 #include <string>
 #include <getopt.h>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 #include <fmt/format.h>
 #include <fmt/printf.h>
 #include <glib.h>

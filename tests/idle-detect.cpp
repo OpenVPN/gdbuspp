@@ -15,13 +15,14 @@
  */
 
 #include <chrono>
+#include <ctime>
 #include <memory>
 #include <thread>
 #include <unistd.h>
 
-#include <fmt/chrono.h>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 #include <fmt/printf.h>
+#include <fmt/chrono.h>
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/mainloop.hpp"
@@ -97,6 +98,40 @@ class IdleCheckEnabled : public DBus::Object::Base
 uint32_t success = 0; ///< Global: Count of successfully completed tests
 uint32_t failed = 0;  ///< Global: Count of failed tests
 
+// TODO: helper to be removed when RHEL8 is no longer supported
+#if FMT_VERSION < 70000
+/**
+ *  Converts a std::chrono::system_clock::time_point to a local time string.
+ *  This avoids relying on fmtlib's chrono support, which is not available
+ *  for time points in older fmtlib releases.
+ *
+ * @param tp     std::chrono::system_clock::time_point to convert
+ * @return std::string with the time formatted as "YYYY-MM-DD HH:MM:SS"
+ *
+ * @note fmt >= 7.0.0 provides native formatting of
+ *       `std::chrono::time_point<std::chrono::system_clock>` via
+ *       `<fmt/chrono.h>`, so this specialization is required only
+ *       when `FMT_VERSION < 70000` for RHEL8 shipped with 6.2.0.
+ */
+static std::string timepoint_to_str(const std::chrono::system_clock::time_point &tp)
+{
+    std::time_t t = std::chrono::system_clock::to_time_t(tp);
+    std::tm tm{};
+    localtime_r(&t, &tm);
+
+    char buf[32]{};
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+    return std::string(buf);
+}
+
+#define FMT_TIMEPOINT_TO_STR(tp) (timepoint_to_str(tp))
+
+#else
+
+#define FMT_TIMEPOINT_TO_STR(tp) (tp)
+
+#endif // FMT_VERSION < 70000
+
 /**
  *  Simple wrapper function which runs a lambda and calculates the runtime
  *  and does a simple evealuation based on an expected runtime with a +/-
@@ -116,7 +151,7 @@ void time_execution(const std::string &descr,
 {
     auto start = std::chrono::system_clock::now();
     bool exception = false;
-    fmt::print(FMT_COMPILE("::: {}:    start={}\n"), descr, start);
+    fmt::print(FMT_COMPILE("::: {}:    start={}\n"), descr, FMT_TIMEPOINT_TO_STR(start));
     try
     {
         testfunc();
@@ -127,7 +162,7 @@ void time_execution(const std::string &descr,
         exception = true;
     }
     auto end = std::chrono::system_clock::now();
-    fmt::print(FMT_COMPILE("::: {}:      end={}\n"), descr, end);
+    fmt::print(FMT_COMPILE("::: {}:      end={}\n"), descr, FMT_TIMEPOINT_TO_STR(end));
 
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
     fmt::print(FMT_COMPILE("::: {}: duration={}s, "), descr, duration.count());

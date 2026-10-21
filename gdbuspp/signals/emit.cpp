@@ -15,7 +15,7 @@
 
 #include <string>
 #include <glib.h>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/printf.h>
 
 #include "../features/debug-log.hpp"

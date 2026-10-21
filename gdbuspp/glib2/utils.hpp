@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 #include <type_traits>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/format.h>
 
 #include <gio/gunixfdlist.h>

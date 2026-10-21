@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 #include <getopt.h>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"

@@ -13,7 +13,7 @@
  *         by the glib2 gdbus APIs
  */
 
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/format.h>
 #include <glib.h>
 #include <gio/gio.h>

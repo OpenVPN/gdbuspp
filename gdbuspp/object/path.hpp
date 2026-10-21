@@ -25,6 +25,7 @@
 #include <vector>
 #include <fmt/ostream.h>
 
+#include "../features/fmt-compat.hpp"
 #include "exceptions.hpp"
 
 namespace DBus::Object {

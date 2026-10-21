@@ -48,7 +48,7 @@ glib2_deps = [
         dependency('gio-unix-2.0'),
         dependency('gthread-2.0'),
         dependency('threads'),
-        dependency('fmt', version: '>= 9.0'),
+        dependency('fmt', version: '>= 6.0'),
 ]
 
 #
@@ -121,6 +121,11 @@ install_headers(
         'gdbuspp/credentials/exceptions.hpp',
         'gdbuspp/credentials/query.hpp',
         subdir: 'gdbuspp/credentials'
+)
+
+install_headers(
+        'gdbuspp/features/fmt-compat.hpp',
+        subdir: 'gdbuspp/features'
 )
 
 install_headers(

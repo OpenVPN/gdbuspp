@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <functional>
 #include <string>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 #include <fmt/printf.h>
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"
@@ -576,16 +576,38 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Dict::Add<bool>(dict, "type_bool_true", true);
                                 glib2::Dict::Add<std::string>(dict, "type_string", "A dictionary string element");
                                 glib2::Dict::Add<DBus::Object::Path>(dict, "type_object_path", "/org/example/gdbuspp/object/path");
-                                std::vector<uint16_t> vector_ui16{1, 2, 4, 8, 16, 32, 65};
+                                const std::vector<uint16_t> vector_ui16{1, 2, 4, 8, 16, 32, 65};
                                 glib2::Dict::Add(dict, "vector_ui16", vector_ui16);
                                 GVariant *data = glib2::Dict::Finish(dict);
 
-                                return testlog.CheckDataTypeValue(
-                                    "a{sv}",
-                                    "{'type_bool_false': <false>, 'type_string': <'A dictionary string element'>, 'type_bool_true': <true>, "
-                                    "'type_int32': <uint64 9402038495>, 'type_object_path': <objectpath '/org/example/gdbuspp/object/path'>, "
-                                    "'vector_ui16': <[uint16 1, 2, 4, 8, 16, 32, 65]>}",
-                                    data);
+                                // GVariantDict does not preserve the insertion order, and the
+                                // element order of the finished dictionary differs between
+                                // GLib versions.  Check each key individually instead of
+                                // comparing against the printed dictionary.
+                                bool ret = testlog.CheckDataTypeValue("a{sv}", "", data);
+                                try
+                                {
+                                    // "type_int32" was added twice; only the last value may remain
+                                    ret &= (g_variant_n_children(data) == 6);
+                                    ret &= (glib2::Dict::Lookup<uint64_t>(data, "type_int32") == 9402038495);
+                                    ret &= (glib2::Dict::Lookup<bool>(data, "type_bool_false") == false);
+                                    ret &= (glib2::Dict::Lookup<bool>(data, "type_bool_true") == true);
+                                    ret &= (glib2::Dict::Lookup<std::string>(data, "type_string") == "A dictionary string element");
+                                    ret &= (glib2::Dict::Lookup<DBus::Object::Path>(data, "type_object_path") == "/org/example/gdbuspp/object/path");
+                                    ret &= (glib2::Dict::LookupVector<uint16_t>(data, "vector_ui16") == vector_ui16);
+                                }
+                                catch (const glib2::Utils::Exception &excp)
+                                {
+                                    testlog.AddLogLine(excp.what());
+                                    ret = false;
+                                }
+
+                                if (!ret)
+                                {
+                                    testlog.AddGVariantDump("Received dictionary", data);
+                                }
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 

@@ -20,7 +20,7 @@
 #include <memory>
 #include <string>
 #include <glib.h>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/ostream.h>
 
 #include "../object/path.hpp"

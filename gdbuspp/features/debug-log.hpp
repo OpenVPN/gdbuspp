@@ -20,7 +20,7 @@
 #ifdef GDBUSPP_INTERNAL_DEBUG
 
 #include <string_view>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/format.h>
 
 namespace GDBusPP::Debug {

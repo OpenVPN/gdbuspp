@@ -19,7 +19,7 @@
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 
 #include "../gdbuspp/connection.hpp"
 #include "../gdbuspp/glib2/utils.hpp"

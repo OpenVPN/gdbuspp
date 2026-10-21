@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <fmt/ostream.h>
 
+#include "../features/fmt-compat.hpp"
 #include "../object/path.hpp"
 
 namespace DBus {

@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/format.h>
 #include <glib.h>
 

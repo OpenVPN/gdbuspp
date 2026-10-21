@@ -17,6 +17,7 @@
 #include <gio/gio.h>
 
 #include "exceptions.hpp"
+#include "features/fmt-compat.hpp"
 
 /**
  * @file connection.cpp

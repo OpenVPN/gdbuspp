@@ -14,7 +14,7 @@
  */
 
 #include <future>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 #include <fmt/printf.h>
 
 

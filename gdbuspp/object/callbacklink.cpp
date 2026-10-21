@@ -15,7 +15,7 @@
  */
 
 #include <string>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/format.h>
 
 #include "callbacklink.hpp"

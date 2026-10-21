@@ -23,6 +23,7 @@
 
 #include "connection.hpp"
 #include "exceptions.hpp"
+#include "features/fmt-compat.hpp"
 #include "glib2/utils.hpp"
 #include "object/path.hpp"
 

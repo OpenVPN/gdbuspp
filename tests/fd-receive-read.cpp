@@ -22,7 +22,7 @@
 #include <getopt.h>
 #include <glib.h>
 #include <unistd.h>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 #include <fmt/printf.h>
 
 #include "../gdbuspp/connection.hpp"

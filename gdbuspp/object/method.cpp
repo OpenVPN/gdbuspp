@@ -17,7 +17,7 @@
  */
 
 #include <algorithm>
-#include <fmt/compile.h>
+#include "../features/fmt-compat.hpp"
 #include <fmt/format.h>
 
 #include "../features/debug-log.hpp"

@@ -19,6 +19,7 @@
 
 #include "async-process.hpp"
 #include "exceptions.hpp"
+#include "features/fmt-compat.hpp"
 #include "object/operation.hpp"
 #include "object/path.hpp"
 

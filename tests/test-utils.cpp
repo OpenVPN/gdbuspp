@@ -17,7 +17,7 @@
 #include <limits>
 #include <string>
 #include <getopt.h>
-#include <fmt/compile.h>
+#include "../gdbuspp/features/fmt-compat.hpp"
 #include <fmt/format.h>
 #include <fmt/printf.h>
 #include <fmt/ranges.h>
@@ -53,7 +53,7 @@ void OptionParser::help(const std::string &argv0, struct option options[])
         {
             fmt::print(FMT_COMPILE("{}"),
                        (opt->val > 0
-                            ? fmt::format(FMT_COMPILE("  -{:c} |"), opt->val)
+                            ? fmt::format(FMT_COMPILE("  -{} |"), static_cast<char>(opt->val))
                             : "       "));
 
 
