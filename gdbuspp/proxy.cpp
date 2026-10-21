@@ -295,7 +295,7 @@ class Proxy
      */
     void do_call_no_response(const std::string &method, GVariant *params)
     {
-        GDBUSPP_LOG("Proxy::Client::Call('{}', '{}', '{}', '{}', params={}) [ NO RESPONSE CALL]",
+        GDBUSPP_LOG("Proxy::Client::Call('{}', '{}', '{}', '{}', params={}) [NO RESPONSE CALL]",
                     destination,
                     object_path,
                     interface,
