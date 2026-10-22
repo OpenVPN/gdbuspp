@@ -295,7 +295,7 @@ test_proxy = executable(
         install_dir: get_option('libexecdir') + '/gdbuspp/tests'
 )
 
-executable(
+test_bus_watcher = executable(
         'test_bus_watcher',
         [
                 'tests/bus-watcher.cpp'
@@ -601,6 +601,18 @@ test('signals-property-change',
         is_parallel: false
 )
 
+test('bus-watcher',
+        server_runner,
+        args: [test_bus_watcher.full_path()],
+        depends:
+        [
+                simple_service,
+                test_bus_watcher
+        ],
+        priority: 100,
+        timeout: 10,
+        is_parallel: false,
+)
 
 test('test-data-types-plain',
         test_data_types,

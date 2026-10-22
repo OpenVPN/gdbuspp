@@ -25,7 +25,7 @@
 
 namespace Tests::Program {
 
-int buswatch_test(int argc, char **argv)
+int test_buswatch(int argc, char **argv)
 {
     using namespace std::literals;
 
@@ -62,6 +62,7 @@ int buswatch_test(int argc, char **argv)
 
         fmt::print(FMT_COMPILE("{} appeared!\n"), busname);
 
+        loop->Stop();
         async_mainloop.get();
     }
     catch (const DBus::Exception &excp)
@@ -81,5 +82,5 @@ int buswatch_test(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    return Tests::Program::buswatch_test(argc, argv);
+    return Tests::Program::test_buswatch(argc, argv);
 }
