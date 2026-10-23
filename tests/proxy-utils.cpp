@@ -305,19 +305,31 @@ int test_proxy_utils(int argc, char **argv)
             std::string started_srv;
 
             testlogger.RunFunctionTest(
-                "service_qry->StartServiceByName(...) == 2", nullptr, [&testlogger, &service_qry, &srv_activatable, &started_srv]() -> bool
+                "service_qry->StartServiceByName(...) == (1||2)",
+                nullptr,
+                [&testlogger, &service_qry, &srv_activatable, &started_srv]() -> bool
                 {
                     // Loop through activatable services until one starts
                     for (const auto &srv : srv_activatable)
                     {
-                        bool r = service_qry->StartServiceByName(srv) == 2;
-                        if (r)
+                        uint32_t status = service_qry->StartServiceByName(srv);
+                        if (status == 0x1 || status == 0x2)
                         {
                             testlogger.AddLogLine(fmt::format(FMT_COMPILE("            [lambda]      >>   Started service: {}"), srv));
                             started_srv = srv;
                             return true;
                         }
                     }
+
+                    // Permittable to skip this test case on minimal images without any graphical desktop app installed.
+                    // More details: https://codeberg.org/OpenVPN/gdbuspp/issues/14
+                    if (srv_activatable.empty())
+                    {
+                        testlogger.AddLogLine("            [lambda]      >>   Activatable services list is empty, skip and continue...");
+                        return true;
+                    }
+
+                    testlogger.AddLogLine("            [lambda]      >>   ERROR: failed to start any activatable service!");
                     return false;
                 },
                 true);
@@ -341,8 +353,13 @@ int test_proxy_utils(int argc, char **argv)
             testlogger.RunFunctionTest(
                 fmt::format(FMT_COMPILE("service_qry->CheckServiceAvail({}) == true"), started_srv),
                 nullptr,
-                [&service_qry, &started_srv]() -> bool
+                [&testlogger, &service_qry, &started_srv]() -> bool
                 {
+                    if (started_srv.empty())
+                    {
+                        testlogger.AddLogLine(fmt::format("            [lambda]      >>   Service not started or found, skip and continue..."));
+                        return true;
+                    }
                     return service_qry->CheckServiceAvail(started_srv, 5) == true;
                 },
                 true);
