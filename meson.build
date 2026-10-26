@@ -13,9 +13,20 @@ project(
         meson_version: '>= 0.58'
 )
 
-cxx = meson.get_compiler('cpp')
-if (not cxx.has_argument('-m64'))
-        error('GDBus++ requires a 64-bit capable compiler')
+target_cpu_64bit = target_machine.cpu_family() in [
+        'aarch64',
+        'x864_64',
+        'loongarch64',
+        'mips64',
+        'ppc64',
+        'ppc64le',
+        'riscv64',
+        's390x',
+        'x86_64',
+]
+message('CPU family build target: ' + target_machine.cpu_family())
+if (not target_cpu_64bit)
+        error('GDBus++ is only available 64-bit CPU targets')
 endif
 
 fs = import('fs')
