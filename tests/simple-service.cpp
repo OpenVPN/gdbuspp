@@ -30,9 +30,13 @@
 
 #include "../gdbuspp/mainloop.hpp"
 #include "../gdbuspp/service.hpp"
+
 #include "test-constants.hpp"
 
-
+namespace GDBusPP {
+std::string GetVersion();
+uint16_t GetAPIversion();
+} // namespace GDBusPP
 
 namespace Tests::Program {
 
@@ -1076,6 +1080,9 @@ int test_simple_service(int argc, char **argv)
 {
     try
     {
+        fmt::print(FMT_COMPILE("Runtime Library version: {}\nRuntime API version: {}\n\n"),
+                   GDBusPP::GetVersion(),
+                   GDBusPP::GetAPIversion());
         // Create a connection to the session D-Bus
         auto dbuscon = DBus::Connection::Create(DBus::BusType::SESSION);
 

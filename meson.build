@@ -12,6 +12,7 @@ project(
         version: run_command('scripts/get-git-ref', check: true).stdout().strip(),
         meson_version: '>= 0.58'
 )
+api_version='4'
 
 target_cpu_64bit = target_machine.cpu_family() in [
         'aarch64',
@@ -39,6 +40,27 @@ if fs.exists(meson.project_source_root() / '.git')
         )
 endif
 meson.add_dist_script('scripts/get-git-ref', '--dist')
+
+version_header_data = configuration_data()
+version_header_data.set_quoted('GDBUSPP_VERSION',
+                               run_command('scripts/get-git-ref', check: true).stdout().strip(),
+                               description: 'GDBus++ release version')
+version_header_data.set('GDBUSPP_API_VERSION',
+			api_version,
+		   	description: 'GDBUS++ library API version')
+configure_file(
+	configuration: version_header_data,
+	output: 'build-version.hpp'
+)
+
+version_header = configure_file(
+        input: 'gdbuspp/version.hpp.in',
+        output: 'version.hpp',
+        configuration: configuration_data({
+            'GDBUSPP_API_VERSION': api_version
+        })
+)
+
 
 if (get_option('debug'))
         add_global_arguments('-DGDBUSPP_DEBUG', language:'cpp')
@@ -106,12 +128,13 @@ gdbuspp_lib = both_libraries(
                 'gdbuspp/signals/signal.cpp',
                 'gdbuspp/signals/single-subscription.cpp',
                 'gdbuspp/signals/subscriptionmgr.cpp',
-                'gdbuspp/signals/target.cpp'
+                'gdbuspp/signals/target.cpp',
+                'gdbuspp/version.cpp',
         ],
         dependencies: [
                 glib2_deps
         ],
-        soversion: '4',
+        soversion: api_version,
         install: true
 )
 
@@ -125,6 +148,7 @@ install_headers(
         'gdbuspp/mainloop.hpp',
         'gdbuspp/proxy.hpp',
         'gdbuspp/service.hpp',
+        version_header,
         subdir: 'gdbuspp'
 )
 
