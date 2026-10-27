@@ -99,7 +99,9 @@ uint32_t success = 0; ///< Global: Count of successfully completed tests
 uint32_t failed = 0;  ///< Global: Count of failed tests
 
 // TODO: helper to be removed when RHEL8 is no longer supported
-#if FMT_VERSION < 70000
+//       and clang can compile fmtlib's chrono support fixed in fmtlib v11.2.0
+//       More info about fmtlib bug: https://github.com/fmtlib/fmt/issues/4396
+#if FMT_VERSION < 70000 || defined(__clang__)
 /**
  *  Converts a std::chrono::system_clock::time_point to a local time string.
  *  This avoids relying on fmtlib's chrono support, which is not available
@@ -112,6 +114,10 @@ uint32_t failed = 0;  ///< Global: Count of failed tests
  *       `std::chrono::time_point<std::chrono::system_clock>` via
  *       `<fmt/chrono.h>`, so this specialization is required only
  *       when `FMT_VERSION < 70000` for RHEL8 shipped with 6.2.0.
+ *       It is also used with clang, which rejects the FMT_STRING
+ *       consteval checks inside <fmt/chrono.h> (seen with fmtlib v10.1.1).
+ *       The problem has been fixed in fmtlib v11.2.0
+ *       (more info: https://github.com/fmtlib/fmt/issues/4396).
  */
 static std::string timepoint_to_str(const std::chrono::system_clock::time_point &tp)
 {
@@ -130,7 +136,7 @@ static std::string timepoint_to_str(const std::chrono::system_clock::time_point 
 
 #define FMT_TIMEPOINT_TO_STR(tp) (tp)
 
-#endif // FMT_VERSION < 70000
+#endif // FMT_VERSION < 70000 || defined(__clang__)
 
 /**
  *  Simple wrapper function which runs a lambda and calculates the runtime
