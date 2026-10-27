@@ -524,17 +524,6 @@ test('proxy-tests',
         is_parallel: false
 )
 
-test('proxy-utils',
-        server_runner,
-        args: [test_proxy_utils.full_path()],
-        depends: [
-                simple_service,
-                test_proxy_utils
-        ],
-        priority: 90,
-        is_parallel: false
-)
-
 test('credentials',
         server_runner,
         args: [find_program('tests/scripts/test-credentials').full_path()],
@@ -634,6 +623,17 @@ test('test-data-types-dbus',
 )
 
 if (get_option('long_tests'))
+    test('proxy-utils',
+            server_runner,
+            args: [test_proxy_utils.full_path()],
+            depends: [
+                    simple_service,
+                    test_proxy_utils
+            ],
+            priority: 90,
+            is_parallel: false
+    )
+
     test('idle-detect',
         server_runner,
         args: [test_idle_detect.full_path()],
