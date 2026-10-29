@@ -182,6 +182,7 @@ void Group::GroupSendGVariant(const std::string &groupname,
     std::string param_type(g_variant_get_type_string(param));
     if (exp_type != param_type)
     {
+        g_variant_unref(param);
         throw Signals::Exception(fmt::format(
             FMT_COMPILE("Invalid data type for '{}' - Expected '{}' but received '{}'"),
             signal_name,
