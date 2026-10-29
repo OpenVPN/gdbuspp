@@ -43,6 +43,7 @@ void result_handler(GDBusProxy *proxy, GAsyncResult *res, gpointer user_data)
                                                 res,
                                                 &error);
     g_variant_unref(result);
+    g_clear_error(&error);
 }
 
 } // namespace proxy_callbacks
