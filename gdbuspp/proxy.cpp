@@ -230,6 +230,7 @@ class Proxy
         GError *error = nullptr;
         if (g_unix_fd_list_append(caller_fdlist, fd, &error) < 0)
         {
+            glib2::Utils::unref_fdlist(caller_fdlist);
             throw DBus::Proxy::Exception(destination,
                                          object_path,
                                          interface,
@@ -238,7 +239,10 @@ class Proxy
                                                      method),
                                          error);
         }
-        return do_call_with_fdlist(method, params, caller_fdlist);
+
+        GVariant *res = do_call_with_fdlist(method, params, caller_fdlist);
+        glib2::Utils::unref_fdlist(caller_fdlist);
+        return res;
     }
 
 
