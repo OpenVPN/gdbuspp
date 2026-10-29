@@ -139,7 +139,10 @@ class Client
      * @param interface    std::string with the interface scope in the object
      * @param method       std::string with the D-Bus method to call
      * @param params       GVariant * with the arguments to used in the
-     *                     D-Bus method call
+     *                     D-Bus method call.  A floating reference is
+     *                     consumed on all code paths, including when an
+     *                     exception is thrown; a non-floating reference
+     *                     remains owned by the caller.
      * @param no_response  bool flag (default false). If set to true, don't
      *                     wait for a response.  This will also disable any
      *                     error checking possibilities, to verify if the
@@ -165,7 +168,10 @@ class Client
      *                     and interface to perform the method call against
      * @param method       std::string with the D-Bus method to call
      * @param params       GVariant * with the arguments to used in the
-     *                     D-Bus method call
+     *                     D-Bus method call.  A floating reference is
+     *                     consumed on all code paths, including when an
+     *                     exception is thrown; a non-floating reference
+     *                     remains owned by the caller.
      * @param no_response  bool flag (default false). If set to true, don't
      *                     wait for a response.  This will also disable any
      *                     error checking possibilities, to verify if the
@@ -190,7 +196,10 @@ class Client
      *                     and interface to perform the method call against
      * @param method       std::string with the D-Bus method to call
      * @param params       GVariant * with the arguments to used in the
-     *                     D-Bus method call
+     *                     D-Bus method call.  A floating reference is
+     *                     consumed on all code paths, including when an
+     *                     exception is thrown; a non-floating reference
+     *                     remains owned by the caller.
      * @param fd           File descriptor to pass to the D-Bus method
      *
      * @return GVariant*   GVariant object with the results provided by the
@@ -212,7 +221,10 @@ class Client
      *                     and interface to perform the method call against
      * @param method       std::string with the D-Bus method to call
      * @param params       GVariant * with the arguments to used in the
-     *                     D-Bus method call
+     *                     D-Bus method call.  A floating reference is
+     *                     consumed on all code paths, including when an
+     *                     exception is thrown; a non-floating reference
+     *                     remains owned by the caller.
      *
      * @return GVariant*   GVariant object with the results provided by the
      *                     D-Bus method.  The file descriptor is available

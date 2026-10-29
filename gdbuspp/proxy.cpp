@@ -22,6 +22,7 @@
 #include <gio/gio.h>
 
 #include "connection.hpp"
+#include "data.hpp"
 #include "proxy.hpp"
 #include "features/debug-log.hpp"
 #include "glib2/utils.hpp"
@@ -524,12 +525,13 @@ GVariant *Client::Call(const Object::Path &object_path,
                        GVariant *params,
                        const bool no_response) const
 {
+    auto call_params = Data::MakeUPtr(params);
     glib2::Proxy prx(connection,
                      destination,
                      object_path,
                      interface,
                      method);
-    return prx.Call(method, params, no_response);
+    return prx.Call(method, call_params.get(), no_response);
 }
 
 
@@ -538,12 +540,13 @@ GVariant *Client::Call(const TargetPreset::Ptr preset,
                        GVariant *params,
                        const bool no_response) const
 {
+    auto call_params = Data::MakeUPtr(params);
     glib2::Proxy prx(connection,
                      destination,
                      preset->object_path,
                      preset->interface,
                      method);
-    return prx.Call(method, params, no_response);
+    return prx.Call(method, call_params.get(), no_response);
 }
 
 
@@ -552,12 +555,13 @@ GVariant *Client::GetFD(int &fd,
                         const std::string &method,
                         GVariant *params) const
 {
+    auto call_params = Data::MakeUPtr(params);
     glib2::Proxy prx(connection,
                      destination,
                      preset->object_path,
                      preset->interface,
                      method);
-    return prx.CallGetFD(&fd, method, params);
+    return prx.CallGetFD(&fd, method, call_params.get());
 }
 
 
@@ -566,12 +570,13 @@ GVariant *Client::SendFD(const TargetPreset::Ptr preset,
                          GVariant *params,
                          int &fd) const
 {
+    auto call_params = Data::MakeUPtr(params);
     glib2::Proxy prx(connection,
                      destination,
                      preset->object_path,
                      preset->interface,
                      method);
-    return prx.CallSendFD(method, params, fd);
+    return prx.CallSendFD(method, call_params.get(), fd);
 }
 
 
