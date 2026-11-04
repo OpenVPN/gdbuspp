@@ -54,6 +54,7 @@ bool checkParams_no_fail_no_container(Tests::Utils::ResultLog &log)
                              glib2::Utils::checkParams(__func__, data_array, "aq", 2);
                          },
                          {"Incorrect parameter format: aq, expected aq (elements expected: 2, received: 5)"});
+    g_variant_unref(data_array);
 
 
     GVariant *data_ints = g_variant_new("(qq)", 123, 456);
@@ -71,6 +72,7 @@ bool checkParams_no_fail_no_container(Tests::Utils::ResultLog &log)
                              glib2::Utils::checkParams(__func__, data_ints, "qq", 3);
                          },
                          {"Incorrect parameter format: (qq), expected qq (elements expected: 3, received: 2)"});
+    g_variant_unref(data_ints);
 
 
     GVariantBuilder *data_dict_b = glib2::Builder::Create("a{ss}");
@@ -90,6 +92,7 @@ bool checkParams_no_fail_no_container(Tests::Utils::ResultLog &log)
                              glib2::Utils::checkParams(__func__, data_dict, "a{ss}", 2);
                          },
                          {"Incorrect parameter format: a{ss}, expected a{ss} (elements expected: 2, received: 1)"});
+    g_variant_unref(data_dict);
 
 
     std::string test_data_string{"Hello tester"};
@@ -107,6 +110,7 @@ bool checkParams_no_fail_no_container(Tests::Utils::ResultLog &log)
                              glib2::Utils::checkParams(__func__, data_string, "s", 1);
                          },
                          {"Parameter type is not a container, it has no children"});
+    g_variant_unref(data_string);
 
 
     GVariant *data_bool = glib2::Value::Create(true);
@@ -123,8 +127,10 @@ bool checkParams_no_fail_no_container(Tests::Utils::ResultLog &log)
                              glib2::Utils::checkParams(__func__, data_bool, "b", 1);
                          },
                          {"Parameter type is not a container, it has no children"});
+    g_variant_unref(data_bool);
 
     log.DumpLogs();
+
     return log.PrintTestReport();
 }
 
