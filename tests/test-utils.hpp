@@ -170,7 +170,8 @@ class ResultLog
      *  creates the expected GVariant object
      *
      * @param msg     String describing the test case
-     * @param value   GVariant object with the value to check
+     * @param value   GVariant object with the value to check.  This
+     *                function takes ownership and will unref it.
      * @param expect  String with the expected D-Bus data type encoding
      */
     void CheckGVariantDataType(const std::string &msg,

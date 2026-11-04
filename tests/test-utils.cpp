@@ -223,6 +223,8 @@ void ResultLog::CheckGVariantDataType(const std::string &msg,
     TestResult testres(pass_glib2 && pass_gdbus, true, 0, 0);
     log_result(testres, nullptr, result_msg);
     running_test = false;
+
+    g_variant_unref(value);
 }
 
 
