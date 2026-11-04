@@ -448,10 +448,12 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Builder::AddKeyValue<uint16_t, bool>(keyval, 4, true);
                                 GVariant *data = glib2::Builder::Finish(keyval);
 
-                                return testlog.CheckDataTypeValue(
+                                bool ret = testlog.CheckDataTypeValue(
                                     "a{qb}",
                                     "{1: true, 2: false, 3: false, 4: true}",
                                     data);
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 
@@ -464,10 +466,12 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Builder::AddKeyValue<std::string, uint16_t>(keyval, "key_four", -1039); // This will wrap
                                 GVariant *data = glib2::Builder::Finish(keyval);
 
-                                return testlog.CheckDataTypeValue(
+                                bool ret = testlog.CheckDataTypeValue(
                                     "a{sq}",
                                     "{'key_one': 123, 'key_two': 6789, 'key_three': 65535, 'key_four': 64497}",
                                     data);
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 
@@ -479,10 +483,12 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Builder::AddKeyValue<uint32_t, std::string>(keyval, 30, "Key 30");
                                 GVariant *data = glib2::Builder::Finish(keyval);
 
-                                return testlog.CheckDataTypeValue(
+                                bool ret = testlog.CheckDataTypeValue(
                                     "a{us}",
                                     "{10: 'Key 10', 20: 'Key 20', 30: 'Key 30'}",
                                     data);
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 
@@ -495,9 +501,11 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Builder::AddKeyValue<std::string, std::string>(keyval, "key_3", "Value C");
                                 GVariant *data = glib2::Builder::Finish(keyval);
 
-                                return testlog.CheckDataTypeValue("a{ss}",
-                                                                  "{'key_1': 'Value A', 'key_2': 'Value B', 'key_3': 'Value C'}",
-                                                                  data);
+                                bool ret = testlog.CheckDataTypeValue("a{ss}",
+                                                                      "{'key_1': 'Value A', 'key_2': 'Value B', 'key_3': 'Value C'}",
+                                                                      data);
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 
@@ -509,10 +517,12 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Builder::AddKeyValue<std::string, DBus::Object::Path>(keyval, "pathC", "/example/gdbuspp/path3");
                                 GVariant *data = glib2::Builder::Finish(keyval);
 
-                                return testlog.CheckDataTypeValue(
+                                bool ret = testlog.CheckDataTypeValue(
                                     "a{so}",
                                     "{'pathA': '/example/gdbuspp/path1', 'pathB': '/example/gdbuspp/path2', 'pathC': '/example/gdbuspp/path3'}",
                                     data);
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 
@@ -525,10 +535,12 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Builder::AddKeyValue<std::string, GVariant *>(keyval, "null_value", nullptr);
                                 GVariant *data = glib2::Builder::Finish(keyval);
 
-                                return testlog.CheckDataTypeValue(
+                                bool ret = testlog.CheckDataTypeValue(
                                     "a{sv}",
                                     "{'pathA': <objectpath '/example/gdbuspp/path1'>, 'a_string': <'some random string'>, 'an_int': <12345>, 'null_value': <@mv nothing>}",
                                     data);
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 
@@ -626,6 +638,7 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                 glib2::Dict::Add(dict, "vector_ui16", vector_ui16);
                                 GVariant *data = glib2::Dict::Finish(dict);
 
+                                bool ret = true;
                                 try
                                 {
                                     glib2::Dict::IterateDictionary(
@@ -663,20 +676,23 @@ void test_base_data_types(Tests::Utils::ResultLog &testlog)
                                                 throw std::runtime_error("Incorrect value for 'type_object_path'");
                                             }
                                             else if ("vector_ui16" == key
-                                                     && vector_ui16 != glib2::Value::ExtractVector<uint16_t>(value))
+                                                     // ExtractVector() unrefs its argument, but value
+                                                     // is owned by the dictionary iterator
+                                                     && vector_ui16 != glib2::Value::ExtractVector<uint16_t>(g_variant_ref(value)))
                                             {
                                                 throw std::runtime_error("Incorrect value for 'vector_ui16'");
                                             }
                                         });
-                                    return true;
                                 }
                                 catch (const std::runtime_error &err)
                                 {
                                     testlog.AddLogLine(fmt::format(
                                         FMT_COMPILE("    ** IterateDictionary exception: {}"),
                                         err.what()));
-                                    return false;
+                                    ret = false;
                                 }
+                                g_variant_unref(data);
+                                return ret;
                             },
                             true);
 }
