@@ -150,13 +150,25 @@ class ParsePropertiesChanged
 
         interface = glib2::Value::Extract<std::string>(params, 0);
 
-        glib2::Dict::IterateDictionary(
-            glib2::Value::ExtractChild(params, 1),
-            [this](const std::string &property_name, GVariant *value)
-            {
-                this->changed[property_name] = Tests::Utils::parse_gvariant_to_string(value);
-            });
+        // ExtractChild() returns a new reference; IterateDictionary() only borrows it
+        GVariant *changed_props = glib2::Value::ExtractChild(params, 1);
+        try
+        {
+            glib2::Dict::IterateDictionary(
+                changed_props,
+                [this](const std::string &property_name, GVariant *value)
+                {
+                    this->changed[property_name] = Tests::Utils::parse_gvariant_to_string(value);
+                });
+        }
+        catch (...)
+        {
+            g_variant_unref(changed_props);
+            throw;
+        }
+        g_variant_unref(changed_props);
 
+        // ExtractVector() takes ownership of the extracted child
         invalidated = glib2::Value::ExtractVector<std::string>(glib2::Value::ExtractChild(params, 2));
     }
 
