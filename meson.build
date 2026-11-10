@@ -99,6 +99,7 @@ configure_file(
 gdbuspp_lib = both_libraries(
         'gdbuspp',
         [
+                'gdbuspp/data.cpp',
                 'gdbuspp/async-process.cpp',
                 'gdbuspp/authz-request.cpp',
                 'gdbuspp/bus-watcher.cpp',
@@ -143,6 +144,7 @@ install_headers(
         'gdbuspp/authz-request.hpp',
         'gdbuspp/bus-watcher.hpp',
         'gdbuspp/connection.hpp',
+        'gdbuspp/data.hpp',
         'gdbuspp/exceptions.hpp',
         'gdbuspp/gen-constants.hpp',
         'gdbuspp/mainloop.hpp',
